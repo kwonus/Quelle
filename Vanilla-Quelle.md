@@ -1,6 +1,6 @@
 # Vanilla Quelle HMI Specification
 
-##### version 1.22.707
+##### version 1.0.2.707
 
 ### I. Background
 
@@ -44,7 +44,7 @@ Quelle Syntax comprises fifteen(15) verbs. Each verb corresponds to a basic acti
 - version
 - exit
 
-Quelle is an open and extensible standard, additional verbs, and verbs for other languages can be defined without altering the overall syntax structure of the Quelle HMI. The remainder of this document describes Version 1.0.4 of the Quelle-HMI specification.  
+Quelle is an open and extensible standard, additional verbs, and verbs for other languages can be defined without altering the overall syntax structure of the Quelle HMI. The remainder of this document describes Version 1.0 of the Quelle-HMI specification.  
 
 In Quelle terminology, a statement is made up of actions. Each action has a single verb. While there are fifteen verbs, there are only six syntax categories:
 
@@ -463,13 +463,13 @@ Like the earlier example, the subject is "you understood".  The object this time
 
 **Statement**: A statement is composed of one or more *actions*. If there is more than one SEARCH actions issued by the statement, then search action is logically OR’ed together.
 
-**Unquoted SEARCH segments:** an unquoted search segment contains one or more search words. If there is more than one word in the segment, then each word is logically AND’ed together. Like all other types of clauses, the end of the clause terminates with a semicolon, a plus-sign, or a linefeed.
+**Unquoted SEARCH clauses:** an unquoted search clause contains one or more search words. If there is more than one word in the clause, then each word is logically AND’ed together. Like all other types of clauses, the end of the clause terminates with a semicolon, a plus-sign, or a linefeed.
 
 - ; [semi-colon]
 - \+ [plus-sign]
 - the end-of-the-line [newline]
 
-**Quoted SEARCH segments:** a quoted clause contains a single string of terms to search. An explicit match on the string is required. However, an ellipsis ( … ) can be used to indicate that wildcards may appear within the quoted string.
+**Quoted SEARCH clauses:** a quoted clause contains a single string of terms to search. An explicit match on the string is required. However, an ellipsis ( … ) can be used to indicate that wildcards may appear within the quoted string.
 
 **NOTES:**
 
@@ -480,7 +480,7 @@ Like the earlier example, the subject is "you understood".  The object this time
 
 *“noun ... said|says|stated|replied ... [Trump president|predidency]”*
 
-Bracketed terms differ from the pipe symbol in that all terms within brackets are required, but the order is leaxed within the quoted phrase. As non-quoted segments are always unordered, bracketed terms can only be invoked within a quoted segment. 
+Bracketed terms differ from the pipe symbol in that all terms within brackets are required, but the order is relaxed within the quoted phrase. As non-quoted clauses are always unordered, bracketed terms can only be invoked within a quoted search clause. 
 
 The serch clause above would match any of these phrases:
 
@@ -495,6 +495,6 @@ These phrase would NOT match:
 
 **or:** In Boolean logic, **or** means that any term constitutes a match. With Quelle, *or* is represented by the semi-colon ( **;** ) or plus (+) between SEARCH clauses. 
 
-**not:** In Boolean logic, **not** means that the term must not be found. With Quelle, *not* is represented by a minus, minus ( **--** ) and applies to an entire segment (it cannot be applied to individual words unless the search segment has only a single term). In other words, a -- means subtract results; it cancels-out matches against all matches of other clauses. Most clauses are additive as each additional clause increases search results. Contrariwise, a **not** clause is subtractive as it decreases search results.
+**not:** In Boolean logic, **not** means that the term must not be found. With Quelle, *not* is represented by a minus, minus ( **--** ) and applies to an entire clause (it cannot be applied to individual segments (e.g. discrete words) within the search clause. However, a search clause is permitted to contain a single segment, which easily circumvents that limitation. In short, -- means subtract results; it cancels-out matches against all matches of other clauses. Most clauses are additive as each additional clause increases search results. Contrariwise, a **not** clause is subtractive as it decreases search results.
 
-In short, -- means that the clause will be subtracted from the search results.. When commands only contain a single search clause, it is always positive. A single negative clause following the find imperative, while it might be grammatically valid syntax, will never match anything. Therefore, while permitted in theory, it would have no real-world meaning. Consequently, most implementations of Quelle-HMI disallow that construct.
+Again, -- means that the clause will be subtracted from the search results.. When commands only contain a single search clause, it is always positive. A single negative clause following the find imperative, while it might be grammatically valid syntax, will never match anything. Therefore, while permitted in theory, it would have no real-world meaning. Consequently, most implementations of Quelle-HMI disallow that construct.
