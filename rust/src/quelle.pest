@@ -11,7 +11,6 @@
 // fragments are used to match terms (i.e. word tokens) across the corpus being searched; match logic should consider all features of the token when deeming it to be matched
 
 WHITESPACE = _ { " " | "\t" | "\r" | "\n" }
-//test = { "@" ~ ("T" | "t") ~ ("E" | "e") ~ ("S" | "s") ~ ("T" | "t") }
 space = _ { " " | "\t" }
 command = { (clauses ~ save) | (clauses ~ scope ~ export) | (clauses ~ export ~ scope) | (clauses ~ export) | (clauses ~ scope) | clauses | explicit }
 scope = { pick | limit }
@@ -37,7 +36,7 @@ previous = { "{" ~ ('0' .. '9')+ ~ "}" }
 digit = _ { '0' .. '9' }
 alpha = _ { 'a' .. 'z' | 'A' .. 'Z' }
 hyphenated = { alpha+ | "-" }
-loc = { ("B" | "b" | "E" | "e") ~ ("O" | "o") ~ ("B" | "b" | "C" | "c" | "V" | "v") }
+loc = { ^"BoB" | ^"EoB" | ^"BoC" | ^"EoC" | ^"BoV" | ^"EoV" }
 and = { "&" }
 or = { "|" }
 
@@ -82,16 +81,16 @@ span = { spanSet | spanDel }
 spanEq = { spanKey ~ "=" }
 spanDel = { spanEq ~ "@" }
 spanSet = { spanEq ~ digit+ }
-SPAN = { ("S" | "s") ~ ("P" | "p") ~ ("A" | "a") ~ ("N" | "n") }
+SPAN = { ^"span" }
 spanKey = { SPAN | (searchPrefix ~ SPAN) }
 searchPrefix =  { searchAll ~ "." }
-searchAll =  { ("S"|"s") ~ ("E"|"e") ~ ("A"|"a") ~ ("R"|"r") ~ ("C"|"c") ~ ("H"|"h") }
+searchAll =  { ^"search" }
 
 domain = { domainSet | domainDel }
 domainEq = { domainKey ~ "=" }
 domainDel = { domainEq ~ "@" }
 domainSet = { domainEq ~ domains }
-DOMAIN = { ("D"|"d") ~ ("O"|"o") ~ ("M"|"m") ~ ("A"|"a") ~ ("I"|"i") | ("N"|"n") }
+DOMAIN = { ^"domain" }
 domainKey = { DOMAIN | (searchPrefix ~ DOMAIN) }
 domains = { av | avx }  // very specific domain for the AVX driver/parser implementation
 avx = { (("M"|"m")~("O"|"o")~("D"|"d")~("E"|"e")~("R"|"r")~("N"|"n")) | (("A"|"a") ~ ("V"|"v") ~ ("X"|"x")) }
@@ -103,5 +102,5 @@ exact = { exactSet | exactDel }
 exactEq = { exactKey ~ "=" }
 exactDel = { exactEq ~ "@" }
 exactSet = { exactEq ~ boolean }
-EXACT = { ("E" | "e") ~ ("X" | "x") ~ ("A" | "a") ~ ("C" | "c") ~ ("T" | "t") }
+EXACT = { ^"exact"}
 exactKey = { EXACT | (searchPrefix ~ EXACT) }
