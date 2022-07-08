@@ -1,5 +1,5 @@
 # Quelle
-Quelle is a specification.  the most generic form of the spec is known as Vanilla-Quelle. As Quelle is a being proposed as a standard for search across various domains, tailoring for specific domains will inevitable produce various dialects. It is recommended that each dialect conform to the Vanilla-Quelle specification. A user-manual-of-sorts is provided here:
+Quelle is a specification. The most generic form of the spec is known as Vanilla-Quelle. As Quelle is a being proposed as a standard for search across various domains, tailoring for specific domains will inevitable produce various dialects. It is recommended that each dialect conform to the Vanilla-Quelle specification. A user-manual-of-sorts is provided here:
 
 [https://github.com/kwonus/Quelle/blob/main/VanillaQuelle.md](https://github.com/kwonus/Quelle/blob/main/Vanilla-Quelle.md)
 
