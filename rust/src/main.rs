@@ -10,8 +10,8 @@ use pest::iterators::Pairs;
 struct QuelleParser;
 
 fn main() {
-    let tests = QuelleParser::parse(Rule::segment, "he \t said").unwrap_or_else(|e| panic!("{}", e));
-    output(tests, 0);
+//  let tests = QuelleParser::parse(Rule::segment, "he \t said").unwrap_or_else(|e| panic!("{}", e));
+//  output(tests, 0);
 
     let pairs = QuelleParser::parse(Rule::command, "\"#foo ... [he \t said] ... /pronoun/&#3\" + bar + x|y&z a&b&c > xfile < genesis 1:1").unwrap_or_else(|e| panic!("{}", e));
     output(pairs, 0);
