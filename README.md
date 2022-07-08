@@ -12,7 +12,7 @@ Every attempt is being made to keep the Quelle syntax agnostic about the search 
 
 Developer notes, now obsolete, may still be useful and can be found at at:</br>
 
-https://github.com/kwonus/Quelle-Obsolete/blob/master/Quelle-Developer-Notes.md
+https://github.com/kwonus/Quelle/blob/main/Quelle-Developer-Notes.md
 
 <br/></br>
 # What's Ahead?
