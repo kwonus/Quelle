@@ -65,7 +65,7 @@ In Quelle terminology, a statement is made up of actions. Each action has a sing
    - @review
    - *invoke*
 6. LABEL
-   - @save
+   - *save*
    - @delete
    - @expand
    - *execute*
