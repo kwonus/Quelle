@@ -3,7 +3,7 @@ Quelle is a specification. The most generic form of the spec is known as Vanilla
 
 [https://github.com/kwonus/Quelle/blob/main/VanillaQuelle.md](https://github.com/kwonus/Quelle/blob/main/Vanilla-Quelle.md)
 
-For the time being, that is also the most complete specification. It is a specification-by-example (SBE). A [PEG](https://en.wikipedia.org/wiki/Domain-specific_language) grammar is provided in the reference Rust implementation of Vanilla-Quelle:
+Initially, the manual served as the most complete specification. It was a specification-by-example (SBE). Now: a [PEG](https://en.wikipedia.org/wiki/Domain-specific_language) grammar exists. This grammar not only provides reference implementation in Rust, but it also provides a formal specification for Vanilla-Quelle:
 
 [https://github.com/kwonus/Quelle/blob/main/rust/src/quelle.pest](https://github.com/kwonus/Quelle/blob/main/rust/src/quelle.pest)
 
