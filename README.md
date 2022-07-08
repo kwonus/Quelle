@@ -10,7 +10,7 @@ Initially, the manual served as the most complete specification. It was a specif
 Every attempt is being made to keep the Quelle syntax agnostic about the search domain. Consequently, Quelle syntax has the potential for ubiquity.
 <br/></br>
 
-Developer notes, now obsolete, may still be useful and can be found at at:</br>
+Developer notes, a little out of date, may still be useful and can be found at at:</br>
 
 https://github.com/kwonus/Quelle/blob/main/Quelle-Developer-Notes.md
 
