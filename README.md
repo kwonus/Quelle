@@ -16,4 +16,5 @@ https://github.com/kwonus/Quelle-Obsolete/blob/master/Quelle-Developer-Notes.md
 
 <br/></br>
 # What's Ahead?
-Tandem projects are expected to become siblings of the reference Rust implementation in this github repo.
+- The reference implementation will be made intereactive and report the results of the parse via a console-based/command-line interface
+- Tandem projects [search dialects] are expected to become siblings of the reference Rust implementation in this github repo.
