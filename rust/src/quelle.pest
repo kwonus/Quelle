@@ -8,12 +8,12 @@
 // search-clause contains [>= 1] segments
 // segments contain [>= 1] fragments
 // fragments contain [>= 1] features
-// fragments are used to match terms (i.e. word tokens) across the corpus being searched; match logic should consider all features of the token when deeming it to be matched
+// fragments are used to match terms (i.e. word tokens) across the corpus being searched; match logic should consider all features of the fragment/token when deeming it to be matched
 
 WHITESPACE = _ { " " | "\t" | "\r" | "\n" }
 space = _ { " " | "\t" }
 command = { (clauses ~ save) | (clauses ~ scope ~ export) | (clauses ~ export ~ scope) | (clauses ~ export) | (clauses ~ scope) | clauses | explicit }
-scope = { pick | limit }
+scope = { pick | filter }
 pick = { "\\[" ~ digit+ ~ ("," ~ digit+)* | "]" }
 cv = ${ chapter ~ ":" ~ verse }
 bcv = { (bookName | bookNum)}
@@ -22,16 +22,16 @@ verse = ${ digit+ }
 bookName = ${ alpha+ | (onetwothree ~ space* ~ alpha+) }
 onetwothree = { ('1' .. '3') }
 bookNum  = ${ ('1' .. '9') | (('1' .. '5') ~ digit) ~ ( "6" ~ ('1' .. '6')) } // 1-66
-limit = ${ "<" ~ ((bookName ~ space+) | bookNum ~ ":") }
+filter = ${ positive? ~ space* ~ "<" ~ ((bookName ~ space+) | bookNum ~ ":") }
 clauses = { clause ~ (polarity ~ clause)* }
 clause = { search | setting | named | previous }
 polarity = ${ negative | positive }
-positive = ${ "+" | ";" }
-negative = ${"--" | "+" ~ space+ ~ "--" ~ space* | ";" ~ space* ~ "--" ~ space*}
+positive = ${ "+" | ";" }   // extra positive delimiters are permitted in front of save, filter, output, and negative. This will allow user to always terminate clauses with semicolon [or plus]
+negative = ${ positive? ~ space+ ~ "--" ~ space* }
 setting = { span | domain | exact /* | heading | annotation */ }
 label = { ('a' .. 'z' | 'A' .. 'Z' | '0' .. '9' | " " | "-" | "_")+ }
 named = ${ space* ~ "{" ~ space* ~ label ~ space* ~ "}" ~ space*}   // macro is a Rust keyword; cannot use it here
-save = { "<-" ~ label}
+save = ${ positive? ~ space* ~ "<-" ~ space* ~ label}
 previous = { "{" ~ ('0' .. '9')+ ~ "}" }
 digit = _ { '0' .. '9' }
 alpha = _ { 'a' .. 'z' | 'A' .. 'Z' }
@@ -69,7 +69,7 @@ delete = { ^"@delete" ~  named* }
 version = { ^"@version" }
 get = { ^"@get" ~ var }
 var = ${ space* ~ (spanKey | domainKey | exactKey | searchAll) ~space*}
-export = { output | overwrite | append }
+export = { positive? ~ (output | overwrite | append) }
 overwrite = ${ output ~ "!" ~space* }
 append = ${ ">>" ~  space* ~ filename ~space* }
 output = ${ ">" ~ space* ~ filename ~space* }

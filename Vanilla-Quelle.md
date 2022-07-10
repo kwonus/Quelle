@@ -4,7 +4,7 @@
 
 ### I. Background
 
-Most modern search engines, provide a mechanism for searching via a text input box where the user is expected to type search terms. While primitive, this interface was pioneered by major web-search providers and represented an evolution from the far more complex interfaces that came earlier. When you search for multiple terms, however, there seems to be only one basic paradigm: “find every term”. The vast world of search is rife for a search-syntax that moves us past the ability to only search using basic search expressions. To this end, the Quelle specification put forward an open Human-Machine-Interface (HMI) that can be invoked within a command shell or even within a simple text input box on a web page. The syntax fully supports basic Boolean operations such as AND, OR, and NOT. While great care has been taken to support the construction of complex queries, greater care has been taken to maintain a clear and concise syntax.
+Most modern search engines, provide a mechanism for searching via a text input box where the user is expected to type search terms. While primitive, this interface was pioneered by major web-search providers and represented an evolution from the far more complex interfaces that came earlier. When you search for multiple terms, however, there seems to be only one basic paradigm: “find every term”. The vast world of search is rife for a search-syntax that moves us past the ability to only search using basic search expressions. To this end, the Quelle specification is put forward an open Human-Machine-Interface (HMI) that can be invoked within a command shell or even within a simple text input box on a web page. The syntax fully supports basic Boolean operations such as AND, OR, and NOT. While great care has been taken to support the construction of complex queries, greater care has been taken to maintain a clear and concise syntax.
 
 Quelle, IPA: [kɛl], in French means "What? or Which?". As Quelle HMI is designed to obtain search-results from search-engines, this interrogative nature befits its name. An earlier interpreter, Clarity, served as inspiration for defining Quelle.  You could think of the Quelle HMI as version 2 of the Clarity HMI specification.  However, in order to create linguistic consistency in Quelle's Human-to-Machine command language, the resulting syntax varies so significantly from the baseline specification that a new name was the best way forward.  Truly, Quelle HMI incorporates lessons learned after creating, implementing, and revising Clarity HMI for over a decade.
 
@@ -14,7 +14,7 @@ Now that we understand what Quelle is, what is Vanilla Quelle?  Quelle was origi
 
 ### II. Overview
 
-Quelle HMI maintains the assumption that proximity of terms to one another is an important aspect of searching unstructured data. Ascribing importance to the proximity between search terms is sometimes referred to as a *proximal* *search* technique. Proximal searches intentionally constrains the span of words between search terms, yet still constitute a match.
+Quelle HMI maintains the assumption that proximity of terms to one another is an important aspect of searching unstructured data. Ascribing importance to the proximity between search terms is sometimes referred to as a *proximal* *search* technique. Proximal searches intentionally constrain the span of words between search terms, yet still constitute a match.
 
 Beyond search, the specification provides a means to persist user settings and system-wide configurations. The design of Quelle is privacy-first, and is therefore not cloud-first. Consequently, settings in Quelle can easily be stored on your local system. Likewise, all processing can occur without cloud/internet computing resources.
 
@@ -26,9 +26,10 @@ Vanilla Quelle is implemented in [Rust](https://www.rust-lang.org/) using the [P
 
 The Quelle specification defines a declarative syntax for specifying search criteria using the *find* verb. Quelle also defines additional verbs to round out its syntax as a simple straightforward means to interact with custom applications where searching text is the fundamental problem at hand.
 
-Quelle Syntax comprises fifteen(15) verbs. Each verb corresponds to a basic action:
+Quelle Syntax comprises sixteen(16) verbs. Each verb corresponds to a basic action:
 
 - find
+- filter
 - set
 - get
 - clear
@@ -46,10 +47,11 @@ Quelle Syntax comprises fifteen(15) verbs. Each verb corresponds to a basic acti
 
 Quelle is an open and extensible standard, additional verbs, and verbs for other languages can be defined without altering the overall syntax structure of the Quelle HMI. The remainder of this document describes Version 1.0 of the Quelle-HMI specification.  
 
-In Quelle terminology, a statement is made up of actions. Each action has a single verb. While there are fifteen verbs, there are only six syntax categories:
+In Quelle terminology, a statement is made up of one or more clauses. Each clause represents an action. While there are sixteen action-verbs, there are only six syntax categories:
 
 1. SEARCH
    - *find*
+   - *filter*
 2. CONTROL
    - *set*
    - *clear*
@@ -70,7 +72,7 @@ In Quelle terminology, a statement is made up of actions. Each action has a sing
    - @expand
    - *execute*
 
-Each syntax category has a combination of explicit and implicit actions.  Explicit actions begin with the @ symbol, immediately followed by the explicit verb.  Implicit actions are inferred by the syntax of the command.
+Each syntax category has either explicit and/or implicit actions.  Explicit actions begin with the @ symbol, immediately followed by the explicit verb.  Implicit actions are inferred by the syntax of the command.
 
 ### IV. Fundamental Quelle Commands
 
@@ -79,6 +81,7 @@ Learning just five verbs is all that is necessary to effectively use Quelle. In 
 | Verb      | Action Type | Syntax Category | Required Parameters     | Required Operators | Optional Operators | > 1 permitted |
 | --------- | :---------: | :-------------- | ----------------------- | :----------------: | :----------------: | :-----------: |
 | *find*    |  implicit   | SEARCH          | **1**: *search spec*    |                    |   **" "  \|  &**   |      yes      |
+| *filter*  |  implicit   | SEARCH          | **1**: *filter spec*    |       **<**        |      **" "**       |      yes      |
 | *set*     |  implicit   | CONTROL         | **2**: *name* = *value* |       **=**        |                    |      yes      |
 | *show*    |  implicit   | DISPLAY         | 0                       |       **\\**       |      **[ ] **      |      no       |
 | **@help** |  explicit   | SYSTEM          | 0 or 1                  |                    |                    |      no       |
