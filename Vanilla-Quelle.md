@@ -1,6 +1,6 @@
 # Vanilla Quelle HMI Specification
 
-##### version 1.0.2.709
+##### version 1.0.2.712
 
 ### I. Background
 
@@ -18,7 +18,7 @@ Quelle HMI maintains the assumption that proximity of terms to one another is an
 
 Beyond search, the specification provides a means to persist user settings and system-wide configurations. The design of Quelle is privacy-first, and is therefore not cloud-first. Consequently, settings in Quelle can easily be stored on your local system. Likewise, all processing can occur without cloud/internet computing resources.
 
-Any application can implement the Quelle specification without royalty. We provide a [PEG]([Parsing expression grammar - Wikipedia](https://en.wikipedia.org/wiki/Parsing_expression_grammar)) grammar that showcases how to harvest the meaning behind the parse. Vanilla Quelle makes no claim that it represents a ready-made interpreter.  You'll have to look elsewhere for working interpreter examples implemented atop the Quelle grammar.  The reason is, the search domain needs to be chosen in order to successfully implement an interpreter optimized for whatever domain. Consequently, Vanilla Quelle instead exposes the details of the parse in lieu of a working [DSL](https://en.wikipedia.org/wiki/Domain-specific_language) for search.
+Any application can implement the Quelle specification without royalty. We provide a [PEG]([Parsing Expression Grammar](https://en.wikipedia.org/wiki/Parsing_expression_grammar)) grammar that showcases how to harvest the meaning behind the parse. Vanilla Quelle makes no claim that it represents a ready-made interpreter.  You'll have to look elsewhere for working interpreter examples implemented atop the Quelle grammar.  The reason is, the search domain needs to be chosen in order to successfully implement an interpreter optimized for whatever domain. Consequently, Vanilla Quelle instead exposes the details of the parse in lieu of a working [DSL](https://en.wikipedia.org/wiki/Domain-specific_language) for search.
 
 Vanilla Quelle is implemented in [Rust](https://www.rust-lang.org/) using the [Pest](https://pest.rs/) crate.  Rust source code for Vanilla Quelle and the companion PEG grammar are being shared to the community with a liberal MIT open source license.
 
@@ -76,7 +76,7 @@ Each syntax category has either explicit and/or implicit actions.  Explicit acti
 
 ### IV. Fundamental Quelle Commands
 
-Learning just five verbs is all that is necessary to effectively use Quelle. In the table below, each verb has a minimum and maximum number of parameters.  Each of these verbs are described below and in this section.
+Learning just six verbs is all that is necessary to effectively use Quelle. In the table below, each verb is identified with required and optional parameters/operators.
 
 | Verb      | Action Type | Syntax Category | Required Parameters     | Required Operators | Optional Operators | > 1 permitted |
 | --------- | :---------: | :-------------- | ----------------------- | :----------------: | :----------------: | :-----------: |
