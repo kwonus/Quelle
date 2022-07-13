@@ -1,6 +1,6 @@
 # Quelle Developer Notes
 
-##### version 1.0.2707 (not fully updated yet to the 1.02xxx version)
+##### version 1.0.2.707 (not fully updated yet to the 1.02xxx version)
 
 1. SEARCH
    - *find*
