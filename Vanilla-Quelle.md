@@ -173,7 +173,7 @@ This would find phrases where a noun appeared within a span of six words and pre
 
 **Another SEARCH Example:**
 
-Consider a query for all passages that contain God AND created, but NOT containing earth AND NOT containing heaven:
+Consider a query for all passages that contain a word beginning with pres, followed by Bush AND created, but filter out phrases containing H W Bush.
 
 *span = 15 ; "Pres*\* ... Bush" -- "H W Bush"*
 
