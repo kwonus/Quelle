@@ -1,6 +1,6 @@
 # Vanilla Quelle HMI Specification
 
-##### version 1.0.2.712
+##### version 1.0.3.120
 
 ### I. Background
 
@@ -87,7 +87,7 @@ Learning just six verbs is all that is necessary to effectively use Quelle. In t
 | **@help** |  explicit   | SYSTEM          | 0 or 1                  |                    |                    |      no       |
 | **@exit** |  explicit   | SYSTEM          | 0                       |                    |                    |      no       |
 
-**TABLE 4-1** -- **The five fundamental Quelle commands with corresponding syntax summaries**
+**TABLE 4-1** -- **The six fundamental Quelle commands with corresponding syntax summaries**
 
 From a linguistic standpoint, all Quelle commands are issued in the imperative. The subject of the verb is always "you understood". As the user, you are commanding Quelle what to do. Some verbs have direct objects [aka required parameters]. These parameters instruct Quelle <u>what</u> to act upon. The syntax category of the verb dictates the required parameters.
 
@@ -104,9 +104,9 @@ Even before we describe Quelle syntax generally, let's examine these concepts us
 
 | Description                             | Example                                  |
 | --------------------------------------- | :--------------------------------------- |
-| SYSTEM action                           | @help                                    |
-| DISPLAY action                          | < wall street journal : 2022-07-04       |
-| single SEARCH action                    | this is some text expected to be found   |
+| SYSTEM command                          | @help                                    |
+| SEARCH filter                           | < wall street journal : 2022-07-04       |
+| SEARCH specification                    | this is some text expected to be found   |
 | Compound statement: two SEARCH actions  | "this quoted text" ; other unquoted text |
 | Compound statement: two CONTROL actions | span=7 ; exact = true                    |
 | Compound statement: CONTROL & SEARCH    | span=7; "Moses said"                     |
@@ -119,13 +119,13 @@ search.domain = wall street journal
 
 "Kamala Harris"
 
-Notice that both statements above are single actions.  We should have a way to express both of these in a single command. And this is the rationale behind a compound statement. A compound statement has more than one action. To combine the previous two actions into one compound statement, issue this command:
+Notice that both statements above are single actions.  We should have a way to express both of these in a single command. And this is the rationale behind a compound statement. To combine the previous two actions into one compound statement, issue this command:
 
 "Kamala Harris" ; search.domain=wall street journal
 
 ### V. Deep Dive into Quelle SEARCH actions
 
-Consider the proximity search where the search target is the bible. Here is an example search using Quelle syntax:
+Consider this proximity search where the search using Quelle syntax:
 
 *domain=wall street journal ; Harris Biden*
 
@@ -143,19 +143,19 @@ The order in which the search terms are provided is insignificant. Additionally,
 
 Of course, there are times when word order is significant. Accordingly, searching for explicit strings can be accomplished using double-quotes as follows:
 
-*“Biden said ... Harris”*
+*"Biden said ... Harris"*
 
 These constructs can even be combined. For example:
 
-*"Biden said ... Kamala|Harris”*
+*"Biden said ... Kamala|Harris"*
 
 The search criteria above is equivalent to this search:
 
-“Biden said ... Kamala” + *“Biden said ... Harris”*
+*"Biden said ... Kamala" + "Biden said ... Harris"*
 
 In all cases, “...” means “followed by”, but the ellipsis allows other words to appear between "said" and "Kamala". Likewise, it allows words to appear between "said" and "Harris". 
 
-Of course, translating the commands into actual search results might not be trivial for the application developer. Still, the Vanilla Quelle parser and the PEG grammar are freely available.
+Of course, translating the commands into actual search results might not be trivial for the application developer. Still, the Vanilla Quelle parser and the PEG grammar are freely available, allowing the developer to just leverage the parse and focus on delivering search results.
 
 Quelle is designed to be intuitive. It provides the ability to invoke Boolean logic on how term matching should be performed. As we saw above, the pipe symbol ( | ) can be used to invoke an OR condition [Boolean multiplication upon the terms that compose a search expression].
 
@@ -173,7 +173,7 @@ This would find phrases where a noun appeared within a span of six words and pre
 
 **Another SEARCH Example:**
 
-Consider a query for all passages that contain a word beginning with pres, followed by Bush AND created, but filter out phrases containing H W Bush.
+Consider a query for all passages that contain a word beginning with pres, followed by Bush, but filter out phrases containing H W Bush.
 
 *span = 15 ; "Pres*\* ... Bush" -- "H W Bush"*
 
@@ -190,13 +190,13 @@ Due to the latter condition above, SEARCH summarizes results (it does NOT displa
 
 "Clinton answered"			*summarize documents that contain this phrase, with paragraph references*
 
-"Clinton answered" \\        *display every matching phrase* // equivalent to Clinton answered" \\[\*]
+"Clinton answered" \\\\        *display every matching phrase* // equivalent to Clinton answered" \\[\*]
 
-"Clinton answered" \\ [1]  *this would would display only the first matching phrase*
+"Clinton answered" \\\\ [1]  *this would would display only the first matching phrase*
 
-"Clinton answered" \\ [1 2 3]  *this would would display only the first three matching phrases*
+"Clinton answered" \\\\ [1 2 3]  *this would would display only the first three matching phrases*
 
-"Clinton answered" \\ [4 5 6]  *this would would display the next first three matching phrases*
+"Clinton answered" \\\\ [4 5 6]  *this would would display the next first three matching phrases*
 
 ### VII. Exporting Results
 
@@ -206,13 +206,13 @@ Export using a display-coordinate:
 
 To revisit the example in the previous sample, we can export records to a file with these commands:
 
-"Clinton answered" \ > my-file.output  // *this would would export every matching phrase*
+"Clinton answered" \\\\ > my-file.output  // *this would export every matching phrase*
 
-"Clinton answered"  \ [1]  > my-file.output  // *this would would export only the first matching phrase*
+"Clinton answered" \\\\ [1]  > my-file.output  // *this would would export only the first matching phrase*
 
-"Clinton answered" \ \[1 2 3]  >> my-file.output  //  *this would would export the first three matching phrases* // >> indicates that the results should be appended
+"Clinton answered" \\\\ [1 2 3]  >> my-file.output  //  *this would would export the first three matching phrases* // >> indicates that the results should be appended
 
-format=html ; "Clinton answered"  \[1 2 3]  > my-file.html ! // *export the first three matching phrases as html*
+format=html ; "Clinton answered" \\\\ [1 2 3]  > my-file.html ! // *export the first three matching phrases as html*
 
 The trailing exclamation point allows existing file to be overwritten
 
