@@ -203,8 +203,6 @@ Due to the latter condition above, SEARCH summarizes results (it does NOT displa
 
 Export using a display-coordinate:
 
-*\\* wall street journal : 2022-07-04 *\\*
-
 To revisit the example in the previous sample, we can export records to a file with these commands:
 
 "Clinton answered" || > my-file.output  // *this would export every matching phrase*
