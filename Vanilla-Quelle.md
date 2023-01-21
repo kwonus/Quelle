@@ -1,6 +1,6 @@
 # Vanilla Quelle HMI Specification
 
-##### version 1.0.3.120
+##### version 1.0.3.121
 
 ### I. Background
 
@@ -10,6 +10,7 @@ Quelle, IPA: [kɛl], in French means "What? or Which?". As Quelle HMI is designe
 
 Every attempt has been made to make Quelle consistent with itself. Some constructs are in place to make parsing unambiguous, other constructs are biased toward ease of typing (such as limiting keystrokes that require the shift key). In all, Quelle represents an easy to type and easy to learn HMI.  Moreover, simple search statements look no different than they might appear today in a Google or Bing search box. Still, let's not get ahead of ourselves or even hint about where our simple specification might take us ;-)
 
+Now that we understand what Quelle is, what is Vanilla Quelle?  Quelle was originally designed by AV Text Ministries to search the sacred text of the King James Bible using an inutive command language. Vanilla Quelle removes all domain bias and presents itself as a general purpose query language that can locate sections of <u>any</u> text-based documents, containing terms and/or linguistic features that are in close proximity to one another.  In this specification, any reference to Quelle implies Vanilla Quelle.
 Now that we understand what Quelle is, what is Vanilla Quelle?  Quelle was originally designed by AV Text Ministries to search the sacred text of the King James Bible using an inutive command language. Vanilla Quelle removes all domain bias and presents itself as a general purpose query language that can locate sections of <u>any</u> text-based documents, containing terms and/or linguistic features that are in close proximity to one another.  In this specification, any reference to Quelle implies Vanilla Quelle.
 
 ### II. Overview
@@ -81,9 +82,9 @@ Learning just six verbs is all that is necessary to effectively use Quelle. In t
 | Verb      | Action Type | Syntax Category | Required Parameters     | Required Operators | Optional Operators | > 1 permitted |
 | --------- | :---------: | :-------------- | ----------------------- | :----------------: | :----------------: | :-----------: |
 | *find*    |  implicit   | SEARCH          | **1**: *search spec*    |                    |   **" "  \|  &**   |      yes      |
-| *filter*  |  implicit   | SEARCH          | **1**: *filter spec*    |       **<**        |      **" "**       |      yes      |
+| *filter*  |  implicit   | SEARCH          | **1**: *filter spec*    |  **\\**spec**\\**  |                    |      yes      |
 | *set*     |  implicit   | CONTROL         | **2**: *name* = *value* |       **=**        |                    |      yes      |
-| *show*    |  implicit   | DISPLAY         | 0                       |     **\\\\**       |      **[ ]**       |      no       |
+| *show*    |  implicit   | DISPLAY         | 0                       |      **||**        |      **[ ]**       |      no       |
 | **@help** |  explicit   | SYSTEM          | 0 or 1                  |                    |                    |      no       |
 | **@exit** |  explicit   | SYSTEM          | 0                       |                    |                    |      no       |
 
@@ -105,7 +106,7 @@ Even before we describe Quelle syntax generally, let's examine these concepts us
 | Description                             | Example                                  |
 | --------------------------------------- | :--------------------------------------- |
 | SYSTEM command                          | @help                                    |
-| SEARCH filter                           | < wall street journal : 2022-07-04       |
+| SEARCH filter                           | \\wall street journal : 2022-07-04\\     |
 | SEARCH specification                    | this is some text expected to be found   |
 | Compound statement: two SEARCH actions  | "this quoted text" ; other unquoted text |
 | Compound statement: two CONTROL actions | span=7 ; exact = true                    |
@@ -190,29 +191,29 @@ Due to the latter condition above, SEARCH summarizes results (it does NOT displa
 
 "Clinton answered"			*summarize documents that contain this phrase, with paragraph references*
 
-"Clinton answered" \\\\        *display every matching phrase* // equivalent to Clinton answered" \\[\*]
+"Clinton answered" ||        *display every matching phrase* // equivalent to Clinton answered" ||[\*]
 
-"Clinton answered" \\\\ [1]  *this would would display only the first matching phrase*
+"Clinton answered" || [1]  *this would would display only the first matching phrase*
 
-"Clinton answered" \\\\ [1 2 3]  *this would would display only the first three matching phrases*
+"Clinton answered" || [1 2 3]  *this would would display only the first three matching phrases*
 
-"Clinton answered" \\\\ [4 5 6]  *this would would display the next first three matching phrases*
+"Clinton answered" || [4 5 6]  *this would would display the next first three matching phrases*
 
 ### VII. Exporting Results
 
 Export using a display-coordinate:
 
-*<* wall street journal : 2022-07-04
+*\\* wall street journal : 2022-07-04 *\\*
 
 To revisit the example in the previous sample, we can export records to a file with these commands:
 
-"Clinton answered" \\\\ > my-file.output  // *this would export every matching phrase*
+"Clinton answered" || > my-file.output  // *this would export every matching phrase*
 
-"Clinton answered" \\\\ [1]  > my-file.output  // *this would would export only the first matching phrase*
+"Clinton answered" || [1]  > my-file.output  // *this would would export only the first matching phrase*
 
-"Clinton answered" \\\\ [1 2 3]  >> my-file.output  //  *this would would export the first three matching phrases* // >> indicates that the results should be appended
+"Clinton answered" || [1 2 3]  >> my-file.output  //  *this would would export the first three matching phrases* // >> indicates that the results should be appended
 
-format=html ; "Clinton answered" \\\\ [1 2 3]  > my-file.html ! // *export the first three matching phrases as html*
+format=html ; "Clinton answered" || [1 2 3]  > my-file.html ! // *export the first three matching phrases as html*
 
 The trailing exclamation point allows existing file to be overwritten
 
@@ -243,7 +244,7 @@ Type this to terminate the Quelle interpreter:
 | Verb         | Action Type | Syntax Category | Required Parameters     |    Required Operators     | Optional Operators | > 1 permitted |
 | ------------ | :---------: | --------------- | ----------------------- | :-----------------------: | :----------------: | :-----------: |
 | *clear*      |  implicit   | CONTROL         | **2**: *name*           |          **=@**           |                    |      yes      |
-| *output*     |  implicit   | DISPLAY         | **1**: *filename*       | **>** or **>>** or **>!** |       **<**        |      no       |
+| *output*     |  implicit   | DISPLAY         | **1**: *filename*       | **>** or **>>** or **>!** |                    |      no       |
 | **@get**     |  explicit   | CONTROL         | **0+**: *control_names* |                           |                    |      no       |
 | **@version** |  explicit   | SYSTEM          | **0**                   |                           |                    |      no       |
 
@@ -377,7 +378,7 @@ span = 7 ; exact = true ; eternal power
 
 | Verb        | Action Type | Syntax Category | Required Arguments     | Required Operators | Optional Operators | > 1 permitted |
 | ----------- | ----------- | --------------- | ---------------------- | :----------------: | :----------------: | :-----------: |
-| *save*      | implicit    | LABEL           | **1**: *macro_label*   |       **<-**       |                    |      no       |
+| *save*      | implicit    | LABEL           | **1**: *macro_label*   |       **<<**       |                    |      no       |
 | **@delete** | independent | LABEL           | **1+**: *macro_label*s |      **{ }**       |                    |      no       |
 | **@expand** | independent | LABEL           | **0+**: *macro_labels* |                    |      **{ }**       |      no       |
 | *execute*   | implicit    | LABEL           | 1: *macro_label*       |      **{ }**       |                    |      yes      |
@@ -393,7 +394,7 @@ In this section, we will examine how user-defined macros are used in Quelle.  A 
 
 Let’s say we want to name our previously identified SEARCH directive with a label; We’ll call it “kh”. To accomplish this, we would issue this command:
 
-"Kamala Harris" ; search.domain=wall street journal <- kh
+"Kamala Harris" ; search.domain=wall street journal << kh
 
 It’s that simple, now instead of typing the entire statement, we can use the label to execute our newly saved statement. Here is how we would execute the macro:
 
@@ -401,7 +402,7 @@ It’s that simple, now instead of typing the entire statement, we can use the l
 
 Labelled statements also support compounding using the semi-colon ( ; ), as follows; we will label it also:
 
-{kh} ; "former President Bush" <- my label can contain spaces
+{kh} ; "former President Bush" << my label can contain spaces
 
 Later I can issue this command:
 
@@ -413,13 +414,13 @@ Which is obviously equivalent to executing these labeled statements:
 
 To illustrate this further, here are four more examples of labeled statement definitions:
 
-search.exact=1 <- C1
+search.exact=1 << C1
 
-search.span=8  <- C2
+search.span=8  << C2
 
-nationality <- F1
+nationality << F1
 
-eternal  <- F2
+eternal  << F2
 
 We can execute these as a compound statement by issuing this command:
 
@@ -427,7 +428,7 @@ We can execute these as a compound statement by issuing this command:
 
 Similarly, we could define another label from these, by issuing this command:
 
-{C1} ; {C2} ; {F1} ; {F2} <- sample-compound-macro
+{C1} ; {C2} ; {F1} ; {F2} << sample-compound-macro
 
 This expands to:
 
