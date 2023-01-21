@@ -14,7 +14,7 @@ WHITESPACE = _ { " " | "\t" | "\r" | "\n" }
 space = _ { " " | "\t" }
 command = { (clauses ~ save) | (clauses ~ scope ~ export) | (clauses ~ export ~ scope) | (clauses ~ export) | (clauses ~ scope) | clauses | explicit }
 scope = { pick | filter }
-pick = { "\\[" ~ digit+ ~ ("," ~ digit+)* | "]" }
+pick = { "\\\\[" ~ digit+ ~ ("," ~ digit+)* | "]" }
 cv = ${ chapter ~ ":" ~ verse }
 bcv = { (bookName | bookNum)}
 chapter = ${ digit+ }
@@ -74,7 +74,7 @@ overwrite = ${ output ~ "!" ~space* }
 append = ${ ">>" ~  space* ~ filename ~space* }
 output = ${ ">" ~ space* ~ filename ~space* }
 
-legal = _ { ('a' .. 'z' | 'A' .. 'Z' | '0' .. '9') | "/" | "\\" | "-" | "_" }
+legal = _ { ('a' .. 'z' | 'A' .. 'Z' | '0' .. '9') | "/" | "\\\\" | "-" | "_" }
 filename = ${ space* ~ (("\"" ~ (legal+ | " ") + ~ "\"" ) | legal+) ~ space* }
 
 span = { spanSet | spanDel }
