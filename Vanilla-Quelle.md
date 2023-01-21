@@ -84,7 +84,7 @@ Learning just six verbs is all that is necessary to effectively use Quelle. In t
 | *find*    |  implicit   | SEARCH          | **1**: *search spec*    |                    |   **" "  \|  &**   |      yes      |
 | *filter*  |  implicit   | SEARCH          | **1**: *filter spec*    |  **\\**spec**\\**  |                    |      yes      |
 | *set*     |  implicit   | CONTROL         | **2**: *name* = *value* |       **=**        |                    |      yes      |
-| *show*    |  implicit   | DISPLAY         | 0                       |      **||**        |      **[ ]**       |      no       |
+| *show*    |  implicit   | DISPLAY         | 0                       |     **\|\|**       |      **[ ]**       |      no       |
 | **@help** |  explicit   | SYSTEM          | 0 or 1                  |                    |                    |      no       |
 | **@exit** |  explicit   | SYSTEM          | 0                       |                    |                    |      no       |
 
