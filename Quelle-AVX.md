@@ -491,7 +491,7 @@ Again, -- means that the clause will be subtracted from the search results.. Whe
 
 Search tokens in Quelle are normally any word in the lexicon for the domain being searched. In Quelle-AVX, this includes all words in the original KJV text and any modernized version of those words (e.g. hast and has).  The table below lists examples that are extensions of search terms
 
-| Verb        | Operator Type     | Meaning                                                                         |
+| Search Term | Operator Type     | Meaning                                                                         |
 | ----------- | ----------------- | ------------------------------------------------------------------------------- |
 | Jer\*       | wildcard          | starts with Jer                                                                 |
 | \*iah       | wildcard          | ends with iah                                                                   |      
