@@ -491,7 +491,7 @@ Again, -- means that the clause will be subtracted from the search results.. Whe
 
 Search tokens in Quelle are normally any word in the lexicon for the domain being searched. In Quelle-AVX, this includes all words in the original KJV text and any modernized version of those words (e.g. hast and has).  The table below lists examples that are extensions of search terms
 
-| Search Term | Operator Type     | Meaning                                                                         | Maps To              | Mask to Apply |
+| Search Term | Operator Type     | Meaning                                                                         | Maps To              | Mask          |
 | ----------- | ----------------- | ------------------------------------------------------------------------------- | -------------------- | ------------- |
 | Jer\*       | wildcard          | starts with Jer                                                                 | selects from lexicon | 0x3FFF        |
 | \*iah       | wildcard          | ends with iah                                                                   | selects from lexicon | 0x3FFF        |
@@ -503,46 +503,46 @@ Search tokens in Quelle are normally any word in the lexicon for the domain bein
 | are#mod     | explicit search   | synonym for are#avx                                                             | are\|art             | 0x3FFF        |
 | /noun/      | lexical marker    | any word where part of speech is a noun                                         | POS12::0x010         | 0x0FF0        |
 | /n/         | lexical marker    | synonym for /noun/                                                              | POS12::0x010         | 0x0FF0        |
-| /!n/        | lexical marker    | any word where part of speech is not a noun                                     | POS12::0x010         | 0x0FF0        |
+| /!n/        | lexical marker    | any word where part of speech is not a noun                                     | POS12::0x010         | 0x0FF0^       |
 | /verb/      | lexical marker    | any word where part of speech is a verb                                         | POS12::0x100         | 0x0FF0        |
 | /v/         | lexical marker    | synonym for /verb/                                                              | POS12::0x100         | 0x0FF0        |
-| /!v/        | lexical marker    | any word where part of speech is not a verb                                     | POS12::0x100         | 0x0FF0        |
+| /!v/        | lexical marker    | any word where part of speech is not a verb                                     | POS12::0x100         | 0x0FF0^       |
 | /pronoun/   | lexical marker    | any word where part of speech is a pronoun                                      | POS12::0x020         | 0x0FF0        |
 | /pn/        | lexical marker    | synonym for /pronoun/                                                           | POS12::0x020         | 0x0FF0        |
-| /!pn/       | lexical marker    | any word where part of speech is not a pronoun                                  | POS12::0x020         | 0x0FF0        |
+| /!pn/       | lexical marker    | any word where part of speech is not a pronoun                                  | POS12::0x020         | 0x0FF0^       |
 | /adjective/ | lexical marker    | any word where part of speech is an adjective                                   | POS12::0xF00         | 0x0FFF        |
 | /adj/       | lexical marker    | synonym for /adjective/                                                         | POS12::0xF00         | 0x0FFF        |
-| /!adj/      | lexical marker    | any word where part of speech is not an adjective                               | POS12::0xF00         | 0x0FFF        |
+| /!adj/      | lexical marker    | any word where part of speech is not an adjective                               | POS12::0xF00         | 0x0FFF^       |
 | /adverb/    | lexical marker    | any word where part of speech is an adverb                                      | POS12::0xA00         | 0x0FFF        |
 | /adv/       | lexical marker    | synonym for /adverb/                                                            | POS12::0xA00         | 0x0FFF        |
-| /!adj/      | lexical marker    | any word where part of speech is not an adjective                               | POS12::0xA00         | 0x0FFF        |
+| /!adj/      | lexical marker    | any word where part of speech is not an adjective                               | POS12::0xA00         | 0x0FFF^       |
 | /determiner/| lexical marker    | any word where part of speech is a determiner                                   | POS12::0xD00         | 0x0FF0        |
 | /det/       | lexical marker    | synonym for /determiner/                                                        | POS12::0xD00         | 0x0FF0        |
-| /!det/      | lexical marker    | any word where part of speech is not a determiner                               | POS12::0xD00         | 0x0FF0        |
+| /!det/      | lexical marker    | any word where part of speech is not a determiner                               | POS12::0xD00         | 0x0FF0^       |
 | /1p/        | lexical marker    | any word where it is inflected for 1st person (pronouns and verbs)              | POS12::0x100         | 0x3000        |
 | /2p/        | lexical marker    | any word where it is inflected for 2nd person (pronouns and verbs)              | POS12::0x200         | 0x3000        |
 | /3p/        | lexical marker    | any word where it is inflected for 3rd person (pronouns, verbs, and nouns)      | POS12::0x300         | 0x3000        |
 | /singular/  | lexical marker    | any word that is known to be singular (pronouns, verbs, and nouns)              | POS12::0x400         | 0xC000        |
 | /plural/    | lexical marker    | any word that is known to be plural (pronouns, verbs, and nouns)                | POS12::0x800         | 0xC000        |
 | /WH/        | lexical marker    | any word that is a WH word (e.g., Who, What, When, Where, How)                  | POS12::0xC00         | 0xC000        |
-| \|BoB\|     | transition marker | any word where it is the first word of the book (e.g. first word in Genesis)    | See Digital-AV SDK   | 0xF8          |
-| \|BoC\|     | transition marker | any word where it is the first word of the chapter                              | See Digital-AV SDK   | 0xF8          |
-| \|BoV\|     | transition marker | any word where it is the first word of the verse                                | See Digital-AV SDK   | 0xF8          |
-| \|EoB\|     | transition marker | any word where it is the last word of the book (e.g. last word in revelation)   | See Digital-AV SDK   | 0xF8          |
-| \|EoC\|     | transition marker | any word where it is the last word of the chapter                               | See Digital-AV SDK   | 0xF8          |
-| \|EoV\|     | transition marker | any word where it is the last word of the verse                                 | See Digital-AV SDK   | 0xF8          |
-| \|!BoB\|    | transition marker | any word where it is not the first word of the book                             | See Digital-AV SDK   | 0xF8          |
-| \|!BoC\|    | transition marker | any word where it is not the first word of the chapter                          | See Digital-AV SDK   | 0xF8          |
-| \|!BoV\|    | transition marker | any word where it is not the first word of the verse                            | See Digital-AV SDK   | 0xF8          |
-| \|!EoB\|    | transition marker | any word where it is not the last word of the book                              | See Digital-AV SDK   | 0xF8          |
-| \|!EoC\|    | transition marker | any word where it is not the last word of the chapter                           | See Digital-AV SDK   | 0xF8          |
-| \|!EoV\|    | transition marker | any word where it is not the last word of the verse                             | See Digital-AV SDK   | 0xF8          |
-| \|Hsm\|     | segment marker    | Hard Segment Marker (end) ... one of \. \? \!                                   | See Digital-AV SDK   | 0x07          |
-| \|Csm\|     | segment marker    | Core Segment Marker (end) ... \:                                                | See Digital-AV SDK   | 0x07          |
-| \|Rsm\|     | segment marker    | Real Segment Marker (end) ... one of \. \? \! \:                                | See Digital-AV SDK   | 0x07          |
-| \|Ssm\|     | segment marker    | Soft Segment Marker (end) ... one of \. \? \! \) --                             | See Digital-AV SDK   | 0x07          |
-| \|sm\|      | segment marker    | Any Segment Marker (end)  ... one of \. \? \! \: \) --                          | See Digital-AV SDK   | 0x07          |
-| \|M\|       | punctuation       | any word that is immediately marked for clausal punctuation                     | PUNC::0xE0           | 0xE0          |
+| \|BoB\|     | transition marker | any word where it is the first word of the book (e.g. first word in Genesis)    | TRAN::0xE0           | 0xF0          |
+| \|BoC\|     | transition marker | any word where it is the first word of the chapter                              | TRAN::0x60           | 0xF0          |
+| \|BoV\|     | transition marker | any word where it is the first word of the verse                                | TRAN::0x20           | 0xF0          |
+| \|EoB\|     | transition marker | any word where it is the last word of the book (e.g. last word in revelation)   | TRAN::0xF0           | 0xF0          |
+| \|EoC\|     | transition marker | any word where it is the last word of the chapter                               | TRAN::0x70           | 0xF0          |
+| \|EoV\|     | transition marker | any word where it is the last word of the verse                                 | TRAN::0x30           | 0xF0          |
+| \|!BoB\|    | transition marker | any word where it is not the first word of the book                             | TRAN::0xE0           | 0xF0^         |
+| \|!BoC\|    | transition marker | any word where it is not the first word of the chapter                          | TRAN::0x60           | 0xF0^         |
+| \|!BoV\|    | transition marker | any word where it is not the first word of the verse                            | TRAN::0x20           | 0xF0^         |
+| \|!EoB\|    | transition marker | any word where it is not the last word of the book                              | TRAN::0xF0           | 0xF0^         |
+| \|!EoC\|    | transition marker | any word where it is not the last word of the chapter                           | TRAN::0x70           | 0xF0^         |
+| \|!EoV\|    | transition marker | any word where it is not the last word of the verse                             | TRAN::0x30           | 0xF0^         |
+| \|Hsm\|     | segment marker    | Hard Segment Marker (end) ... one of \. \? \!                                   | TRAN::0x40           | 0x07          |
+| \|Csm\|     | segment marker    | Core Segment Marker (end) ... \:                                                | TRAN::0x20           | 0x07          |
+| \|Rsm\|     | segment marker    | Real Segment Marker (end) ... one of \. \? \! \:                                | TRAN::0x60           | 0x07          |
+| \|Ssm\|     | segment marker    | Soft Segment Marker (end) ... one of \, \; \( \) --                             | TRAN::0x10           | 0x07          |
+| \|sm\|      | segment marker    | Any Segment Marker (end)  ... any of the above                                  | TRAN::!=0x00         | 0x07          |
+| \|M\|       | punctuation       | any word that is immediately marked for clausal punctuation                     | PUNC::!=0x00         | 0xE0          |
 | \|X\|       | punctuation       | any word that is immediately followed by an exclamation mark                    | PUNC::0x80           | 0xE0          |
 | \|Q\|       | punctuation       | any word that is immediately followed by a question mark                        | PUNC::0xC0           | 0xE0          |
 | \|D\|       | punctuation       | any word that is immediately followed by a period (declarative)                 | PUNC::0xE0           | 0xE0          |
