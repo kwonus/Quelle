@@ -427,7 +427,7 @@ There are two restrictions on macro definitions:
 
 Finally, there are two additional ways that a labelled statement can be referenced. In the last macro definition above where we created {sample2}, the user could see the expansion in Quelle by issuing this command:
 
-@list {sample-compound-macro}
+@expand {sample-compound-macro}
 
 If the user wanted to remove this definition, the @delete action is used.  Here is an example:
 
