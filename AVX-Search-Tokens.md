@@ -1,4 +1,4 @@
-# Vanilla Quelle HMI Specification
+# Quelle-AVX Addendum
 
 ##### version 1.0.3.121
 
@@ -10,21 +10,14 @@ Quelle, IPA: [kɛl], in French means "What? or Which?". As Quelle HMI is designe
 
 Every attempt has been made to make Quelle consistent with itself. Some constructs are in place to make parsing unambiguous, other constructs are biased toward ease of typing (such as limiting keystrokes that require the shift key). In all, Quelle represents an easy to type and easy to learn HMI.  Moreover, simple search statements look no different than they might appear today in a Google or Bing search box. Still, let's not get ahead of ourselves or even hint about where our simple specification might take us ;-)
 
-Now that we understand what Quelle is, what is Vanilla Quelle?  Quelle was originally designed by AV Text Ministries to search the sacred text of the King James Bible using an inutive command language. Vanilla Quelle removes all domain bias and presents itself as a general purpose query language that can locate sections of <u>any</u> text-based documents, containing terms and/or linguistic features that are in close proximity to one another.  In this specification, any reference to Quelle implies Vanilla Quelle.
+### II. Addendum
 
-### II. Overview
-
-Quelle HMI maintains the assumption that proximity of terms to one another is an important aspect of searching unstructured data. Ascribing importance to the proximity between search terms is sometimes referred to as a *proximal* *search* technique. Proximal searches intentionally constrain the span of words between search terms, yet still constitute a match.
-
-Beyond search, the specification provides a means to persist user settings and system-wide configurations. The design of Quelle is privacy-first, and is therefore not cloud-first. Consequently, settings in Quelle can easily be stored on your local system. Likewise, all processing can occur without cloud/internet computing resources.
-
-Any application can implement the Quelle specification without royalty. We provide a [PEG]([Parsing Expression Grammar](https://en.wikipedia.org/wiki/Parsing_expression_grammar)) grammar that showcases how to harvest the meaning behind the parse. Vanilla Quelle makes no claim that it represents a ready-made interpreter.  You'll have to look elsewhere for working interpreter examples implemented atop the Quelle grammar.  The reason is, the search domain needs to be chosen in order to successfully implement an interpreter optimized for whatever domain. Consequently, Vanilla Quelle instead exposes the details of the parse in lieu of a working [DSL](https://en.wikipedia.org/wiki/Domain-specific_language) for search.
-
-Vanilla Quelle is implemented in [Rust](https://www.rust-lang.org/) using the [Pest](https://pest.rs/) crate.  Rust source code for Vanilla Quelle and the companion PEG grammar are being shared to the community with a liberal MIT open source license.
+Quelle-AVX extends baseline Quelle to include AVX-specific constructs.
+Each section below identifies specialized constructs for parsing AVX commands using the Quelle parser.
 
 ### III. Quelle Syntax
 
-The Quelle specification defines a declarative syntax for specifying search criteria using the *find* verb. Quelle also defines additional verbs to round out its syntax as a simple straightforward means to interact with custom applications where searching text is the fundamental problem at hand.
+Just like the baseline Quelle specification, Quell-AVX defines a declarative syntax for specifying search criteria using the *find* verb. Quelle also defines additional verbs to round out its syntax as a simple straightforward means to interact with custom applications where searching text is the fundamental problem at hand.
 
 Quelle Syntax comprises sixteen(16) verbs. Each verb corresponds to a basic action:
 
@@ -115,69 +108,65 @@ Even before we describe Quelle syntax generally, let's examine these concepts us
 
 Consider these two examples of Quelle statements (first CONTROL; then SEARCH):
 
-search.domain = wall street journal
+search.domain = AV Bible
 
-"Kamala Harris"
+"Moses"
 
 Notice that both statements above are single actions.  We should have a way to express both of these in a single command. And this is the rationale behind a compound statement. To combine the previous two actions into one compound statement, issue this command:
 
-"Kamala Harris" ; search.domain=wall street journal
+"Moses" ; search.domain=AV Bible
 
 ### V. Deep Dive into Quelle SEARCH actions
 
 Consider this proximity search where the search using Quelle syntax:
 
-*domain=wall street journal ; Harris Biden*
+*domain=old testament ; Moses*
 
 Quelle syntax can alter the span by also supplying an additional CONTROL action:
 
-*domain=wall street journal ; span=8 ; Harris Biden*
+*domain=old testament ; Moses*
 
 The statement above has two CONTROL actions and one SEARCH action
 
-Next, consider a search to find Biden and (Kamala or Harris):
+Next, consider a search to find Moses or Aaron:
 
-*Biden Kamala|Harris*
+*Moses|Aaron*
 
 The order in which the search terms are provided is insignificant. Additionally, the type-case is insignificant. 
 
 Of course, there are times when word order is significant. Accordingly, searching for explicit strings can be accomplished using double-quotes as follows:
 
-*"Biden said ... Harris"*
+*"Moses said ... Aaron"*
 
 These constructs can even be combined. For example:
 
-*"Biden said ... Kamala|Harris"*
+*"Moses said ... Aaron|Miriam"*
 
 The search criteria above is equivalent to this search:
 
-*"Biden said ... Kamala" + "Biden said ... Harris"*
+*"Moses said ... Aaron" + "Moses said ... Miriam"*
 
-In all cases, “...” means “followed by”, but the ellipsis allows other words to appear between "said" and "Kamala". Likewise, it allows words to appear between "said" and "Harris". 
-
-Of course, translating the commands into actual search results might not be trivial for the application developer. Still, the Vanilla Quelle parser and the PEG grammar are freely available, allowing the developer to just leverage the parse and focus on delivering search results.
+In all cases, “...” means “followed by”, but the ellipsis allows other words to appear between "said" and "Aaron". Likewise, it allows words to appear between "said" and "Miriam". 
 
 Quelle is designed to be intuitive. It provides the ability to invoke Boolean logic on how term matching should be performed. As we saw above, the pipe symbol ( | ) can be used to invoke an OR condition [Boolean multiplication upon the terms that compose a search expression].
 
-The ampersand symbol can similarly be used to represent AND conditions upon terms. If we were searching for how a baseball archive, we might issue this command:
+The ampersand symbol can similarly be used to represent AND conditions upon terms. Perhaps there are instances of "run" being used as a noun; we might issue this command:
 
-"Babe Ruth ... home run&/noun/"
+"run&/noun/"
 
 If the corpus is marked for part-of-speech, this search would return only matching phrases where the word run was labelled as a noun.
 
 Of course, part-of-speech expressions can also be used independent of the an AND condition, as follows:
 
-span = 6 ; "/noun/ ... home run"
+span = 6 ; "/noun/ ... home"
 
-This would find phrases where a noun appeared within a span of six words and preceded "home run"
+This would find phrases where a noun appeared within a span of six words, preceding the word "home"
 
 **Another SEARCH Example:**
 
-Consider a query for all passages that contain a word beginning with pres, followed by Bush, but filter out phrases containing H W Bush.
+Consider a query for all passages that contain a word beginning with lord, but filter out phrases containing lordship.
 
-*span = 15 ; "Pres*\* ... Bush" -- "H W Bush"*
-
-*(this could be read as: find all references to a wildcard Pres [e.g. Pres. or President] Bush, but filter out [i.e. subtract] phrases that also contain "HW Bush"*
+*span = 15 ; "Lord\* -- Lordship
 
 ### VI. Displaying Results
 
@@ -188,15 +177,15 @@ Consider that there are two fundamental types of searches:
 
 Due to the latter condition above, SEARCH summarizes results (it does NOT display every result found). However, if more than a summary is desired, the user can control how many results to display.
 
-"Clinton answered"			*summarize documents that contain this phrase, with paragraph references*
+"Jesus answered"			*summarize documents that contain this phrase, with paragraph references*
 
-"Clinton answered" ||        *display every matching phrase* // equivalent to Clinton answered" ||[\*]
+"Jesus answered" ||        *display every matching phrase* // equivalent to Jesus answered" ||[\*]
 
-"Clinton answered" || [1]  *this would would display only the first matching phrase*
+"Jesus answered" || [1]  *this would would display only the first matching phrase*
 
-"Clinton answered" || [1 2 3]  *this would would display only the first three matching phrases*
+"Jesus answered" || [1 2 3]  *this would would display only the first three matching phrases*
 
-"Clinton answered" || [4 5 6]  *this would would display the next first three matching phrases*
+"Jesus answered" || [4 5 6]  *this would would display the next first three matching phrases*
 
 ### VII. Exporting Results
 
@@ -204,13 +193,13 @@ Export using a display-coordinate:
 
 To revisit the example in the previous sample, we can export records to a file with these commands:
 
-"Clinton answered" || > my-file.output  // *this would export every matching phrase*
+"Jesus answered" || > my-file.output  // *this would export every matching phrase*
 
-"Clinton answered" || [1]  > my-file.output  // *this would would export only the first matching phrase*
+"Jesus answered" || [1]  > my-file.output  // *this would would export only the first matching phrase*
 
-"Clinton answered" || [1 2 3]  >> my-file.output  //  *this would would export the first three matching phrases* // >> indicates that the results should be appended
+"Jesus answered" || [1 2 3]  >> my-file.output  //  *this would would export the first three matching phrases* // >> indicates that the results should be appended
 
-format=html ; "Clinton answered" || [1 2 3]  > my-file.html ! // *export the first three matching phrases as html*
+format=html ; "Jesus answered" || [1 2 3]  > my-file.html ! // *export the first three matching phrases as html*
 
 The trailing exclamation point allows existing file to be overwritten
 
@@ -499,3 +488,73 @@ These phrase would NOT match:
 **not:** In Boolean logic, **not** means that the term must not be found. With Quelle, *not* is represented by a minus, minus ( **--** ) and applies to an entire clause (it cannot be applied to individual segments (e.g. discrete words) within the search clause. However, a search clause is permitted to contain a single segment, which easily circumvents that limitation. In short, -- means subtract results; it cancels-out matches against all matches of other clauses. Most clauses are additive as each additional clause increases search results. Contrariwise, a **not** clause is subtractive as it decreases search results.
 
 Again, -- means that the clause will be subtracted from the search results.. When commands only contain a single search clause, it is always positive. A single negative clause following the find imperative, while it might be grammatically valid syntax, will never match anything. Therefore, while permitted in theory, it would have no real-world meaning. Consequently, most implementations of Quelle-HMI disallow that construct.
+
+### Appendix B. Specialized Search tokens in Quelle-AVX
+
+Search tokens in Quelle are normally any word in the lexicon for the domain being searched. In Quelle-AVX, this includes all words in the original KJV text and any modernized version of those words (e.g. hast and has).  The table below lists examples that are extensions of search terms
+
+| Verb        | Operator Type     | Meaning                                                                         |
+| ----------- | ----------------- | ------------------------------------------------------------------------------- |
+| Jer\*       | wildcard          | starts with Jer                                                                 |
+| \*iah       | wildcard          | ends with iah                                                                   |      
+| Jer\*iah    | wildcard          | starts with Jer and ends with iah                                               |
+| \\is\\      | lemma             | search on all words that share the same lemma as is: be, is, are, art, etc      |
+| are#kjv     | explicit search   | consider only matches on archaic versions of are (exclude art)                  |
+| are#av      | explicit search   | synonym for are#kjv                                                             |
+| are#avx     | explicit search   | consider only matches on modern lexical versions of are (includes art & are)    |
+| are#mod     | explicit search   | synonym for are#avx                                                             |
+| /noun/      | lexical marker    | any word where part of speech is a noun                                         |
+| /n/         | lexical marker    | synonym for /noun/                                                              |
+| /!n/        | lexical marker    | any word where part of speech is not a noun                                     |
+| /verb/      | lexical marker    | any word where part of speech is a verb                                         |
+| /v/         | lexical marker    | synonym for /verb/                                                              |
+| /!v/        | lexical marker    | any word where part of speech is not a verb                                     |
+| /pronoun/   | lexical marker    | any word where part of speech is a pronoun                                      |
+| /pn/        | lexical marker    | synonym for /pronoun/                                                           |
+| /!pn/       | lexical marker    | any word where part of speech is not a pronoun                                  |
+| /adjective/ | lexical marker    | any word where part of speech is an adjective                                   |
+| /adj/       | lexical marker    | synonym for /adjective/                                                         |
+| /!adj/      | lexical marker    | any word where part of speech is not an adjective                               |
+| /adverb/    | lexical marker    | any word where part of speech is an adverb                                      |
+| /adv/       | lexical marker    | synonym for /adverb/                                                            |
+| /!adj/      | lexical marker    | any word where part of speech is not an adjective                               |
+| /determiner/| lexical marker    | any word where part of speech is a determiner                                   |
+| /det/       | lexical marker    | synonym for /determiner/                                                        |
+| /!det/      | lexical marker    | any word where part of speech is not a determiner                               |
+| /1p/        | lexical marker    | any word where it is inflected for 1st person (pronouns and verbs)              |
+| /2p/        | lexical marker    | any word where it is inflected for 2nd person (pronouns and verbs)              |
+| /3p/        | lexical marker    | any word where it is inflected for 3rd person (pronouns, verbs, and nouns)      |
+| \|BoB\|     | transition marker | any word where it is the first word of the book (e.g. first word in Genesis)    |
+| \|BoC\|     | transition marker | any word where it is the first word of the chapter                              |
+| \|BoV\|     | transition marker | any word where it is the first word of the verse                                |
+| \|EoB\|     | transition marker | any word where it is the last word of the book (e.g. last word in revelation)   |
+| \|EoC\|     | transition marker | any word where it is the last word of the chapter                               |
+| \|EoV\|     | transition marker | any word where it is the last word of the verse                                 |
+| \|!BoB\|    | transition marker | any word where it is not the first word of the book                             |
+| \|!BoC\|    | transition marker | any word where it is not the first word of the chapter                          |
+| \|!BoV\|    | transition marker | any word where it is not the first word of the verse                            |
+| \|!EoB\|    | transition marker | any word where it is not the last word of the book                              |
+| \|!EoC\|    | transition marker | any word where it is not the last word of the chapter                           |
+| \|!EoV\|    | transition marker | any word where it is not the last word of the verse                             |
+| \|Hsm\|     | segment marker    | Hard Segment Marker (end) ... one of \. \? \!                                   |
+| \|Csm\|     | segment marker    | Core Segment Marker (end) ... \:                                                |
+| \|Rsm\|     | segment marker    | Real Segment Marker (end) ... one of \. \? \! \:                                |
+| \|Ssm\|     | segment marker    | Soft Segment Marker (end) ... one of \. \? \! \) --                             |
+| \|sm\|      | segment marker    | Any Segment Marker (end)  ... one of \. \? \! \: \) --                          |
+| \|M\|       | punctuation       | any word that is immediately marked for clausal punctuation               (0xE0)|
+| \|X\|       | punctuation       | any word that is immediately followed by an exclamation mark              (0x80)|
+| \|Q\|       | punctuation       | any word that is immediately followed by a question mark                  (0xC0)|
+| \|D\|       | punctuation       | any word that is immediately followed by a period (declarative)           (0xE0)|
+| \|H\|       | punctuation       | any word that is immediately followed by a hyphen/dash                    (0xA0)|
+| \|S\|       | punctuation       | any word that is immediately followed by a semicolon                      (0x20)|
+| \|C\|       | punctuation       | any word that is immediately followed by a comma                          (0x40)|
+| \|I\|       | punctuation       | any word that is immediately followed by a colon (information follows)    (0x60)|
+| \|P\|       | punctuation       | any word that is possessive, marked with an apostrophe                    (0x10)|
+| \|PC\|      | parenthetical text| any word that is immediately followed by a close parenthesis              (0x0C)|
+| \|PT\|      | parenthetical text| any word contained within parenthesis                                     (0x04)|
+| \|TI\|      | text decoration   | italisized words marked with this bit in puncutation byte                 (0x02)|
+| \|TJ\|      | text decoration   | words of jesus marked with this bit in puncutation byte                   (0x01)|
+| \#FFFF      | PN+POS(12)        | hexdecimal representation of bits for a PN+POS(12) value. See Digital-AV SDK    |
+| \#FFFFFFFF  | POS(32)           | hexdecimal representation of bits for a POS(32) value. See Digital-AV SDK       |
+| 99999:H     | Strongs Number    | decimal Strongs number for the Hebrew word in the Old Testament                 |
+| 99999:G     | Strongs Number    | decimal Strongs number for the Greek word in the New Testament                  |
