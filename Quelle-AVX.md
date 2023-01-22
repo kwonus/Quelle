@@ -378,25 +378,25 @@ In this section, we will examine how user-defined macros are used in Quelle.  A 
 2. Utilization of a labelled statement (executing a macro)
 
 
-Let’s say we want to name our previously identified SEARCH directive with a label; We’ll call it “kh”. To accomplish this, we would issue this command:
+Let’s say we want to name our previously identified SEARCH directive with a label; We’ll call it “moses”. To accomplish this, we would issue this command:
 
-"Kamala Harris" ; search.domain=wall street journal << kh
+*domain=old testament ; Moses << moses*
 
 It’s that simple, now instead of typing the entire statement, we can use the label to execute our newly saved statement. Here is how we would execute the macro:
 
-{kh}
+{moses}
 
 Labelled statements also support compounding using the semi-colon ( ; ), as follows; we will label it also:
 
-{kh} ; "former President Bush" << my label can contain spaces
+{moses} ; Aaron << my label can contain spaces
 
 Later I can issue this command:
 
 {my label can contain spaces}
 
-Which is obviously equivalent to executing these labeled statements:
+Which is equivalent to executing these labeled statements:
 
-"Kamala Harris" ; search.domain=wall street journal ; "former President Bush"
+*domain=old testament ; Moses ; Aaron
 
 To illustrate this further, here are four more examples of labeled statement definitions:
 
@@ -468,18 +468,16 @@ Like the earlier example, the subject is "you understood".  The object this time
 
 **Bracketed Terms:** When searching, there are part the order of some terms within a quoted are unknown. Square brackets can be used to identify such terms. For example, consider this SEARCH statement:
 
-*“noun ... said|says|stated|replied ... [Trump president|predidency]”*
+*"/pronoun/ ... said|says|stated|replied ... [David|Solomon King]"*
 
-Bracketed terms differ from the pipe symbol in that all terms within brackets are required, but the order is relaxed within the quoted phrase. As non-quoted clauses are always unordered, bracketed terms can only be invoked within a quoted search clause. 
+Bracketed terms differ in that all terms within brackets are required, but the order is relaxed within the quoted phrase. As non-quoted clauses are always unordered, bracketed terms can only be invoked within a quoted search clause. 
 
 The serch clause above would match any of these phrases:
 
-- Biden stated that President Trump was ...
-- Kamala Harris replied, indicating the Trump presidency was ...
+- he stated that King David was ...
+- she replied to him that King Solomon ...
 
-These phrase would NOT match:
-
-- Bush said, Trump is not his favorite president // Bracketed terms need be adjacent to one another
+// Bracketed terms need be adjacent to one another
 
 **and:** In Boolean logic, **and** means that all terms must be found. With Quelle, *and* is represented by terms that appear within an unquoted clause. 
 
