@@ -497,9 +497,9 @@ Search tokens in Quelle are normally any word in the lexicon for the domain bein
 | \*iah       | wildcard          | ends with iah                                                                   |      
 | Jer\*iah    | wildcard          | starts with Jer and ends with iah                                               |
 | \\is\\      | lemma             | search on all words that share the same lemma as is: be, is, are, art, etc      |
-| are#kjv     | explicit search   | consider only matches on archaic versions of are (exclude art)                  |
+| are#kjv     | explicit search   | consider only matches in original KJV text (exclude modernizations of art)      |
 | are#av      | explicit search   | synonym for are#kjv                                                             |
-| are#avx     | explicit search   | consider only matches on modern lexical versions of are (includes art & are)    |
+| are#avx     | explicit search   | consider matches on modern lexical variants of are; includes: are & art (in kjv)|
 | are#mod     | explicit search   | synonym for are#avx                                                             |
 | /noun/      | lexical marker    | any word where part of speech is a noun                                         |
 | /n/         | lexical marker    | synonym for /noun/                                                              |
