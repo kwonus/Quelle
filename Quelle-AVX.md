@@ -468,7 +468,7 @@ Like the earlier example, the subject is "you understood".  The object this time
 
 *"/pronoun/ ... said|says|stated|replied ... [David|Solomon King]"*
 
-Bracketed terms differ in that all terms within brackets are required, but the order is relaxed within the quoted phrase. As non-quoted clauses are always unordered, bracketed terms can only be invoked within a quoted search clause. 
+Bracketed terms differ from ordinary quoited terms, in that while all terms within brackets are required, the order is relaxed within the quoted phrase. As non-quoted clauses are always unordered, bracketed terms can only be invoked within a quoted search clause.  
 
 The serch clause above would match any of these phrases:
 

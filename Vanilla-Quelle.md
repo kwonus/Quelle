@@ -479,14 +479,14 @@ Like the earlier example, the subject is "you understood".  The object this time
 
 *“noun ... said|says|stated|replied ... [Trump president|predidency]”*
 
-Bracketed terms differ from the pipe symbol in that all terms within brackets are required, but the order is relaxed within the quoted phrase. As non-quoted clauses are always unordered, bracketed terms can only be invoked within a quoted search clause. 
+Bracketed terms differ from ordinary quoited terms, in that while all terms within brackets are required, the order is relaxed within the quoted phrase. As non-quoted clauses are always unordered, bracketed terms can only be invoked within a quoted search clause. 
 
 The serch clause above would match any of these phrases:
 
 - Biden stated that President Trump was ...
 - Kamala Harris replied, indicating the Trump presidency was ...
 
-These phrase would NOT match:
+This phrase would NOT match:
 
 - Bush said, Trump is not his favorite president // Bracketed terms need be adjacent to one another
 
