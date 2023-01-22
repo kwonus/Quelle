@@ -1,4 +1,4 @@
-# Quelle-AVX Addendum
+# Quelle-AVX Specification
 
 ##### version 1.0.3.121
 
@@ -12,7 +12,7 @@ Every attempt has been made to make Quelle consistent with itself. Some construc
 
 ### II. Addendum
 
-Quelle-AVX extends baseline Quelle to include AVX-specific constructs.
+Quelle-AVX extends baseline Vanilla-Quelle to include AVX-specific constructs.
 Each section below identifies specialized constructs for parsing AVX commands using the Quelle parser.
 
 ### III. Quelle Syntax
