@@ -1,6 +1,6 @@
 # Vanilla Quelle HMI Specification
 
-##### version 1.0.3.121
+##### version 1.0.3.122
 
 ### I. Background
 
@@ -98,7 +98,7 @@ Quelle supports two types of actions:
 
 Implicit actions can be combined into compound statements.  However, compound statements are limited to contain ONLY implicit actions. This means that explicit actions cannot be used to construct a compound statement.
 
-Constructing a compound statement with multiple implicit actions, involves delimiting each action with semi-colons. As search is a fundamental concern of Quelle, it is optimized to make compound implicit actions easy to construct with a concise and and intuitive syntax.
+Constructing a compound statement with multiple implicit actions, involves delimiting each action with semi-colons. As search is a fundamental concern of Quelle, it is optimized to make compound implicit actions easy to construct with a concise and intuitive syntax.
 
 Even before we describe Quelle syntax generally, let's examine these concepts using examples:
 
@@ -159,7 +159,7 @@ Of course, translating the commands into actual search results might not be triv
 
 Quelle is designed to be intuitive. It provides the ability to invoke Boolean logic on how term matching should be performed. As we saw above, the pipe symbol ( | ) can be used to invoke an OR condition [Boolean multiplication upon the terms that compose a search expression].
 
-The ampersand symbol can similarly be used to represent AND conditions upon terms. If we were searching for how a baseball archive, we might issue this command:
+The ampersand symbol can similarly be used to represent AND conditions upon terms. If we were searching a dataset in a baseball domain, we might issue this command:
 
 "Babe Ruth ... home run&/noun/"
 
@@ -284,8 +284,6 @@ The control names are applicable to ***set***, ***clear***, and ***@get*** verbs
 | search.span          | span       | proximity                    | 0 to 1000      |   normal   |
 | search.domain        | domain     | the domain of the search     | string         |   normal   |
 | search.exact         | exact      | exact match vs liberal/fuzzy | true/false     |   normal   |
-| display.heading      | heading    | heading of results           | string         |   normal   |
-| display.record       | record     | annotation of results        | string         |   normal   |
 | display.format       | format     | format of results            | see Table 10-2 |   normal   |
 
 **TABLE 10-4** -- **Summary of standard Quelle Control Names**
