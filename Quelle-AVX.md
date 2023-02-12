@@ -513,7 +513,7 @@ Search tokens in Quelle are normally any word in the lexicon for the domain bein
 | /!adj/      | lexical marker    | any word where part of speech is not an adjective                               | POS12::0xF00         | 0x0FFF^       |
 | /adverb/    | lexical marker    | any word where part of speech is an adverb                                      | POS12::0xA00         | 0x0FFF        |
 | /adv/       | lexical marker    | synonym for /adverb/                                                            | POS12::0xA00         | 0x0FFF        |
-| /!adj/      | lexical marker    | any word where part of speech is not an adjective                               | POS12::0xA00         | 0x0FFF^       |
+| /!adv/      | lexical marker    | any word where part of speech is not an adverb                               | POS12::0xA00         | 0x0FFF^       |
 | /determiner/| lexical marker    | any word where part of speech is a determiner                                   | POS12::0xD00         | 0x0FF0        |
 | /det/       | lexical marker    | synonym for /determiner/                                                        | POS12::0xD00         | 0x0FF0        |
 | /!det/      | lexical marker    | any word where part of speech is not a determiner                               | POS12::0xD00         | 0x0FF0^       |
@@ -540,19 +540,19 @@ Search tokens in Quelle are normally any word in the lexicon for the domain bein
 | \|Rsm\|     | segment marker    | Real Segment Marker (end) ... one of \. \? \! \:                                | TRAN::0x60           | 0x07          |
 | \|Ssm\|     | segment marker    | Soft Segment Marker (end) ... one of \, \; \( \) --                             | TRAN::0x10           | 0x07          |
 | \|sm\|      | segment marker    | Any Segment Marker (end)  ... any of the above                                  | TRAN::!=0x00         | 0x07          |
-| \|M\|       | punctuation       | any word that is immediately marked for clausal punctuation                     | PUNC::!=0x00         | 0xE0          |
-| \|X\|       | punctuation       | any word that is immediately followed by an exclamation mark                    | PUNC::0x80           | 0xE0          |
-| \|Q\|       | punctuation       | any word that is immediately followed by a question mark                        | PUNC::0xC0           | 0xE0          |
-| \|D\|       | punctuation       | any word that is immediately followed by a period (declarative)                 | PUNC::0xE0           | 0xE0          |
-| \|H\|       | punctuation       | any word that is immediately followed by a hyphen/dash                          | PUNC::0xA0           | 0xE0          |
-| \|S\|       | punctuation       | any word that is immediately followed by a semicolon                            | PUNC::0x20           | 0xE0          |
-| \|C\|       | punctuation       | any word that is immediately followed by a comma                                | PUNC::0x40           | 0xE0          |
-| \|I\|       | punctuation       | any word that is immediately followed by a colon (information follows)          | PUNC::0x60           | 0xE0          |
-| \|P\|       | punctuation       | any word that is possessive, marked with an apostrophe                          | PUNC::0x10           | 0x10          |
-| \|PC\|      | parenthetical text| any word that is immediately followed by a close parenthesis                    | PUNC::0x0C           | 0x0C          |
-| \|PT\|      | parenthetical text| any word contained within parenthesis                                           | PUNC::0x04           | 0x04          |
-| \|TI\|      | text decoration   | italisized words marked with this bit in puncutation byte                       | PUNC::0x02           | 0x02          |
-| \|TJ\|      | text decoration   | words of jesus marked with this bit in puncutation byte                         | PUNC::0x01           | 0x01          |
+| \|_\|       | punctuation       | any word that is immediately marked for clausal punctuation                     | PUNC::!=0x00         | 0xE0          |
+| \|!\|       | punctuation       | any word that is immediately followed by an exclamation mark                    | PUNC::0x80           | 0xE0          |
+| \|?\|       | punctuation       | any word that is immediately followed by a question mark                        | PUNC::0xC0           | 0xE0          |
+| \|.\|       | punctuation       | any word that is immediately followed by a period (declarative)                 | PUNC::0xE0           | 0xE0          |
+| \|-\|       | punctuation       | any word that is immediately followed by a hyphen/dash                          | PUNC::0xA0           | 0xE0          |
+| \|;\|       | punctuation       | any word that is immediately followed by a semicolon                            | PUNC::0x20           | 0xE0          |
+| \|,\|       | punctuation       | any word that is immediately followed by a comma                                | PUNC::0x40           | 0xE0          |
+| \|:\|       | punctuation       | any word that is immediately followed by a colon (information follows)          | PUNC::0x60           | 0xE0          |
+| \|'\|       | punctuation       | any word that is possessive, marked with an apostrophe                          | PUNC::0x10           | 0x10          |
+| \|)\|       | parenthetical text| any word that is immediately followed by a close parenthesis                    | PUNC::0x0C           | 0x0C          |
+| \|(\|       | parenthetical text| any word contained within parenthesis                                           | PUNC::0x04           | 0x04          |
+| \|I\|       | text decoration   | italisized words marked with this bit in puncutation byte                       | PUNC::0x02           | 0x02          |
+| \|J\|       | text decoration   | words of jesus marked with this bit in puncutation byte                         | PUNC::0x01           | 0x01          |
 | \#FFFF      | PN+POS(12)        | hexdecimal representation of bits for a PN+POS(12) value. See Digital-AV SDK    | One of Strongs\[4\]  | 0x7FFF        |
 | \#FFFFFFFF  | POS(32)           | hexdecimal representation of bits for a POS(32) value. See Digital-AV SDK       | One of Strongs\[4\]  | 0x7FFF        |
 | 99999:H     | Strongs Number    | decimal Strongs number for the Hebrew word in the Old Testament                 | One of Strongs\[4\]  | 0x7FFF        |
