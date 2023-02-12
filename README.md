@@ -10,9 +10,11 @@ Initially, the manual served as the most complete specification. It was a specif
 Every attempt is being made to keep the Quelle syntax agnostic about the search domain. Consequently, Quelle syntax has the potential for ubiquity.
 <br/></br>
 
-Developer notes, a little out of date, may still be useful and can be found at at:</br>
+That said, a dialect of Quelle, optimized for the Digital-AV, can be found here:
 
-https://github.com/kwonus/Quelle/blob/main/Quelle-Developer-Notes.md
+[https://github.com/kwonus/Quelle/blob/main/rust/src/quelle.pest](https://github.com/kwonus/Quelle/blob/main/rust/src/quelle-avx.pest)
+
+
 
 <br/></br>
 # What's Ahead?
