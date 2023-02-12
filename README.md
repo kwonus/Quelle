@@ -8,7 +8,6 @@ Initially, the manual served as the most complete specification. It was a specif
 [https://github.com/kwonus/Quelle/blob/main/rust/src/quelle.pest](https://github.com/kwonus/Quelle/blob/main/rust/src/quelle.pest)
 
 Every attempt is being made to keep the Quelle syntax agnostic about the search domain. Consequently, Quelle syntax has the potential for ubiquity.
-<br/></br>
 
 That said, a dialect of Quelle, optimized for the Digital-AV, can be found here:
 
@@ -18,5 +17,5 @@ That said, a dialect of Quelle, optimized for the Digital-AV, can be found here:
 
 <br/></br>
 # What's Ahead?
-- The reference implementation will be made interactive and report the results of the parse via a console-based/command-line interface
-- Tandem projects [search dialects] are expected to become siblings of the reference Rust implementation in this github repo.
+- The reference implementation will be made interactive and report the results of the parse via a REST interface
+- A Web interface that includes this parsing engine will be incorporated into [Pin-Shot-Blue.io](https://Pin-Shot-Blue.io): Parsing as a Service to be available in 2023.
