@@ -1,6 +1,6 @@
 # Quelle-AVX Specification
 
-##### version 1.0.3.122
+##### version 1.0.3.212
 
 ### I. Background
 
@@ -17,7 +17,7 @@ Each section below identifies specialized constructs for parsing AVX commands us
 
 ### III. Quelle Syntax
 
-Just like the baseline Quelle specification, Quell-AVX defines a declarative syntax for specifying search criteria using the *find* verb. Quelle also defines additional verbs to round out its syntax as a simple straightforward means to interact with custom applications where searching text is the fundamental problem at hand.
+Just like the baseline Quelle specification, Quelle-AVX defines a declarative syntax for specifying search criteria using the *find* verb. Quelle also defines additional verbs to round out its syntax as a simple straightforward means to interact with custom applications where searching text is the fundamental problem at hand.
 
 Quelle Syntax comprises sixteen(16) verbs. Each verb corresponds to a basic action:
 
