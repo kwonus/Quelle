@@ -11,6 +11,7 @@ Every attempt is being made to keep the Quelle syntax agnostic about the search 
 
 That said, a dialect of Quelle, optimized for the Digital-AV, can be found here:
 
+[https://github.com/kwonus/Quelle/blob/main/VanillaQuelle.md](https://github.com/kwonus/Quelle/blob/main/Quelle-AVX.md)
 [https://github.com/kwonus/Quelle/blob/main/rust/src/quelle-avx.pest](https://github.com/kwonus/Quelle/blob/main/rust/src/quelle-avx.pest)
 
 
