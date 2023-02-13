@@ -35,7 +35,7 @@ save = ${ positive? ~ space* ~ "<<" ~ space* ~ label}
 previous = { "{" ~ ('0' .. '9')+ ~ "}" }
 digit = _ { '0' .. '9' }
 alpha = _ { 'a' .. 'z' | 'A' .. 'Z' }
-hyphenated = { alpha+ | "-" }
+text = { alpha+ | "-" }
 loc = { ^"BoB" | ^"EoB" | ^"BoC" | ^"EoC" | ^"BoV" | ^"EoV" }
 and = { "&" }
 or = { "|" }
@@ -51,7 +51,7 @@ unanchored = { ellipsis ~ anchored }
 unordered = { "[" ~ segment ~ segment* ~ "]" }
 
 feature = ${ space* ~ (term | pos | pn | lemma | wildcard | punc) ~ space* }
-term = { hyphenated+ }
+term = { text+ }
 pn = { "#" ~ ('0' .. '3') }
 pos = { "/" ~ alpha+ ~ "/" }
 lemma = { "#" ~ alpha+ }

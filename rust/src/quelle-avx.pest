@@ -1,4 +1,4 @@
-// Vanilla-Quelle Grammar - Expressed in PEG
+// AVX-Quelle Grammar - Expressed in PEG
 // Copyright (c) 2023, Kevin Wonus
 // MIT License
 
@@ -35,7 +35,6 @@ save = ${ positive? ~ space* ~ "<<" ~ space* ~ label}
 previous = { "{" ~ ('0' .. '9')+ ~ "}" }
 digit = _ { '0' .. '9' }
 alpha = _ { 'a' .. 'z' | 'A' .. 'Z' }
-hyphenated = { alpha+ | "-" }
 and = { "&" }
 or = { "|" }
 
@@ -49,8 +48,8 @@ anchored = _{ (unordered | (fragment ~ (or ~ fragment)*)) }
 unanchored = { ellipsis ~ anchored }
 unordered = { "[" ~ segment ~ segment* ~ "]" }
 
-feature = ${ space* ~ (term | pos | pn | pn_pos12 | pos32 | greek | hebrew | loc | seg | lemma | wildcard | punc | decoration) ~ space* }
-term = { hyphenated+ }
+feature = ${ space* ~ (text | pos | pn | pn_pos12 | pos32 | greek | hebrew | loc | seg | lemma | wildcard | punc | decoration) ~ space* }
+text = { alpha+ }
 pn = {  ^"/1p/" | ^"/2p/" | ^"/3p/" }
 pos_noun = { ^"/noun/" | ^"/n/" }
 not_noun = { ^"/!noun/" | ^"/!n/" }
@@ -72,28 +71,62 @@ singular = { ^"/singular/" }
 plural = { ^"/pural/" }
 pos = { pos_noun | not_noun | pos_verb | not_verb | pos_pro | not_pro | pos_adj | not_adj | pos_adv | not_adv | pos_det | not_det | pos_art | not_art | pos_wh | not_wh | singular | plural | pn }
 
-loc = { ^"|EoB|" | ^"|BoC|" | ^"|EoC|" | ^"|BoV|" | ^"|EoV|" | ^"|!BoB|" | ^"|!EoB|" | ^"|!BoC|" | ^"|!EoC|" | ^"|!BoV|" | ^"|!EoV|" }
-seg = { ^"|Hsm|" | ^"|Csm|" | ^"|Ssm|" | ^"|sm|" |  ^"|!Hsm|" | ^"|!Csm|" | ^"|!Ssm|" | ^"|!sm|" }
-punc = { ^"|_|" | ^"|!|" | ^"|?|" | ^"|.|" |  ^"|-|" | ^"|;|" | ^"|,|" | ^"|:|" | ^"|\'|" | ^"|(|" | ^"|)|" }
-italics = { ^"|italics|" | ^"|I|" }
-jesus = { ^"|Jesus|" | ^"|J|" }
+loc_bob = { ^"/BoB/" }
+loc_eob = { ^"/EoB/" }
+loc_boc = { ^"/BoC/" }
+loc_eoc = { ^"/EoC/" }
+loc_bov = { ^"/BoV/" }
+loc_eov = { ^"/EoV/" }
+not_bob = { ^"/!BoB/" }
+not_eob = { ^"/!EoB/" }
+not_boc = { ^"/!BoC/" }
+not_eoc = { ^"/!EoC/" }
+not_bov = { ^"/!BoV/" }
+not_eov = { ^"/!EoV/" }
+loc = { loc_bob | loc_eob | loc_boc | loc_eoc | loc_bov | loc_eov | not_bob | not_eob | not_boc | not_eoc | not_bov | not_eov }
+
+seg_hsm = { ^"/Hsm/"  }
+seg_csm = { ^"/Csm/"  }
+seg_ssm = { ^"/Ssm/"  }
+seg_any = { ^"/sm/"   }
+not_hsm = { ^"/!Hsm/" }
+not_csm = { ^"/!Csm/" }
+not_ssm = { ^"/!Ssm/" }
+not_any = { ^"/!sm/"  }
+seg = { seg_hsm | seg_csm | seg_ssm | seg_any | not_hsm | not_csm | not_ssm | not_any }
+
+punc_any      = { "/_/" }
+punc_exclaim  = { "/!/" }
+punc_question = { "/?/" }
+punc_declare  = { "/./" }
+punc_dash     = { "/-/" }
+punc_semi     = { "/;/" }
+punc_comma    = { "/,/" }
+punc_colon    = { "/:/" }
+punc_possessive = { "/\'/" }
+punc_parenthetical = { "/(/" }
+punc_parenthetical_close = { "/)/" }
+punc = { punc_any | punc_question | punc_declare | punc_dash | punc_semi | punc_comma | punc_colon | punc_possessive | punc_parenthetical | punc_parenthetical_close }
+
+italics = { ^"/italics/" }
+jesus = { ^"/Jesus/" }
 decoration = { italics | jesus }
 pos32 = { "#" ~ digit ~ digit ~ digit ~ digit ~ digit+ }
 pn_pos12 = { "#" ~ digit ~ digit+ }
 greek = { digit ~ digit+ ~ ^":G" }
 hebrew = { digit ~ digit+ ~ ^":H" }
 
-lemma = { "\\" ~ alpha+ ~ "\\" }
+lemma = { "\\" ~ text ~ "\\" }
 wildcard = { (alpha+ ~ "*" ~ alpha+) | ("*" ~ alpha+) | (alpha+ ~ "*" ) }
-limit_av = { (alpha+ ~ ^"#kjv") | (alpha+ ~ ^"#av") }
-limit_avx = { (alpha+ ~ ^"#mod") | (alpha+ ~ ^"#avx") }
+limit_av = { (text ~ ^"#kjv") | (text ~ ^"#av") }
+limit_avx = { (text ~ ^"#mod") | (text ~ ^"#avx") }
 ellipsis = _{ "..." }
 
 explicit = { exit | help | history | expand | delete | version | get }
 exit = { ^"@exit" }
 help = { ^"@help" ~ topic | ^"@help" }
 history = {^"@history" }
-topic = ${ space* ~ alpha+ ~ space* }
+topic = ${ space* ~ text ~ space* }
 expand = { ^"@expand" ~ named* }
 delete = { ^"@delete" ~  named* }
 version = { ^"@version" }

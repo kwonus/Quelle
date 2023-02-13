@@ -13,7 +13,7 @@ fn main() {
 //  let tests = QuelleParser::parse(Rule::segment, "he \t said").unwrap_or_else(|e| panic!("{}", e));
 //  output(tests, 0);
 
-    let pairs = QuelleParser::parse(Rule::command, "\"#foo ... [he \t said] ... /pronoun/&#3\" + bar + x|y&z a&b&c > xfile < genesis 1:1").unwrap_or_else(|e| panic!("{}", e));
+    let pairs = QuelleParser::parse(Rule::command, "\"\\foo\\ ... [he \t said] ... /pronoun/&/3p/\" + bar + x|y&z a&b&c |BoV|&in> xfile < genesis 1:1").unwrap_or_else(|e| panic!("{}", e));
     output(pairs, 0);
 }
 

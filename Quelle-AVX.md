@@ -513,7 +513,7 @@ Search tokens in Quelle are normally any word in the lexicon for the domain bein
 | /!adj/      | lexical marker    | any word where part of speech is not an adjective                               | POS12::0xF00         | 0x0FFF^       |
 | /adverb/    | lexical marker    | any word where part of speech is an adverb                                      | POS12::0xA00         | 0x0FFF        |
 | /adv/       | lexical marker    | synonym for /adverb/                                                            | POS12::0xA00         | 0x0FFF        |
-| /!adv/      | lexical marker    | any word where part of speech is not an adverb                               | POS12::0xA00         | 0x0FFF^       |
+| /!adv/      | lexical marker    | any word where part of speech is not an adverb                                  | POS12::0xA00         | 0x0FFF^       |
 | /determiner/| lexical marker    | any word where part of speech is a determiner                                   | POS12::0xD00         | 0x0FF0        |
 | /det/       | lexical marker    | synonym for /determiner/                                                        | POS12::0xD00         | 0x0FF0        |
 | /!det/      | lexical marker    | any word where part of speech is not a determiner                               | POS12::0xD00         | 0x0FF0^       |
@@ -523,37 +523,37 @@ Search tokens in Quelle are normally any word in the lexicon for the domain bein
 | /singular/  | lexical marker    | any word that is known to be singular (pronouns, verbs, and nouns)              | POS12::0x400         | 0xC000        |
 | /plural/    | lexical marker    | any word that is known to be plural (pronouns, verbs, and nouns)                | POS12::0x800         | 0xC000        |
 | /WH/        | lexical marker    | any word that is a WH word (e.g., Who, What, When, Where, How)                  | POS12::0xC00         | 0xC000        |
-| \|BoB\|     | transition marker | any word where it is the first word of the book (e.g. first word in Genesis)    | TRAN::0xE0           | 0xF0          |
-| \|BoC\|     | transition marker | any word where it is the first word of the chapter                              | TRAN::0x60           | 0xF0          |
-| \|BoV\|     | transition marker | any word where it is the first word of the verse                                | TRAN::0x20           | 0xF0          |
-| \|EoB\|     | transition marker | any word where it is the last word of the book (e.g. last word in revelation)   | TRAN::0xF0           | 0xF0          |
-| \|EoC\|     | transition marker | any word where it is the last word of the chapter                               | TRAN::0x70           | 0xF0          |
-| \|EoV\|     | transition marker | any word where it is the last word of the verse                                 | TRAN::0x30           | 0xF0          |
-| \|!BoB\|    | transition marker | any word where it is not the first word of the book                             | TRAN::0xE0           | 0xF0^         |
-| \|!BoC\|    | transition marker | any word where it is not the first word of the chapter                          | TRAN::0x60           | 0xF0^         |
-| \|!BoV\|    | transition marker | any word where it is not the first word of the verse                            | TRAN::0x20           | 0xF0^         |
-| \|!EoB\|    | transition marker | any word where it is not the last word of the book                              | TRAN::0xF0           | 0xF0^         |
-| \|!EoC\|    | transition marker | any word where it is not the last word of the chapter                           | TRAN::0x70           | 0xF0^         |
-| \|!EoV\|    | transition marker | any word where it is not the last word of the verse                             | TRAN::0x30           | 0xF0^         |
-| \|Hsm\|     | segment marker    | Hard Segment Marker (end) ... one of \. \? \!                                   | TRAN::0x40           | 0x07          |
-| \|Csm\|     | segment marker    | Core Segment Marker (end) ... \:                                                | TRAN::0x20           | 0x07          |
-| \|Rsm\|     | segment marker    | Real Segment Marker (end) ... one of \. \? \! \:                                | TRAN::0x60           | 0x07          |
-| \|Ssm\|     | segment marker    | Soft Segment Marker (end) ... one of \, \; \( \) --                             | TRAN::0x10           | 0x07          |
-| \|sm\|      | segment marker    | Any Segment Marker (end)  ... any of the above                                  | TRAN::!=0x00         | 0x07          |
-| \|_\|       | punctuation       | any word that is immediately marked for clausal punctuation                     | PUNC::!=0x00         | 0xE0          |
-| \|!\|       | punctuation       | any word that is immediately followed by an exclamation mark                    | PUNC::0x80           | 0xE0          |
-| \|?\|       | punctuation       | any word that is immediately followed by a question mark                        | PUNC::0xC0           | 0xE0          |
-| \|.\|       | punctuation       | any word that is immediately followed by a period (declarative)                 | PUNC::0xE0           | 0xE0          |
-| \|-\|       | punctuation       | any word that is immediately followed by a hyphen/dash                          | PUNC::0xA0           | 0xE0          |
-| \|;\|       | punctuation       | any word that is immediately followed by a semicolon                            | PUNC::0x20           | 0xE0          |
-| \|,\|       | punctuation       | any word that is immediately followed by a comma                                | PUNC::0x40           | 0xE0          |
-| \|:\|       | punctuation       | any word that is immediately followed by a colon (information follows)          | PUNC::0x60           | 0xE0          |
-| \|'\|       | punctuation       | any word that is possessive, marked with an apostrophe                          | PUNC::0x10           | 0x10          |
-| \|)\|       | parenthetical text| any word that is immediately followed by a close parenthesis                    | PUNC::0x0C           | 0x0C          |
-| \|(\|       | parenthetical text| any word contained within parenthesis                                           | PUNC::0x04           | 0x04          |
-| \|I\|       | text decoration   | italisized words marked with this bit in puncutation byte                       | PUNC::0x02           | 0x02          |
-| \|J\|       | text decoration   | words of jesus marked with this bit in puncutation byte                         | PUNC::0x01           | 0x01          |
-| \#FFFF      | PN+POS(12)        | hexdecimal representation of bits for a PN+POS(12) value. See Digital-AV SDK    | One of Strongs\[4\]  | 0x7FFF        |
-| \#FFFFFFFF  | POS(32)           | hexdecimal representation of bits for a POS(32) value. See Digital-AV SDK       | One of Strongs\[4\]  | 0x7FFF        |
+| /BoB/       | transition marker | any word where it is the first word of the book (e.g. first word in Genesis)    | TRAN::0xE0           | 0xF0          |
+| /BoC/       | transition marker | any word where it is the first word of the chapter                              | TRAN::0x60           | 0xF0          |
+| /BoV/       | transition marker | any word where it is the first word of the verse                                | TRAN::0x20           | 0xF0          |
+| /EoB/       | transition marker | any word where it is the last word of the book (e.g. last word in revelation)   | TRAN::0xF0           | 0xF0          |
+| /EoC/       | transition marker | any word where it is the last word of the chapter                               | TRAN::0x70           | 0xF0          |
+| /EoV/       | transition marker | any word where it is the last word of the verse                                 | TRAN::0x30           | 0xF0          |
+| /!BoB/      | transition marker | any word where it is not the first word of the book                             | TRAN::0xE0           | 0xF0^         |
+| /!BoC/      | transition marker | any word where it is not the first word of the chapter                          | TRAN::0x60           | 0xF0^         |
+| /!BoV/      | transition marker | any word where it is not the first word of the verse                            | TRAN::0x20           | 0xF0^         |
+| /!EoB/      | transition marker | any word where it is not the last word of the book                              | TRAN::0xF0           | 0xF0^         |
+| /!EoC/      | transition marker | any word where it is not the last word of the chapter                           | TRAN::0x70           | 0xF0^         |
+| /!EoV/      | transition marker | any word where it is not the last word of the verse                             | TRAN::0x30           | 0xF0^         |
+| /Hsm/       | segment marker    | Hard Segment Marker (end) ... one of \. \? \!                                   | TRAN::0x40           | 0x07          |
+| /Csm/       | segment marker    | Core Segment Marker (end) ... \:                                                | TRAN::0x20           | 0x07          |
+| /Rsm/       | segment marker    | Real Segment Marker (end) ... one of \. \? \! \:                                | TRAN::0x60           | 0x07          |
+| /Ssm/       | segment marker    | Soft Segment Marker (end) ... one of \, \; \( \) --                             | TRAN::0x10           | 0x07          |
+| /sm/        | segment marker    | Any Segment Marker (end)  ... any of the above                                  | TRAN::!=0x00         | 0x07          |
+| /_/         | punctuation       | any word that is immediately marked for clausal punctuation                     | PUNC::!=0x00         | 0xE0          |
+| /!/         | punctuation       | any word that is immediately followed by an exclamation mark                    | PUNC::0x80           | 0xE0          |
+| /?/         | punctuation       | any word that is immediately followed by a question mark                        | PUNC::0xC0           | 0xE0          |
+| /./         | punctuation       | any word that is immediately followed by a period (declarative)                 | PUNC::0xE0           | 0xE0          |
+| /-/         | punctuation       | any word that is immediately followed by a hyphen/dash                          | PUNC::0xA0           | 0xE0          |
+| /;/         | punctuation       | any word that is immediately followed by a semicolon                            | PUNC::0x20           | 0xE0          |
+| /,/         | punctuation       | any word that is immediately followed by a comma                                | PUNC::0x40           | 0xE0          |
+| /:/         | punctuation       | any word that is immediately followed by a colon (information follows)          | PUNC::0x60           | 0xE0          |
+| /'/         | punctuation       | any word that is possessive, marked with an apostrophe                          | PUNC::0x10           | 0x10          |
+| /)/         | parenthetical text| any word that is immediately followed by a close parenthesis                    | PUNC::0x0C           | 0x0C          |
+| /(/         | parenthetical text| any word contained within parenthesis                                           | PUNC::0x04           | 0x04          |
+| /Italics/   | text decoration   | italisized words marked with this bit in puncutation byte                       | PUNC::0x02           | 0x02          |
+| /Jesus/     | text decoration   | words of jesus marked with this bit in puncutation byte                         | PUNC::0x01           | 0x01          |
+| \#FFFF      | PN+POS(12)        | hexdecimal representation of bits for a PN+POS(12) value.                       | See Digital-AV SDK   | uint32        |
+| \#FFFFFFFF  | POS(32)           | hexdecimal representation of bits for a POS(32) value. See Digital-AV SDK       | See Digital-AV SDK   | uint64        |
 | 99999:H     | Strongs Number    | decimal Strongs number for the Hebrew word in the Old Testament                 | One of Strongs\[4\]  | 0x7FFF        |
 | 99999:G     | Strongs Number    | decimal Strongs number for the Greek word in the New Testament                  | One of Strongs\[4\]  | 0x7FFF        |
