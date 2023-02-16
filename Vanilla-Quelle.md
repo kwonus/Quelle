@@ -1,6 +1,6 @@
 # Vanilla Quelle HMI Specification
 
-##### version 1.0.3.122
+##### version 1.0.3.216
 
 ### I. Background
 
@@ -81,7 +81,7 @@ Learning just six verbs is all that is necessary to effectively use Quelle. In t
 | Verb      | Action Type | Syntax Category | Required Parameters     | Required Operators | Optional Operators | > 1 permitted |
 | --------- | :---------: | :-------------- | ----------------------- | :----------------: | :----------------: | :-----------: |
 | *find*    |  implicit   | SEARCH          | **1**: *search spec*    |                    |   **" "  \|  &**   |      yes      |
-| *filter*  |  implicit   | SEARCH          | **1**: *filter spec*    |  **\\**spec**\\**  |                    |      yes      |
+| *filter*  |  implicit   | SEARCH          | **1**: *filter spec*    |  **<**spec         |                    |      yes      |
 | *set*     |  implicit   | CONTROL         | **2**: *name* = *value* |       **=**        |                    |      yes      |
 | *show*    |  implicit   | DISPLAY         | 0                       |     **\|\|**       |      **[ ]**       |      no       |
 | **@help** |  explicit   | SYSTEM          | 0 or 1                  |                    |                    |      no       |
@@ -105,7 +105,7 @@ Even before we describe Quelle syntax generally, let's examine these concepts us
 | Description                             | Example                                  |
 | --------------------------------------- | :--------------------------------------- |
 | SYSTEM command                          | @help                                    |
-| SEARCH filter                           | \\wall street journal : 2022-07-04\\     |
+| SEARCH filter                           | < wall street journal : 2022-07-04       |
 | SEARCH specification                    | this is some text expected to be found   |
 | Compound statement: two SEARCH actions  | "this quoted text" ; other unquoted text |
 | Compound statement: two CONTROL actions | span=7 ; exact = true                    |
@@ -173,11 +173,11 @@ This would find phrases where a noun appeared within a span of six words and pre
 
 **Another SEARCH Example:**
 
-Consider a query for all passages that contain a word beginning with pres, followed by Bush, but filter out phrases containing H W Bush.
+Consider a query for all passages that contain a word beginning with pres, followed by Bush, but subtract phrases containing H W Bush.
 
 *span = 15 ; "Pres*\* ... Bush" -- "H W Bush"*
 
-*(this could be read as: find all references to a wildcard Pres [e.g. Pres. or President] Bush, but filter out [i.e. subtract] phrases that also contain "HW Bush"*
+*(this could be read as: find all references to a wildcard Pres [e.g. Pres. or President] Bush, but subtract phrases that also contain "HW Bush"*
 
 ### VI. Displaying Results
 

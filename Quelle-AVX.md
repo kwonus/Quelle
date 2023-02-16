@@ -1,6 +1,6 @@
 # Quelle-AVX Specification
 
-##### version 1.0.3.212
+##### version 1.0.3.216
 
 ### I. Background
 
@@ -74,7 +74,7 @@ Learning just six verbs is all that is necessary to effectively use Quelle. In t
 | Verb      | Action Type | Syntax Category | Required Parameters     | Required Operators | Optional Operators | > 1 permitted |
 | --------- | :---------: | :-------------- | ----------------------- | :----------------: | :----------------: | :-----------: |
 | *find*    |  implicit   | SEARCH          | **1**: *search spec*    |                    |   **" "  \|  &**   |      yes      |
-| *filter*  |  implicit   | SEARCH          | **1**: *filter spec*    |  **\\**spec**\\**  |                    |      yes      |
+| *filter*  |  implicit   | SEARCH          | **1**: *filter spec*    |  **<**spec         |                    |      yes      |
 | *set*     |  implicit   | CONTROL         | **2**: *name* = *value* |       **=**        |                    |      yes      |
 | *show*    |  implicit   | DISPLAY         | 0                       |     **\|\|**       |      **[ ]**       |      no       |
 | **@help** |  explicit   | SYSTEM          | 0 or 1                  |                    |                    |      no       |
@@ -98,7 +98,7 @@ Even before we describe Quelle syntax generally, let's examine these concepts us
 | Description                             | Example                                  |
 | --------------------------------------- | :--------------------------------------- |
 | SYSTEM command                          | @help                                    |
-| SEARCH filter                           | \\wall street journal : 2022-07-04\\     |
+| SEARCH filter                           | < wall street journal : 2022-07-04       |
 | SEARCH specification                    | this is some text expected to be found   |
 | Compound statement: two SEARCH actions  | "this quoted text" ; other unquoted text |
 | Compound statement: two CONTROL actions | span=7 ; exact = true                    |
@@ -164,7 +164,7 @@ This would find phrases where a noun appeared within a span of six words, preced
 
 **Another SEARCH Example:**
 
-Consider a query for all passages that contain a word beginning with lord, but filter out phrases containing lordship.
+Consider a query for all passages that contain a word beginning with lord, but subtract phrases containing lordship.
 
 *span = 15 ; "Lord\* -- Lordship
 
