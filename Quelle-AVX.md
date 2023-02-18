@@ -485,6 +485,10 @@ The serch clause above would match any of these phrases:
 
 Again, -- means that the clause will be subtracted from the search results.. When commands only contain a single search clause, it is always positive. A negative clause only makes sense when combined with another non-negative search clause or search filter. As a search.domain acts a filter, single search clauses can execute and provide search results.
 
+An object model that can be manifested to support this grammar is depicted below:
+
+![QCommand](./QCommand.png)
+
 ### Appendix B. Specialized Search tokens in Quelle-AVX
 
 Search tokens in Quelle are normally any word in the lexicon for the domain being searched. In Quelle-AVX, this includes all words in the original KJV text and any modernized version of those words (e.g. hast and has).  The table below lists examples that are extensions of search terms
@@ -557,3 +561,11 @@ Search tokens in Quelle are normally any word in the lexicon for the domain bein
 | \#FFFFFFFF  | POS(32)           | hexdecimal representation of bits for a POS(32) value. See Digital-AV SDK       | See Digital-AV SDK   | uint64        |
 | 99999:H     | Strongs Number    | decimal Strongs number for the Hebrew word in the Old Testament                 | One of Strongs\[4\]  | 0x7FFF        |
 | 99999:G     | Strongs Number    | decimal Strongs number for the Greek word in the New Testament                  | One of Strongs\[4\]  | 0x7FFF        |
+
+
+
+### Appendix B. Object Model to support search tokens in Quelle-AVX
+
+An object model to support specialized Search Tokens for Quelle-AVX is depicted below:
+
+![QFind](./QFind.png)
