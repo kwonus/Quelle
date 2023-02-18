@@ -446,6 +446,10 @@ If the user wanted to remove this definition, the @delete action is used.  Here 
 
 NOTE: Labels must begin with a letter [A-Z] or [a-z], but they may contain numbers, spaces, hyphens, periods, commas, underscores, and single-quotes (no other punctuation or special characters are supported).
 
+An object model that can be manifested to support this grammar is depicted below:
+
+![QCommand](./QCommand.png)
+
 ### Appendix A. Glossary of Quelle Terminology
 
 **Syntax Categories:** Each syntax category defines rules by which verbs can be expressed in the statement. 
@@ -497,7 +501,3 @@ This phrase would NOT match:
 **not:** In Boolean logic, **not** means that the term must not be found. With Quelle, *not* is represented by a minus, minus ( **--** ) and applies to an entire clause (it cannot be applied to individual segments (e.g. discrete words) within the search clause. However, a search clause is permitted to contain a single segment, which easily circumvents that limitation. In short, -- means subtract results; it cancels-out matches against all matches of other clauses. Most clauses are additive as each additional clause increases search results. Contrariwise, a **not** clause is subtractive as it decreases search results.
 
 Again, -- means that the clause will be subtracted from the search results.. When commands only contain a single search clause, it is always positive. A negative clause only makes sense when combined with another non-negative search clause or search filter. As a search.domain acts a filter, single search clauses can execute and provide search results.
-
-An object model that can be manifested to support this grammar is depicted below:
-
-![QCommand](./QCommand.png)
