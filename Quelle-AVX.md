@@ -1,6 +1,6 @@
 # Quelle-AVX Specification
 
-##### version 1.0.3.216
+##### version 1.0.3.315
 
 ### I. Background
 
@@ -71,14 +71,14 @@ Each syntax category has either explicit and/or implicit actions.  Explicit acti
 
 Learning just six verbs is all that is necessary to effectively use Quelle. In the table below, each verb is identified with required and optional parameters/operators.
 
-| Verb      | Action Type | Syntax Category | Required Parameters     | Required Operators | Optional Operators | > 1 permitted |
-| --------- | :---------: | :-------------- | ----------------------- | :----------------: | :----------------: | :-----------: |
-| *find*    |  implicit   | SEARCH          | **1**: *search spec*    |                    |   **" "  \|  &**   |      yes      |
-| *filter*  |  implicit   | SEARCH          | **1**: *filter spec*    |  **<**spec         |                    |      yes      |
-| *set*     |  implicit   | CONTROL         | **2**: *name* = *value* |       **=**        |                    |      yes      |
-| *show*    |  implicit   | DISPLAY         | 0                       |     **\|\|**       |      **[ ]**       |      no       |
-| **@help** |  explicit   | SYSTEM          | 0 or 1                  |                    |                    |      no       |
-| **@exit** |  explicit   | SYSTEM          | 0                       |                    |                    |      no       |
+| Verb      | Action Type | Syntax Category | Required Parameters     | Required Operators |    Optional Operators     |
+| --------- | :---------: | :-------------- | ----------------------- | :----------------: | :-----------------------: |
+| *find*    |  implicit   | SEARCH          | **1**: *search spec*    |                    |    **"** *spec* **"**     |
+| *filter*  |  implicit   | SEARCH          | **1**: *filter spec*    |     **<** spec     |                           |
+| *set*     |  implicit   | CONTROL         | **2**: *name* = *value* |       **=**        |                           |
+| *show*    |  implicit   | DISPLAY         | 0                       |      **\|\|**      | **[** *row_indexes* **]** |
+| **@help** |  explicit   | SYSTEM          | 0 or 1                  |                    |                           |
+| **@exit** |  explicit   | SYSTEM          | 0                       |                    |                           |
 
 **TABLE 4-1** -- **The six fundamental Quelle commands with corresponding syntax summaries**
 
@@ -227,12 +227,12 @@ Type this to terminate the Quelle interpreter:
 
 ### X. Additional actions
 
-| Verb         | Action Type | Syntax Category | Required Parameters     |    Required Operators     | Optional Operators | > 1 permitted |
-| ------------ | :---------: | --------------- | ----------------------- | :-----------------------: | :----------------: | :-----------: |
-| *clear*      |  implicit   | CONTROL         | **2**: *name*           |          **=@**           |                    |      yes      |
-| *output*     |  implicit   | DISPLAY         | **1**: *filename*       | **>** or **>>** or **>!** |                    |      no       |
-| **@get**     |  explicit   | CONTROL         | **0+**: *control_names* |                           |                    |      no       |
-| **@version** |  explicit   | SYSTEM          | **0**                   |                           |                    |      no       |
+| Verb         | Action Type | Syntax Category | Required Parameters     |    Required Operators     | Optional Operators |
+| ------------ | :---------: | --------------- | ----------------------- | :-----------------------: | :----------------: |
+| *clear*      |  implicit   | CONTROL         | **2**: *name*           |          **=@**           |                    |
+| *output*     |  implicit   | DISPLAY         | **1**: *filename*       | **>** or **>>** or **>!** |                    |
+| **@get**     |  explicit   | CONTROL         | **1+**: *control_names* |                           |                    |
+| **@version** |  explicit   | SYSTEM          | **0**                   |                           |                    |
 
 **TABLE 10-1** -- **Listing of additional CONTROL, DISPLAY & SYSTEM actions**
 
@@ -309,10 +309,10 @@ span=@ ; domain=@ ; exact=@
 
 ### XI. Reviewing Statement History and re-invoking statements
 
-| Verb        | Action Type | Syntax Category | Required Arguments | Required Operators | > 1 permitted |
-| ----------- | ----------- | --------------- | ------------------ | :----------------: | :-----------: |
-| **@review** | explicit    | HISTORY         | 0 or 1             |                    |      no       |
-| *invoke*    | implicit    | HISTORY         | 1: historic-id     |      **{ }**       |      no       |
+| Verb        | Action Type | Syntax Category | Required Parameter | Optional Parameter |
+| ----------- | ----------- | --------------- | :----------------: | :----------------: |
+| **@review** | explicit    | HISTORY         |                    |    *max_coun*t     |
+| *invoke*    | implicit    | HISTORY         |  **{** *id* **}**  |                    |
 
 ##### **TABLE 11-1 -- Reviewing history and re-invoking previous commands**
 
@@ -360,12 +360,12 @@ span = 7 ; exact = true ; eternal power
 
 ### XII. Labelling Statements for subsequent execution
 
-| Verb        | Action Type | Syntax Category | Required Arguments     | Required Operators | Optional Operators | > 1 permitted |
-| ----------- | ----------- | --------------- | ---------------------- | :----------------: | :----------------: | :-----------: |
-| *save*      | implicit    | LABEL           | **1**: *macro_label*   |       **<<**       |                    |      no       |
-| **@delete** | independent | LABEL           | **1+**: *macro_label*s |      **{ }**       |                    |      no       |
-| **@expand** | independent | LABEL           | **0+**: *macro_labels* |                    |      **{ }**       |      no       |
-| *execute*   | implicit    | LABEL           | 1: *macro_label*       |      **{ }**       |                    |      yes      |
+| Verb        | Action Type | Syntax Category | Required Arguments | Required Operators  |
+| ----------- | ----------- | --------------- | ------------------ | :-----------------: |
+| *save*      | implicit    | LABEL           | **1**: *label*     |   **<<** *label*    |
+| **@delete** | independent | LABEL           | **1+**: *label*s   | **{** *label* **}** |
+| **@expand** | independent | LABEL           | **1**: *label*     | **{** *label* **}** |
+| *execute*   | implicit    | LABEL           | **1+**: *labels*   | **{** *label* **}** |
 
 **TABLE 12-1** -- **Executing labelled statements and related commands**
 
@@ -418,14 +418,18 @@ This expands to:
 
 search.exact = 1  search.span = 8 ; nationality ; eternal
 
-There are two restrictions on macro definitions:
+There are several restrictions on macro definitions:
 
 1. Macro definition must represent a valid Quelle statements:
    - The syntax is verified prior to saving the statement label.
-2. The statement cannot contain explicit actions:
+2. Macro definitions also exlude and output directives
+   - Any portion of the statement that contains > is incompatible with a macro defition
+3. The statement cannot contain explicit actions:
    - Only implicit actions are permitted in a labelled statement.
 
-Finally, there are two additional ways that a labelled statement can be referenced. In the last macro definition above where we created {sample2}, the user could see the expansion in Quelle by issuing this command:
+Finally, any macros referenced within a macro definition is expanded prior to the definition. Therefore redefining a macro after it is utilized in a subsequent macro definition has no effect after it has already been referenced/expanded. We call this macro-determinism.  
+
+Two additional explicit commands exist whereby a macro can be manipulated. We saw above how they can be defined and referenced. There are two additional ways commands that operate on macros: expansion and deletion.  In the last macro definition above where we created {sample2}, the user could preview an expansion by issuing this command:
 
 @expand {sample-compound-macro}
 
@@ -434,6 +438,36 @@ If the user wanted to remove this definition, the @delete action is used.  Here 
 @delete {sample-compound-macro}
 
 NOTE: Labels must begin with a letter [A-Z] or [a-z], but they may contain numbers, spaces, hyphens, periods, commas, underscores, and single-quotes (no other punctuation or special characters are supported).
+
+While macro definitions are deterministic, they can be overwritten/redefined: consider this sequence:
+
+"Jesus said" << jesus_macro
+
+"Mary said" << other_macro
+
+{jesus_macro} + {other_macro} << either_said
+
+@expand either_said
+
+***output:***	"Jesus said" + "Mary said"
+
+"Peter said" << other_macro
+
+@expand either_said
+
+***output:***	"Jesus said" + "Mary said"
+
+{jesus_macro} + {other_macro} << either_said
+
+@expand either_said
+
+***output:***	"Jesus said" + "Peter said"
+
+The sequence above illustrates both macro-determinism and the ability to explicitly redefine a macro.
+
+
+
+---
 
 An object model that can be manifested to support this grammar is depicted below:
 
