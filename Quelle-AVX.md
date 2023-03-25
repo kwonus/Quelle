@@ -1,6 +1,6 @@
 # Quelle-AVX Specification
 
-##### version 1.0.3.324
+##### version 1.0.3.325
 
 ### I. Background
 
@@ -404,7 +404,7 @@ search.exact=1 || C1
 
 search.span=8  || C2
 
-nationality || F1
+nation || F1
 
 eternal  || F2
 
@@ -418,18 +418,20 @@ $C1 ; $C2 ; $F1 ; $F2 || another-macro
 
 This expands to:
 
-search.exact = 1  search.span = 8 ; nationality ; eternal
+search.exact = 1  search.span = 8 ; nation ; eternal
 
 There are several restrictions on macro definitions:
 
 1. Macro definition must represent a valid Quelle statements:
    - The syntax is verified prior to saving the statement label.
-2. Macro definitions also exlude and output directives
-   - Any portion of the statement that contains > is incompatible with a macro defition
-3. The statement cannot contain explicit actions:
+2. Macro definitions exclude output directives
+   - Any portion of the statement that contains > is incompatible with a macro definition
+3. Macro definitions exclude print directives
+   - Any portion of the statement that contains [ ] is incompatible with a macro definition
+4. The statement cannot contain explicit actions:
    - Only implicit actions are permitted in a labelled statement.
 
-Finally, any macros referenced within a macro definition is expanded prior to the definition. Therefore redefining a macro after it is utilized in a subsequent macro definition has no effect after it has already been referenced/expanded. We call this macro-determinism.  
+Finally, any macros referenced within a macro definition are expanded prior to the definition. Therefore redefining a macro after it is utilized in a subsequent macro definition has no effect after it has already been referenced/expanded. We call this macro-determinism.  
 
 Two additional explicit commands exist whereby a macro can be manipulated. We saw above how they can be defined and referenced. There are two additional ways commands that operate on macros: expansion and deletion.  In the last macro definition above where we created  $another-macro, the user could preview an expansion by issuing this command:
 
