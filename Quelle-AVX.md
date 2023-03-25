@@ -1,6 +1,6 @@
 # Quelle-AVX Specification
 
-##### version 1.0.3.323
+##### version 1.0.3.324
 
 ### I. Background
 
@@ -71,14 +71,14 @@ Each syntax category has either explicit and/or implicit actions.  Explicit acti
 
 Learning just six verbs is all that is necessary to effectively use Quelle. In the table below, each verb is identified with required and optional parameters/operators.
 
-| Verb      | Action Type | Syntax Category | Required Parameters     | Required Operators |    Optional Operators     |
-| --------- | :---------: | :-------------- | ----------------------- | :----------------: | :-----------------------: |
-| *find*    |  implicit   | SEARCH          | **1**: *search spec*    |                    |    **"** *spec* **"**     |
-| *filter*  |  implicit   | SEARCH          | **1**: *filter spec*    |     **<** spec     |                           |
-| *set*     |  implicit   | CONTROL         | **2**: *name* = *value* |       **=**        |                           |
-| *show*    |  implicit   | DISPLAY         | 0                       |      **\|\|**      | **[** *row_indexes* **]** |
-| **@help** |  explicit   | SYSTEM          | 0 or 1                  |                    |                           |
-| **@exit** |  explicit   | SYSTEM          | 0                       |                    |                           |
+| Verb      | Action Type | Syntax Category | Required Parameters     |    Required Operators     | Optional Operators |
+| --------- | :---------: | :-------------- | ----------------------- | :-----------------------: | :----------------: |
+| *find*    |  implicit   | SEARCH          | **1**: *search spec*    |                           | **"** *spec* **"** |
+| *filter*  |  implicit   | SEARCH          | **1**: *filter spec*    |        **<<** spec        |                    |
+| *set*     |  implicit   | CONTROL         | **2**: *name* = *value* |           **=**           |                    |
+| *show*    |  implicit   | DISPLAY         | 0                       | **[** *row_indices* **]** |                    |
+| **@help** |  explicit   | SYSTEM          | 0 or 1                  |                           |                    |
+| **@exit** |  explicit   | SYSTEM          | 0                       |                           |                    |
 
 **TABLE 4-1** -- **The six fundamental Quelle commands with corresponding syntax summaries**
 
@@ -98,7 +98,7 @@ Even before we describe Quelle syntax generally, let's examine these concepts us
 | Description                             | Example                                  |
 | --------------------------------------- | :--------------------------------------- |
 | SYSTEM command                          | @help                                    |
-| SEARCH filter                           | < wall street journal : 2022-07-04       |
+| SEARCH filters                          | << Genesis << Exodus << Revelation       |
 | SEARCH specification                    | this is some text expected to be found   |
 | Compound statement: two SEARCH actions  | "this quoted text" ; other unquoted text |
 | Compound statement: two CONTROL actions | span=7 ; exact = true                    |
@@ -108,13 +108,13 @@ Even before we describe Quelle syntax generally, let's examine these concepts us
 
 Consider these two examples of Quelle statements (first CONTROL; then SEARCH):
 
-search.domain = AV Bible
+search.domain = KJV
 
 "Moses"
 
 Notice that both statements above are single actions.  We should have a way to express both of these in a single command. And this is the rationale behind a compound statement. To combine the previous two actions into one compound statement, issue this command:
 
-"Moses" ; search.domain=AV Bible
+"Moses" ; search.domain=KJV
 
 ### V. Deep Dive into Quelle SEARCH actions
 
@@ -199,9 +199,9 @@ To revisit the example in the previous sample, we can export records to a file w
 
 "Jesus answered" [1 2 3]  >> my-file.output  //  *this would would export the first three matching phrases* // >> indicates that the results should be appended
 
-format=html ; "Jesus answered" [1 2 3]  > my-file.html ! // *export the first three matching phrases as html*
+format=html ; "Jesus answered" [1 2 3]  @> my-file.html // *export the first three matching phrases as html*
 
-The trailing exclamation point allows existing file to be overwritten
+The @> allows existing file to be overwritten. Quelle will not overwrite an existing file with > syntax. The @> is required to force an overwrite.
 
 ### VIII. Program Help
 
@@ -238,9 +238,9 @@ Type this to terminate the Quelle interpreter:
 
 **CONTROL::SETTING directives:**
 
-| **Markdown**          | **HTML**                | **Text**                |
-| --------------------- | ----------------------- | ----------------------- |
-| *display.format = md* | *display.format = html* | *display.format = text* |
+| **Markdown**          | **HTML**                | **Text**                | Json                    |
+| --------------------- | ----------------------- | ----------------------- | ----------------------- |
+| *display.format = md* | *display.format = html* | *display.format = text* | *display.format = json* |
 
 **TABLE 10-2** -- **set** format command can be used to set the default content-formatting for for use with the export verb
 
@@ -262,28 +262,30 @@ When *clear* verbs are used alongside *set* verbs, *clear* verbs are always exec
 
 span=@ ; span = 7  `>> implies >>` span=@
 
-Otherwise, when multiple clauses contain the same setting, the last setting in the list is preserved.  Example:
+Otherwise, when multiple clauses contain the same setting, the first setting in the list is preserved.  Example:
 
-format = md ;  format = text `>> implies >>` format = text
+format = md ;  format = text `>> implies >>` format = md
 
 The control names are applicable to ***set***, ***clear***, and ***@get*** verbs. The control name has a fully specified name and also a short name. Either form of the control name is permitted in all Quelle statements.
 
-| Fully Specified Name | Short Name | Meaning                      | Values         | Visibility |
-| -------------------- | ---------- | ---------------------------- | -------------- | :--------: |
-| search.span          | span       | proximity                    | 0 to 1000      |   normal   |
-| search.domain        | domain     | the domain of the search     | string         |   normal   |
-| search.exact         | exact      | exact match vs liberal/fuzzy | true/false     |   normal   |
-| display.format       | format     | format of results            | see Table 10-2 |   normal   |
+| Fully Specified Name | Short Name | Meaning                       | Values         |
+| -------------------- | ---------- | ----------------------------- | -------------- |
+| search.span          | span       | proximity                     | 0 to 1000      |
+| search.domain        | domain     | the domain of the search      | av/avx         |
+| search.exact         | exact      | exact match vs multi-matching | true/false     |
+| display.format       | format     | format of results             | see Table 10-2 |
 
 **TABLE 10-4** -- **Summary of standard Quelle Control Names**
 
-Table 10-4 lists Control-Names for SEARCH and DISPLAY actions. The *@get* command will list the values associated with these. The *@get* command takes zero or more arguments. Zero arguments lists all control settings.  With one or more arguments, get only lists the values of the controls that are specified.  Examples of the command are below (both the long form and the short form of control names are accepted):
-
-*@get*
+Table 10-4 lists Control-Names for SEARCH and DISPLAY settings. The *@get* command fetches these values. The *@get* command requires a single argument. Examples are below (both the long form and the short form of control names are accepted):
 
 *@get* search
 
 *@get* search.domain
+
+*@get* display
+
+@get display.format
 
 Control settings can be cleared using implicit wildcards, by using the shared control-prefix:
 
