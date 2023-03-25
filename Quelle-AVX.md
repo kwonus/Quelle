@@ -1,6 +1,6 @@
 # Quelle-AVX Specification
 
-##### version 1.0.3.315
+##### version 1.0.3.323
 
 ### I. Background
 
@@ -179,13 +179,13 @@ Due to the latter condition above, SEARCH summarizes results (it does NOT displa
 
 "Jesus answered"			*summarize documents that contain this phrase, with paragraph references*
 
-"Jesus answered" ||        *display every matching phrase* // equivalent to Jesus answered" ||[\*]
+"Jesus answered" [ ]        *display every matching phrase* // equivalent to Jesus answered"
 
-"Jesus answered" || [1]  *this would would display only the first matching phrase*
+"Jesus answered" [1]  *this would would display only the first matching phrase*
 
-"Jesus answered" || [1 2 3]  *this would would display only the first three matching phrases*
+"Jesus answered" [1 2 3]  *this would would display only the first three matching phrases*
 
-"Jesus answered" || [4 5 6]  *this would would display the next first three matching phrases*
+"Jesus answered" [4 5 6]  *this would would display the next first three matching phrases*
 
 ### VII. Exporting Results
 
@@ -193,13 +193,13 @@ Export using a display-coordinate:
 
 To revisit the example in the previous sample, we can export records to a file with these commands:
 
-"Jesus answered" || > my-file.output  // *this would export every matching phrase*
+"Jesus answered" [ ] > my-file.output  // *this would export every matching phrase*
 
-"Jesus answered" || [1]  > my-file.output  // *this would would export only the first matching phrase*
+"Jesus answered" [1]  > my-file.output  // *this would would export only the first matching phrase*
 
-"Jesus answered" || [1 2 3]  >> my-file.output  //  *this would would export the first three matching phrases* // >> indicates that the results should be appended
+"Jesus answered" [1 2 3]  >> my-file.output  //  *this would would export the first three matching phrases* // >> indicates that the results should be appended
 
-format=html ; "Jesus answered" || [1 2 3]  > my-file.html ! // *export the first three matching phrases as html*
+format=html ; "Jesus answered" [1 2 3]  > my-file.html ! // *export the first three matching phrases as html*
 
 The trailing exclamation point allows existing file to be overwritten
 
@@ -230,7 +230,7 @@ Type this to terminate the Quelle interpreter:
 | Verb         | Action Type | Syntax Category | Required Parameters     |    Required Operators     | Optional Operators |
 | ------------ | :---------: | --------------- | ----------------------- | :-----------------------: | :----------------: |
 | *clear*      |  implicit   | CONTROL         | **2**: *name*           |          **=@**           |                    |
-| *output*     |  implicit   | DISPLAY         | **1**: *filename*       | **>** or **>>** or **>!** |                    |
+| *output*     |  implicit   | DISPLAY         | **1**: *filename*       | **>** or **>>** or **@>** |                    |
 | **@get**     |  explicit   | CONTROL         | **1+**: *control_names* |                           |                    |
 | **@version** |  explicit   | SYSTEM          | **0**                   |                           |                    |
 
@@ -312,7 +312,7 @@ span=@ ; domain=@ ; exact=@
 | Verb        | Action Type | Syntax Category | Required Parameter | Optional Parameter |
 | ----------- | ----------- | --------------- | :----------------: | :----------------: |
 | **@review** | explicit    | HISTORY         |                    |    *max_coun*t     |
-| *invoke*    | implicit    | HISTORY         |  **{** *id* **}**  |                    |
+| *invoke*    | implicit    | HISTORY         |     **$** *id*     |                    |
 
 ##### **TABLE 11-1 -- Reviewing history and re-invoking previous commands**
 
@@ -344,7 +344,7 @@ The *invoke* command works a little bit like a macro, albeit with different synt
 
 And the invoke command can re-invoke any command listed.
 
-{3}
+$3
 
 would be shorthand to re-invoke the search specified as:
 
@@ -352,7 +352,7 @@ eternal power
 
 or we could re-invoke all three commands in a single statement as:
 
-{1} ; {2} ; {3}
+$1 ; $2 ; $3
 
 which would be interpreted as:
 
@@ -360,12 +360,12 @@ span = 7 ; exact = true ; eternal power
 
 ### XII. Labelling Statements for subsequent execution
 
-| Verb        | Action Type | Syntax Category | Required Arguments | Required Operators  |
-| ----------- | ----------- | --------------- | ------------------ | :-----------------: |
-| *save*      | implicit    | LABEL           | **1**: *label*     |   **<<** *label*    |
-| **@delete** | independent | LABEL           | **1+**: *label*s   | **{** *label* **}** |
-| **@expand** | independent | LABEL           | **1**: *label*     | **{** *label* **}** |
-| *execute*   | implicit    | LABEL           | **1+**: *labels*   | **{** *label* **}** |
+| Verb        | Action Type | Syntax Category | Required Arguments | Required Operators |
+| ----------- | ----------- | --------------- | ------------------ | :----------------: |
+| *save*      | implicit    | LABEL           | **1**: *label*     |  **\|\|** *label*  |
+| **@delete** | independent | LABEL           | **1+**: *label*s   |      *label*       |
+| **@expand** | independent | LABEL           | **1**: *label      |      *label*       |
+| *execute*   | implicit    | LABEL           | **1+**: *labels*   |   **$** *label*    |
 
 **TABLE 12-1** -- **Executing labelled statements and related commands**
 
@@ -378,19 +378,19 @@ In this section, we will examine how user-defined macros are used in Quelle.  A 
 
 Let’s say we want to name our previously identified SEARCH directive with a label; We’ll call it “moses”. To accomplish this, we would issue this command:
 
-*domain=old testament ; Moses << moses*
+*domain=old testament ; Moses || moses*
 
 It’s that simple, now instead of typing the entire statement, we can use the label to execute our newly saved statement. Here is how we would execute the macro:
 
-{moses}
+$moses
 
 Labelled statements also support compounding using the semi-colon ( ; ), as follows; we will label it also:
 
-{moses} ; Aaron << my label can contain spaces
+$moses ; Aaron || my-label-cannot-contain-spaces
 
 Later I can issue this command:
 
-{my label can contain spaces}
+$my-label-cannot-contain-spaces
 
 Which is equivalent to executing these labeled statements:
 
@@ -398,21 +398,21 @@ Which is equivalent to executing these labeled statements:
 
 To illustrate this further, here are four more examples of labeled statement definitions:
 
-search.exact=1 << C1
+search.exact=1 || C1
 
-search.span=8  << C2
+search.span=8  || C2
 
-nationality << F1
+nationality || F1
 
-eternal  << F2
+eternal  || F2
 
 We can execute these as a compound statement by issuing this command:
 
-{C1} ; {C2} ; {F1} ; {F2}
+$C1 ; $C2 ; $F1 ; $F2
 
 Similarly, we could define another label from these, by issuing this command:
 
-{C1} ; {C2} ; {F1} ; {F2} << sample-compound-macro
+$C1 ; $C2 ; $F1 ; $F2 || another-macro
 
 This expands to:
 
@@ -429,35 +429,35 @@ There are several restrictions on macro definitions:
 
 Finally, any macros referenced within a macro definition is expanded prior to the definition. Therefore redefining a macro after it is utilized in a subsequent macro definition has no effect after it has already been referenced/expanded. We call this macro-determinism.  
 
-Two additional explicit commands exist whereby a macro can be manipulated. We saw above how they can be defined and referenced. There are two additional ways commands that operate on macros: expansion and deletion.  In the last macro definition above where we created {sample2}, the user could preview an expansion by issuing this command:
+Two additional explicit commands exist whereby a macro can be manipulated. We saw above how they can be defined and referenced. There are two additional ways commands that operate on macros: expansion and deletion.  In the last macro definition above where we created  $another-macro, the user could preview an expansion by issuing this command:
 
-@expand {sample-compound-macro}
+@expand another-macro
 
 If the user wanted to remove this definition, the @delete action is used.  Here is an example:
 
-@delete {sample-compound-macro}
+@delete another-macro
 
 NOTE: Labels must begin with a letter [A-Z] or [a-z], but they may contain numbers, spaces, hyphens, periods, commas, underscores, and single-quotes (no other punctuation or special characters are supported).
 
 While macro definitions are deterministic, they can be overwritten/redefined: consider this sequence:
 
-"Jesus said" << jesus_macro
+"Jesus said" || jesus_macro
 
-"Mary said" << other_macro
+"Mary said" || other_macro
 
-{jesus_macro} + {other_macro} << either_said
-
-@expand either_said
-
-***output:***	"Jesus said" + "Mary said"
-
-"Peter said" << other_macro
+$jesus_macro + $other_macro || either_said
 
 @expand either_said
 
 ***output:***	"Jesus said" + "Mary said"
 
-{jesus_macro} + {other_macro} << either_said
+"Peter said" || other_macro
+
+@expand either_said
+
+***output:***	"Jesus said" + "Mary said"
+
+$jesus_macro + $other_macro || either_said
 
 @expand either_said
 
