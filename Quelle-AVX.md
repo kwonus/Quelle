@@ -71,14 +71,14 @@ Each syntax category has either explicit and/or implicit actions.  Explicit acti
 
 Learning just six verbs is all that is necessary to effectively use Quelle. In the table below, each verb is identified with required and optional parameters/operators.
 
-| Verb      | Action Type | Syntax Category | Required Parameters     |    Required Operators     | Optional Operators |
-| --------- | :---------: | :-------------- | ----------------------- | :-----------------------: | :----------------: |
-| *find*    |  implicit   | SEARCH          | **1**: *search spec*    |                           | **"** *spec* **"** |
-| *filter*  |  implicit   | SEARCH          | **1**: *filter spec*    |        **<<** spec        |                    |
-| *set*     |  implicit   | CONTROL         | **2**: *name* = *value* |           **=**           |                    |
-| *show*    |  implicit   | DISPLAY         | 0                       | **[** *row_indices* **]** |                    |
-| **@help** |  explicit   | SYSTEM          | 0 or 1                  |                           |                    |
-| **@exit** |  explicit   | SYSTEM          | 0                       |                           |                    |
+| Verb      | Action Type | Syntax Category | Required Parameters       | Optional Parameters |
+| --------- | :---------: | :-------------- | ------------------------- | :-----------------: |
+| *find*    |  implicit   | SEARCH          | *search spec*             |                     |
+| *filter*  |  implicit   | SEARCH          | **<<** spec               |                     |
+| *set*     |  implicit   | CONTROL         | *name* = *value*          |                     |
+| *show*    |  implicit   | DISPLAY         | **[** *row_indices* **]** |                     |
+| **@help** |  explicit   | SYSTEM          |                           |       *topic*       |
+| **@exit** |  explicit   | SYSTEM          |                           |                     |
 
 **TABLE 4-1** -- **The six fundamental Quelle commands with corresponding syntax summaries**
 
