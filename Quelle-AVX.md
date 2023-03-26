@@ -1,6 +1,6 @@
 # Quelle-AVX Specification
 
-##### version 1.0.3.325
+##### version 1.0.3.326
 
 ### I. Background
 
@@ -71,14 +71,14 @@ Each syntax category has either explicit and/or implicit actions.  Explicit acti
 
 Learning just six verbs is all that is necessary to effectively use Quelle. In the table below, each verb is identified with required and optional parameters/operators.
 
-| Verb      | Action Type | Syntax Category | Required Parameters       | Optional Parameters |
-| --------- | :---------: | :-------------- | ------------------------- | :-----------------: |
-| *find*    |  implicit   | SEARCH          | *search spec*             |                     |
-| *filter*  |  implicit   | SEARCH          | **<<** spec               |                     |
-| *set*     |  implicit   | CONTROL         | *name* = *value*          |                     |
-| *show*    |  implicit   | DISPLAY         | **[** *row_indices* **]** |                     |
-| **@help** |  explicit   | SYSTEM          |                           |       *topic*       |
-| **@exit** |  explicit   | SYSTEM          |                           |                     |
+| Verb      | Action Type | Syntax Category | Required Parameters       |  Alternate Parameters   |
+| --------- | :---------: | :-------------- | ------------------------- | :---------------------: |
+| *find*    |  implicit   | SEARCH          | *search spec*             |                         |
+| *filter*  |  implicit   | SEARCH          | **<<** spec               |                         |
+| *set*     |  implicit   | CONTROL         | **%name** **::** *value*  | **%name** **=** *value* |
+| *show*    |  implicit   | DISPLAY         | **[** *row_indices* **]** |                         |
+| **@help** |  explicit   | SYSTEM          |                           |         *topic*         |
+| **@exit** |  explicit   | SYSTEM          |                           |                         |
 
 **TABLE 4-1** -- **The six fundamental Quelle commands with corresponding syntax summaries**
 
@@ -100,31 +100,31 @@ Even before we describe Quelle syntax generally, let's examine these concepts us
 | SYSTEM command                          | @help                                    |
 | SEARCH filters                          | << Genesis << Exodus << Revelation       |
 | SEARCH specification                    | this is some text expected to be found   |
-| Compound statement: two SEARCH actions  | "this quoted text" ; other unquoted text |
-| Compound statement: two CONTROL actions | span=7 ; exact = true                    |
-| Compound statement: CONTROL & SEARCH    | span=7; "Moses said"                     |
+| Compound statement: two SEARCH actions  | "this quoted text" + other unquoted text |
+| Compound statement: two CONTROL actions | %span = 7 %exact = true                  |
+| Compound statement: CONTROL & SEARCH    | %span=7 "Moses said"                     |
 
 **TABLE 4-2** -- **Examples of Quelle statement types**
 
 Consider these two examples of Quelle statements (first CONTROL; then SEARCH):
 
-search.domain = KJV
+%domain = KJV
 
 "Moses"
 
 Notice that both statements above are single actions.  We should have a way to express both of these in a single command. And this is the rationale behind a compound statement. To combine the previous two actions into one compound statement, issue this command:
 
-"Moses" ; search.domain=KJV
+"Moses" + domain=KJV
 
 ### V. Deep Dive into Quelle SEARCH actions
 
 Consider this proximity search where the search using Quelle syntax:
 
-*domain=old testament ; Moses*
+*domain=KJV + Moses*
 
 Quelle syntax can alter the span by also supplying an additional CONTROL action:
 
-*domain=old testament ; Moses*
+*domain=KJV + Moses*
 
 The statement above has two CONTROL actions and one SEARCH action
 
@@ -158,7 +158,7 @@ If the corpus is marked for part-of-speech, this search would return only matchi
 
 Of course, part-of-speech expressions can also be used independent of the an AND condition, as follows:
 
-span = 6 ; "/noun/ ... home"
+span = 6 + "/noun/ ... home"
 
 This would find phrases where a noun appeared within a span of six words, preceding the word "home"
 
@@ -166,7 +166,7 @@ This would find phrases where a noun appeared within a span of six words, preced
 
 Consider a query for all passages that contain a word beginning with lord, but subtract phrases containing lordship.
 
-*span = 15 ; "Lord\* -- Lordship
+*span = 15 + "Lord\* -- Lordship
 
 ### VI. Displaying Results
 
@@ -227,83 +227,97 @@ Type this to terminate the Quelle interpreter:
 
 ### X. Additional actions
 
-| Verb         | Action Type | Syntax Category | Required Parameters     |    Required Operators     | Optional Operators |
-| ------------ | :---------: | --------------- | ----------------------- | :-----------------------: | :----------------: |
-| *clear*      |  implicit   | CONTROL         | **2**: *name*           |          **=@**           |                    |
-| *output*     |  implicit   | DISPLAY         | **1**: *filename*       | **>** or **>>** or **@>** |                    |
-| **@get**     |  explicit   | CONTROL         | **1+**: *control_names* |                           |                    |
-| **@version** |  explicit   | SYSTEM          | **0**                   |                           |                    |
+| Verb         | Action Type | Syntax Category | Parameters             | Alternate #1          | Alternate #2      |
+| ------------ | :---------: | --------------- | ---------------------- | :-------------------- | :---------------- |
+| *clear*      |  implicit   | CONTROL         | *%name* **:: default** | *%name* **= default** |                   |
+| *output*     |  implicit   | DISPLAY         | **>** *filename*       | **@>** *filename*     | **>>** *filename* |
+| **@get**     |  explicit   | CONTROL         | *name*                 |                       |                   |
+| **@version** |  explicit   | SYSTEM          |                        |                       |                   |
 
 **TABLE 10-1** -- **Listing of additional CONTROL, DISPLAY & SYSTEM actions**
 
 **CONTROL::SETTING directives:**
 
-| **Markdown**          | **HTML**                | **Text**                | Json                    |
-| --------------------- | ----------------------- | ----------------------- | ----------------------- |
-| *display.format = md* | *display.format = html* | *display.format = text* | *display.format = json* |
+| **Markdown**   | **HTML**         | **Text**         | Json             |
+| -------------- | ---------------- | ---------------- | ---------------- |
+| *%format = md* | *%format = html* | *%format = text* | *%format = json* |
 
 **TABLE 10-2** -- **set** format command can be used to set the default content-formatting for for use with the export verb
 
 
 
-| **example**            | **explanation**                                              |
-| ---------------------- | ------------------------------------------------------------ |
-| *search*.span = 8      | Assign a control setting                                     |
-| **@get** *search*.span | get a control setting                                        |
-| *search*.span=@        | Clear the control setting; restoring the Quelle driver default setting |
+| **example**    | **explanation**                                              |
+| -------------- | ------------------------------------------------------------ |
+| span = 8       | Assign a control setting                                     |
+| **@get** span  | get a control setting                                        |
+| span = default | Clear the control setting; restoring the Quelle driver default setting |
 
 **TABLE 10-3** -- **set/clear/get** action operate on configuration settings
 
 
 
-**CONTROL::REMOVAL directives:**
+**SETTINGS:**
 
-When *clear* verbs are used alongside *set* verbs, *clear* verbs are always executed after *set* verbs. 
+When *clear* verbs are used alongside *set* verbs, *clear* verbs are silently ignored. 
 
-span=@ ; span = 7  `>> implies >>` span=@
+span=default ; span = 7   `implies`   span=7
 
-Otherwise, when multiple clauses contain the same setting, the first setting in the list is preserved.  Example:
+Otherwise, when multiple clauses contain the same setting, only the first setting in the list is preserved.  Example:
 
-format = md ;  format = text `>> implies >>` format = md
+format = md ;  format = text  `implies`  format = md
 
-The control names are applicable to ***set***, ***clear***, and ***@get*** verbs. The control name has a fully specified name and also a short name. Either form of the control name is permitted in all Quelle statements.
+The control names are applicable to ***set***, ***clear***, and ***@get*** verbs. The control name has a fully specified name and also a short name.
 
-| Fully Specified Name | Short Name | Meaning                       | Values         |
-| -------------------- | ---------- | ----------------------------- | -------------- |
-| search.span          | span       | proximity                     | 0 to 1000      |
-| search.domain        | domain     | the domain of the search      | av/avx         |
-| search.exact         | exact      | exact match vs multi-matching | true/false     |
-| display.format       | format     | format of results             | see Table 10-2 |
+| Setting | Meaning                       | Values                                 |
+| ------- | ----------------------------- | -------------------------------------- |
+| span    | proximity distance limit      | 0 to 999 or verse *[default is verse]* |
+| domain  | the domain of the search      | av/avx  *[default is av]*              |
+| exact   | exact match vs multi-matching | true/false  *[default is false]*       |
+| format  | format of results             | see Table 10-2  *[default is json]*    |
 
 **TABLE 10-4** -- **Summary of standard Quelle Control Names**
 
-Table 10-4 lists Control-Names for SEARCH and DISPLAY settings. The *@get* command fetches these values. The *@get* command requires a single argument. Examples are below (both the long form and the short form of control names are accepted):
+Table 10-4 lists all settings available in AVX-Quelle.
+
+The *@get* command fetches these values. The *@get* command requires a single argument. Examples are below (both the long form and the short form of control names are accepted):
 
 *@get* search
 
-*@get* search.domain
-
 *@get* display
 
-@get display.format
+@get format
 
-Control settings can be cleared using implicit wildcards, by using the shared control-prefix:
+All settings can be cleared using an implicit wildcard:
 
-search=@
-
-display=@
-
-For example, this control statement with an implied wildcard:
-
-search=@
+%settings = default
 
 It is exactly equivalent to this compound statement:
 
-search.span=@ ; search.domain=@ ; search.exact=@
+%span=default ; %domain=default ; %exact=default ; %format=default
 
-Likewise, it is exactly equivalent to this similar compound statement:
+This construct is also available to clear settings only at statement-level scope:
 
-span=@ ; domain=@ ; exact=@
+%settings::default
+
+It is exactly equivalent to this compound statement:
+
+%span::default ; %domain::default ; %exact::default ; %format::default
+
+**Scope of Settings [Statement Scope vs Persistent Scope]**
+
+It should be noted that there is a distinction between name=value and name::value syntax variations. The first form is persistent with respect to subsequent statements. Contrariwise, the latter form affects only the single statement wherewith it is executed. We refer to this as variable cope, Consider these two very similar command sequences:
+
+| Example of Statement Scope | Example of Persistent Scope |
+| -------------------------- | --------------------------- |
+| %settings = default        | %settings = default         |
+| "Moses said" %span::7      | "Moses said" %span = 7      |
+| "Aaron said"               | "Aaron said"                |
+
+In the **statement scope** example, setting span to "7" only affects the search for "Moses said". The next search for "Aaron said" utilizes the default value for span, which is "verse".
+
+In the **persistent scope** example, setting span to "7" affects the search for "Moses said" <u>and all subsequent searches</u>. The next search for "Aaron said" continues to use a span value of "7'".   In other words, the setting **persists** <u>beyond statement execution</u>.
+
+
 
 **QUERYING DRIVER FOR VERSION INFORMATION**
 
@@ -338,9 +352,9 @@ The *invoke* command works a little bit like a macro, albeit with different synt
 
 *@review*
 
-1>  span = 7
+1>  %span = 7
 
-2>  exact = true
+2>  %exact = true
 
 3> eternal power
 
@@ -358,7 +372,7 @@ $1 ; $2 ; $3
 
 which would be interpreted as:
 
-span = 7 ; exact = true ; eternal power
+%span = 7 ; %exact = true ; eternal power
 
 ### XII. Labelling Statements for subsequent execution
 
@@ -378,17 +392,17 @@ In this section, we will examine how user-defined macros are used in Quelle.  A 
 2. Utilization of a labelled statement (executing a macro)
 
 
-Let’s say we want to name our previously identified SEARCH directive with a label; We’ll call it “moses”. To accomplish this, we would issue this command:
+Let’s say we want to name the search example from the previous section; We’ll call it *eternal-power*. To accomplish this, we would issue this command:
 
-*domain=old testament ; Moses || moses*
+%span::7 %exact::true + eternal power || eternal-power
 
 It’s that simple, now instead of typing the entire statement, we can use the label to execute our newly saved statement. Here is how we would execute the macro:
 
-$moses
+$eternal-power
 
 Labelled statements also support compounding using the semi-colon ( ; ), as follows; we will label it also:
 
-$moses ; Aaron || my-label-cannot-contain-spaces
+$eternal-power + godhead|| my-label-cannot-contain-spaces
 
 Later I can issue this command:
 
@@ -396,29 +410,29 @@ $my-label-cannot-contain-spaces
 
 Which is equivalent to executing these labeled statements:
 
-*domain=old testament ; Moses ; Aaron
+%span::7  %exact::true + eternal power + godhead
 
 To illustrate this further, here are four more examples of labeled statement definitions:
 
-search.exact=1 || C1
+%exact::1 || C1
 
-search.span=8  || C2
+%span::8  || C2
 
-nation || F1
++nation || F1
 
-eternal  || F2
++eternal  || F2
 
 We can execute these as a compound statement by issuing this command:
 
-$C1 ; $C2 ; $F1 ; $F2
+$C1 $C2 $F1 $F2
 
 Similarly, we could define another label from these, by issuing this command:
 
-$C1 ; $C2 ; $F1 ; $F2 || another-macro
+$C1 $C2 $F1 $F2 || another-macro
 
 This expands to:
 
-search.exact = 1  search.span = 8 ; nation ; eternal
+%exact::1  %span::8 +nation +eternal
 
 There are several restrictions on macro definitions:
 
@@ -469,7 +483,11 @@ $jesus_macro + $other_macro || either_said
 
 The sequence above illustrates both macro-determinism and the ability to explicitly redefine a macro.
 
+---
 
+In general, AVX-Quelle can be thought of as a stateless server. The only exceptions of that stateless nature are non-default settings with persistent scope and and defined macro definitions. 
+
+Finally delimiters [ ; or + ] between two search clauses are always required. Yet, delimiters are ***not*** required between a search clause and any other type of clause. This makes a Quelle statement easy to read with minimal clutter within a statement. Still, the introduction of macros to a statement can instigate confusion about when to separate clauses with a delimiter. Therefore, delimiters can always be added between any two clauses. Likewise, any statement can end with a delimiter. These extra delimiters are silently ignored.
 
 ---
 
@@ -525,7 +543,7 @@ The serch clause above would match any of these phrases:
 
 **not:** In Boolean logic, **not** means that the term must not be found. With Quelle, *not* is represented by a minus, minus ( **--** ) and applies to an entire clause (it cannot be applied to individual segments (e.g. discrete words) within the search clause. However, a search clause is permitted to contain a single segment, which easily circumvents that limitation. In short, -- means subtract results; it cancels-out matches against all matches of other clauses. Most clauses are additive as each additional clause increases search results. Contrariwise, a **not** clause is subtractive as it decreases search results.
 
-Again, -- means that the clause will be subtracted from the search results.. When commands only contain a single search clause, it is always positive. A negative clause only makes sense when combined with another non-negative search clause or search filter. As a search.domain acts a filter, single search clauses can execute and provide search results.
+Again, -- means that the clause will be subtracted from the search results.. When commands only contain a single search clause, it is always positive. A negative clause only makes sense when combined with another non-negative search clause or search filter. As a search domain acts a filter, single search clauses can execute and provide search results.
 
 ### Appendix B. Specialized Search tokens in Quelle-AVX
 
