@@ -1,6 +1,6 @@
 # Quelle-AVX Specification
 
-##### version 1.0.3.326
+##### version 1.0.3.327
 
 ### I. Background
 
@@ -74,7 +74,7 @@ Learning just six verbs is all that is necessary to effectively use Quelle. In t
 | Verb      | Action Type | Syntax Category | Required Parameters       |  Alternate Parameters   |
 | --------- | :---------: | :-------------- | ------------------------- | :---------------------: |
 | *find*    |  implicit   | SEARCH          | *search spec*             |                         |
-| *filter*  |  implicit   | SEARCH          | **<<** spec               |                         |
+| *filter*  |  implicit   | SEARCH          | **<** *scope*             |                         |
 | *set*     |  implicit   | CONTROL         | **%name** **::** *value*  | **%name** **=** *value* |
 | *show*    |  implicit   | DISPLAY         | **[** *row_indices* **]** |                         |
 | **@help** |  explicit   | SYSTEM          |                           |         *topic*         |
@@ -98,7 +98,7 @@ Even before we describe Quelle syntax generally, let's examine these concepts us
 | Description                             | Example                                  |
 | --------------------------------------- | :--------------------------------------- |
 | SYSTEM command                          | @help                                    |
-| SEARCH filters                          | << Genesis << Exodus << Revelation       |
+| SEARCH filters                          | < Genesis < Exodus < Revelation          |
 | SEARCH specification                    | this is some text expected to be found   |
 | Compound statement: two SEARCH actions  | "this quoted text" + other unquoted text |
 | Compound statement: two CONTROL actions | %span = 7 %exact = true                  |
@@ -199,9 +199,9 @@ To revisit the example in the previous sample, we can export records to a file w
 
 "Jesus answered" [1 2 3]  >> my-file.output  //  *this would would export the first three matching phrases* // >> indicates that the results should be appended
 
-format=html ; "Jesus answered" [1 2 3]  @> my-file.html // *export the first three matching phrases as html*
+format=html ; "Jesus answered" [1 2 3]  => my-file.html // *export the first three matching phrases as html*
 
-The @> allows existing file to be overwritten. Quelle will not overwrite an existing file with > syntax. The @> is required to force an overwrite.
+The => allows existing file to be overwritten. Quelle will not overwrite an existing file with > syntax. The => is required to force an overwrite.
 
 ### VIII. Program Help
 
@@ -230,7 +230,7 @@ Type this to terminate the Quelle interpreter:
 | Verb         | Action Type | Syntax Category | Parameters             | Alternate #1          | Alternate #2      |
 | ------------ | :---------: | --------------- | ---------------------- | :-------------------- | :---------------- |
 | *clear*      |  implicit   | CONTROL         | *%name* **:: default** | *%name* **= default** |                   |
-| *output*     |  implicit   | DISPLAY         | **>** *filename*       | **@>** *filename*     | **>>** *filename* |
+| *output*     |  implicit   | DISPLAY         | **>** *filename*       | **=>** *filename*     | **>>** *filename* |
 | **@get**     |  explicit   | CONTROL         | *name*                 |                       |                   |
 | **@version** |  explicit   | SYSTEM          |                        |                       |                   |
 
