@@ -1,22 +1,25 @@
 # Quelle
 Quelle is a specification. The most generic form of the spec is known as Vanilla-Quelle. Since Quelle could serve as a standard search syntax across various domains, tailoring for specific domains will inevitably produce various dialects. It is recommended that each dialect conform to the Vanilla-Quelle specification. A user-manual-of-sorts is provided here:
 
-[https://github.com/kwonus/Quelle/blob/main/VanillaQuelle.md](https://github.com/kwonus/Quelle/blob/main/Vanilla-Quelle.md)
+[Quelle/VanillaQuelle.md (github.com/kwonus)](https://github.com/kwonus/Quelle/blob/main/Vanilla-Quelle.md)
 
-Initially, the manual served as the most complete specification. It was a specification-by-example (SBE). Now: a [PEG](https://en.wikipedia.org/wiki/Domain-specific_language) grammar exists. This grammar not only provides a reference implementation in Rust, but it also provides a formal specification for Vanilla-Quelle:
+Initially, the manual served as the most complete specification. It was a specification-by-example (SBE). Now: a [PEG](https://bford.info/pub/lang/peg.pdf) grammar exists. This grammar not only provides a reference implementation using [Pest](https://pest.rs/) crate in Rust, but it also provides a formal specification:
 
-[https://github.com/kwonus/Quelle/blob/main/rust/src/quelle.pest](https://github.com/kwonus/Quelle/blob/main/rust/src/quelle.pest)
+[Pin-Shot-Blue/src/quelle.pest (github.com/kwonus)](https://github.com/kwonus/Pin-Shot-Blue/blob/main/src/quelle.pest)
 
 Every attempt is being made to keep the Quelle syntax agnostic about the search domain. Consequently, Quelle syntax has the potential for ubiquity.
 
 That said, a dialect of Quelle, optimized for the Digital-AV, can be found here:
 
-[https://github.com/kwonus/Quelle/blob/main/Quelle-AVX.md](https://github.com/kwonus/Quelle/blob/main/Quelle-AVX.md)
-[https://github.com/kwonus/Quelle/blob/main/rust/src/quelle-avx.pest](https://github.com/kwonus/Quelle/blob/main/rust/src/quelle-avx.pest)
+[Quelle/Quelle-AVX.md (github.com/kwonus)](https://github.com/kwonus/Quelle/blob/main/Quelle-AVX.md)
+
+[Pin-Shot-Blue/src/avx-quelle.pest (github.com/kwonus)](https://github.com/kwonus/Pin-Shot-Blue/blob/main/src/avx-quelle.pest)
+
+
 
 
 
 <br/></br>
-# What's Ahead?
-- The reference implementation will be made interactive and report the results of the parse via a REST interface
-- A Web interface that includes this parsing engine will be incorporated into [Pin-Shot-Blue.io](https://Pin-Shot-Blue.io): Parsing as a Service to be available in 2023.
+# What's Available?
+- A REST implementation is available in the project named [pin-shot-blue](https://github.com/kwonus/Pin-Shot-Blue) in my github repo
+- A DLL (library) implementation is available in the project named [pin-shot-avx](https://github.com/kwonus/pin-shot-avx) in my github repo
