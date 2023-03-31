@@ -1,0 +1,212 @@
+// AVX-Quelle Grammar - Expressed in PEG
+// Copyright (c) 2023, Kevin Wonus
+// MIT License
+
+// Short summary:
+// command has multiple clauses and optional export/scope/macro support
+// each clause is a standalone unit.  Search-Clauses have more granular units/syntax
+// search-clause contains [>= 1] segments
+// segments contain [>= 1] fragments
+// fragments contain [>= 1] features
+// fragments are used to match terms (i.e. word tokens) across the corpus being searched; match logic should consider all features of the fragment/token when deeming it to be matched
+
+WHITESPACE = _ { " " | "\t" | "\r" | "\n" }
+statement = { singleton | vector | macro_vector }
+
+vector = { (IMPLICIT+) ~ implicit_singletons? }
+macro_vector = { IMPLICIT+ ~ define_macro }
+singleton = { exit | help | history | expand | delete | version | get }
+
+IMPLICIT = _{ IMPLICIT_OTHER | IMPLICIT_SEARCH }
+implicit_singletons = { (print ~ export?) | (export ~ print?) }
+export = { (output | append | overwrite) }
+IMPLICIT_SEARCH = _{ negative? ~ search ~ DELIMITER* }
+IMPLICIT_OTHER = _{ DELIMITER* ~ (filter | setting | invoke | exec) }
+filter = { FILTER_OP ~ (bookName | bookNum) ~ (verse | chapter)? }
+
+feature = { (text | pos | pn_pos12 | pos32 | greek | hebrew | loc | seg | lemma | wildcard | punc | decoration) }
+text = ${ ALPHA+ }
+pn = {  ^"/1p/" | ^"/2p/" | ^"/3p/" }
+pos_noun = { ^"/noun/" | ^"/n/" }
+not_noun = { ^"/!noun/" | ^"/!n/" }
+pos_verb = { ^"/verb/" | ^"/n/" }
+not_verb = { ^"/!verb/" | ^"/!v/" }
+pos_pro = { ^"/pronoun/" | ^"/pn/" }
+not_pro = { ^"/!pronoun/" | ^"/!pn/" }
+pos_adj = { ^"/adjective/" | ^"/sdj/" }
+not_adj = { ^"/!adjective/" | ^"/!adj/" }
+pos_adv = { ^"/adjective/" | ^"/sdj/" }
+not_adv = { ^"/!adjective/" | ^"/!adj/" }
+pos_det = { ^"/determiner/" | ^"/det/" }
+not_det = { ^"/!determiner/" | ^"/!det/" }
+pos_art = { ^"/article/" | ^"/art/" }
+not_art = { ^"/!article/" | ^"/!art/" }
+pos_wh = { ^"/wh/" }
+not_wh = { ^"/!wh/" }
+singular = { ^"/singular/" }
+plural = { ^"/pural/" }
+pos = { pos_noun | not_noun | pos_verb | not_verb | pos_pro | not_pro | pos_adj | not_adj | pos_adv | not_adv | pos_det | not_det | pos_art | not_art | pos_wh | not_wh | singular | plural | pn }
+
+loc_bob = { ^"/BoB/" }
+loc_eob = { ^"/EoB/" }
+loc_boc = { ^"/BoC/" }
+loc_eoc = { ^"/EoC/" }
+loc_bov = { ^"/BoV/" }
+loc_eov = { ^"/EoV/" }
+not_bob = { ^"/!BoB/" }
+not_eob = { ^"/!EoB/" }
+not_boc = { ^"/!BoC/" }
+not_eoc = { ^"/!EoC/" }
+not_bov = { ^"/!BoV/" }
+not_eov = { ^"/!EoV/" }
+loc = { loc_bob | loc_eob | loc_boc | loc_eoc | loc_bov | loc_eov | not_bob | not_eob | not_boc | not_eoc | not_bov | not_eov }
+
+seg_hsm = { ^"/Hsm/"  }
+seg_csm = { ^"/Csm/"  }
+seg_ssm = { ^"/Ssm/"  }
+seg_any = { ^"/sm/"   }
+not_hsm = { ^"/!Hsm/" }
+not_csm = { ^"/!Csm/" }
+not_ssm = { ^"/!Ssm/" }
+not_any = { ^"/!sm/"  }
+seg = { seg_hsm | seg_csm | seg_ssm | seg_any | not_hsm | not_csm | not_ssm | not_any }
+
+punc_any      = { "/_/" }
+punc_exclaim  = { "/!/" }
+punc_question = { "/?/" }
+punc_declare  = { "/./" }
+punc_dash     = { "/-/" }
+punc_semi     = { "/;/" }
+punc_comma    = { "/,/" }
+punc_colon    = { "/:/" }
+punc_possessive = { "/\'/" }
+punc_parenthetical = { "/(/" }
+punc_parenthetical_close = { "/)/" }
+punc = { punc_any | punc_question | punc_declare | punc_dash | punc_semi | punc_comma | punc_colon | punc_possessive | punc_parenthetical | punc_parenthetical_close }
+
+italics = { ^"/italics/" }
+jesus = { ^"/Jesus/" }
+
+exit = { ^"@exit" }
+help = { ^"@help" ~ topic? }
+history = {^"@history" }
+topic = { text }
+expand = { ^"@expand" ~ label }
+delete = { ^"@delete" ~  label }
+version = { ^"@version" }
+get = { ^"@get" ~ var }
+var = { span_key | domain_key | exact_key | format_key | config }
+
+search = { ordered | segment+ }   // New nomenclature; searches have = 1 ordered-segments <xor> have >= 1 unordered-segments; segments are separated by OR ( | )
+
+segment = { fragment ~ (AND ~ fragment)* } // Segments have >= 1 Unquoted (unordered) fragments <xor> have >= quoted/bracketed (unordered) fragments
+fragment = { feature ~ (OR ~ feature)* } // Fragments have >= 1 features, separated by AND( & ) // A single token in a document must match all features to be deemed a full-match // partial-matches are not designed into the grammar
+
+ordered = { QUOTE ~ (anchored ~ (unanchored | anchored)*) ~ QUOTE } // Quoted/Ordered segment
+anchored = { unordered | segment }
+unanchored = { ellipsis ~ (unordered | segment) }
+unordered = { "[" ~ segment ~ segment* ~ "]" }
+
+config = ${ ^"settings" }
+VAR = _{ "%" }
+default = ${ ^"default" }
+global_reset = { VAR ~ config ~ EQUALS ~ default }
+local_reset = { VAR ~ config ~ COLON ~ default }
+
+span_key = @{ ^"span" }
+SPAN_VAR = _{ span_key }
+span_var = { VAR ~ SPAN_VAR ~ SETTING ~ span_option }
+span_set = { VAR ~ SPAN_VAR ~ EQUALS ~ span_option }
+span_option = { DIGIT_le3 | span_verse | default }
+span_verse = { ^"verse" }
+
+domain_key = @{ ^"domain" }
+DOMAIN_VAR = _{ domain_key }
+domain_var = { VAR ~ DOMAIN_VAR ~ SETTING ~ domain_option }
+domain_set = { VAR ~ DOMAIN_VAR ~ EQUALS ~ domain_option }
+domain_option = { DOMAINS | default }
+DOMAINS = _{ av | avx }  // very specific domain for the AVX driver/parser implementation
+avx = { ^"modern" | "^avx" }
+av = { ^"kjv" | ^"av" }
+
+exact_key = @{ ^"exact" }
+EXACT_VAR = _{ exact_key }
+exact_var = { VAR ~ EXACT_VAR ~ SETTING ~ exact_option }
+exact_set = { VAR ~ EXACT_VAR ~ EQUALS ~ exact_option }
+exact_option = { TRUE | FALSE | default }
+TRUE = { ^"true" | ^"yes" | "1" }
+FALSE = { ^"false" | ^"no" | "0" }
+
+format_key = @{ ^"format" }
+FORMAT_VAR = _{ format_key }
+format_var = { VAR ~ FORMAT_VAR ~ SETTING ~ format_option }
+format_set = { VAR ~ FORMAT_VAR ~ EQUALS ~ format_option }
+format_option = { html | markdown | textual | json | default }
+html = ${ ^"html" }
+markdown = ${ ^"markdown" | ^"md" }
+textual = ${ ^"text" }
+json = ${ ^"json" }
+
+print = { OPEN_BRACE ~ (DIGITS)* ~ CLOSE_BRACE }
+cv = { chapter ~ COLON ~ verse }
+book = { (bookName | bookNum)}
+verse = { chapter ~ COLON ~ DIGIT_byte }
+chapter = { COLON ~ DIGIT_byte }
+bookName = { ALPHA+ | (onetwothree ~ ALPHA+) }
+onetwothree = { ('1' .. '3') }
+bookNum  = ${ ('1' .. '9') | (('1' .. '5') ~ DIGIT) ~ ( "6" ~ ('1' .. '6')) } // 1-66
+negative = { "--" }
+setting = { span_var | span_set | domain_var | domain_set | exact_var | exact_set | format_var | format_set }
+define_macro = { "||" ~ label}
+label = { ('a' .. 'z' | 'A' .. 'Z') ~ (('a' .. 'z' | 'A' .. 'Z' | '0' .. '9' | "-" | "_")+)? }
+invoke = { DOLLAR ~ label }   // macro is a Rust keyword; cannot use it here
+exec = { DOLLAR ~ ('0' .. '9')+ }
+
+decoration = { italics | jesus }
+pos32 = ${ "#" ~ HEX32 }
+pn_pos12 = ${ "#" ~ HEX16 }
+greek = ${ DIGITS ~ ^":G" }
+hebrew = ${ DIGITS ~ ^":H" }
+
+lemma = { "\\" ~ text ~ "\\" }
+wildcard = ${ (text ~ "*" ~ text) | ("*" ~text) | (text ~ "*" ) }
+limit_av = { (text ~ ^"#kjv") | (text ~ ^"#av") }
+limit_avx = { (text ~ ^"#mod") | (text ~ ^"#avx") }
+ELLIPSIS = @{ "..." }
+ellipsis = _{ "..." }
+
+append = { ">>" ~ filename }
+output = { ">" ~ filename }
+overwrite = { "=>" ~ filename }
+
+FILESPEC = _{ ('a' .. 'z' | 'A' .. 'Z' | '0' .. '9') | "/" | "\\" | "-" | "_" | ":" }
+quoted_filespec = ${ QUOTE ~ FILESPEC ~ (FILESPEC | " ") + ~ QUOTE }
+unquoted_legal = { FILESPEC+ }
+filename = { quoted_filespec | unquoted_legal }
+
+DIGIT = _{ '0' .. '9' }
+HEX = _{ DIGIT | ('a' .. 'f') | ('A' .. 'F') }
+DIGITS = ${ DIGIT+ }
+DIGIT_ge5 = ${DIGIT ~ DIGIT ~ DIGIT ~ DIGIT ~ DIGIT+ }
+DIGIT_le2 = ${DIGIT ~ DIGIT? }
+DIGIT_le3 = ${DIGIT ~ DIGIT ~ DIGIT? }
+DIGIT_byte = ${ (("0" | "1" | "2") ~ DIGIT ~ DIGIT) | (DIGIT ~ DIGIT?) }
+HEX16 = ${ HEX ~ HEX? }
+HEX32 = ${ HEX ~ HEX ~ HEX ~ HEX? }
+ALPHA = _{ 'a' .. 'z' | 'A' .. 'Z' }
+AND = _{ "&" }
+OR = _{ "|" }
+DELIMITER = _{ "+" | ";" }
+EQUALS = _{ "=" }
+OPEN_BRACE = _{ "[" }
+CLOSE_BRACE = _{ "]" }
+DOLLAR = _{ "$" }
+FILTER_OP = _{ "<" }
+QUOTE = _{ "\"" }
+COLON = _{ ":" }
+SETTING = _{ "::" }
+SPACE = _{ " " }
+
+PAREN_OPEN = _{ "(" }
+PAREN_CLOSE = _{ "(" }
+

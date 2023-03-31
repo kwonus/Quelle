@@ -1,0 +1,47 @@
+//
+// Created by intellij-pest on 2023-03-10
+// things
+// Author: Me
+//
+
+WHITESPACE = _ { " " | "\t" | "\r" | "\n" }
+
+identity_command = { ^"create" ~ ^"identity" ~ ^"for" ~ entity ~ ^"using" ~ identity }
+identity = { person_identity | org_identity | vehicle_identity | place_identity }
+person_identity = { person_trait+ }
+org_identity = { org_trait+ }
+vehicle_identity = { vehicle_trait+ }
+place_identity = { place_trait+ }
+
+entity = { person | org | place | vehicle }
+person_trait = { date | place | name | msisdn | national_id | country | address }
+org_trait = { place | name | country | address }
+vehicle_trait = { year | license_plate | address | vehicle_make | vehicle_model | vehicle_color | country | address }
+place_trait = { name | city | state | country | province | county | poi | landmark }
+person = { person_trait+ }
+org = { org_trait+ }
+vehicle = { vehicle_trait+ }
+place = { place_trait+ }
+year = { ("19" | "20") ~ ('0' .. '9') ~ ('0' .. '9') }
+name = { ^"name" ~ weight }
+date = {^"date" ~ weight }
+msisdn = {^"msisdn" ~ weight }
+national_id = {^"national_id" ~ weight }
+country = {^"country" ~ weight }
+address = {^"address" ~ weight }
+license_plate = {^"license_plate" ~ weight }
+vehicle_make = {^"vehicle_make" ~ weight }
+vehicle_model = {^"vehicle_model" ~ weight }
+vehicle_color = {^"vehicle_color" ~ weight }
+city = {^"city" ~ weight }
+state = {^"state" ~ weight }
+province = {^"province" ~ weight }
+county = {^"county" ~ weight }
+poi = {^"license_plate" ~ weight }
+landmark = {^"landmark" ~ weight }
+
+ten_to_ninety_nine = { ('1' .. '9') ~ ('0' .. '9') }
+one_to_nine = { '1' .. '9' }
+weight = { "100" | one_to_nine | ten_to_ninety_nine }
+
+
