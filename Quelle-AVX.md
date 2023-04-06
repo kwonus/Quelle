@@ -1,6 +1,6 @@
 # Quelle-AVX Specification
 
-##### version 1.0.3.327
+##### version 2.0.3.405
 
 ### I. Background
 
@@ -28,9 +28,9 @@ Quelle Syntax comprises sixteen(16) verbs. Each verb corresponds to a basic acti
 - clear
 - output
 - show
-- save
+- apply
 - delete
-- execute
+- utilize
 - expand
 - help
 - review
@@ -60,10 +60,10 @@ In Quelle terminology, a statement is made up of one or more clauses. Each claus
    - @review
    - *invoke*
 6. LABEL
-   - *save*
+   - *apply*
    - @delete
    - @expand
-   - *execute*
+   - *utilize*
 
 Each syntax category has either explicit and/or implicit actions.  Explicit actions begin with the @ symbol, immediately followed by the explicit verb.  Implicit actions are inferred by the syntax of the command.
 
@@ -185,7 +185,7 @@ Due to the latter condition above, SEARCH summarizes results (it does NOT displa
 
 "Jesus answered" [1 2 3]  *this would would display only the first three matching phrases*
 
-"Jesus answered" [4 5 6]  *this would would display the next first three matching phrases*
+"Jesus answered" [4 5 6]  *this would would display the next three matching phrases*
 
 ### VII. Exporting Results
 
@@ -258,15 +258,23 @@ Type this to terminate the Quelle interpreter:
 
 **SETTINGS:**
 
-When *clear* verbs are used alongside *set* verbs, *clear* verbs are silently ignored. 
+Otherwise, when multiple clauses contain the same setting, only the last setting in the list is preserved.  Example:
 
-span=default ; span = 7   `implies`   span=7
+format=md   format=default  format=text
 
-Otherwise, when multiple clauses contain the same setting, only the first setting in the list is preserved.  Example:
+@get format
 
-format = md ;  format = text  `implies`  format = md
+The final command would return text.  We call this: "last assignment wins". However, there is one caveat to this precedence order: regardless of where in the statement a macro or history invocation is provided within a statement, it never has precedence over a setting that is actually visible within the statement.  Consider this sequence as an example:
 
-The control names are applicable to ***set***, ***clear***, and ***@get*** verbs. The control name has a fully specified name and also a short name.
+%exact = false || precedence_example
+
+%exact = true  $precedence_example
+
+@get exact
+
+The final command would return true, because it was visible in the compound statement.
+
+Quelle-AVX manifests four control names. Each allows all three actions: ***set***, ***clear***, and ***@get*** verbs. Table 10-4 lists all settings available in AVX-Quelle.
 
 | Setting | Meaning                       | Values                                 |
 | ------- | ----------------------------- | -------------------------------------- |
@@ -275,9 +283,7 @@ The control names are applicable to ***set***, ***clear***, and ***@get*** verbs
 | exact   | exact match vs multi-matching | true/false  *[default is false]*       |
 | format  | format of results             | see Table 10-2  *[default is json]*    |
 
-**TABLE 10-4** -- **Summary of standard Quelle Control Names**
-
-Table 10-4 lists all settings available in AVX-Quelle.
+**TABLE 10-4** -- **Summary of Quelle-AVX Control Names**
 
 The *@get* command fetches these values. The *@get* command requires a single argument. Examples are below (both the long form and the short form of control names are accepted):
 
@@ -305,7 +311,7 @@ It is exactly equivalent to this compound statement:
 
 **Scope of Settings [Statement Scope vs Persistent Scope]**
 
-It should be noted that there is a distinction between name=value and name::value syntax variations. The first form is persistent with respect to subsequent statements. Contrariwise, the latter form affects only the single statement wherewith it is executed. We refer to this as variable cope, Consider these two very similar command sequences:
+It should be noted that there is a distinction between name=value and name::value syntax variations. The first form is persistent with respect to subsequent statements. Contrariwise, the latter form affects only the single statement wherewith it is executed. We refer to this as variable scope, Consider these two very similar command sequences:
 
 | Example of Statement Scope | Example of Persistent Scope |
 | -------------------------- | --------------------------- |
@@ -348,7 +354,7 @@ To show the last twenty searches, type:
 
 **INVOKE**
 
-The *invoke* command works a little bit like a macro, albeit with different syntax.  After executing a *@review* command, the user might receive a response as follows.
+The *invoke* command works a little bit like a macro, albeit with different syntax.  After invoking a *@review* command, the user might receive a response as follows.
 
 *@review*
 
@@ -374,29 +380,29 @@ which would be interpreted as:
 
 %span = 7 ; %exact = true ; eternal power
 
-### XII. Labelling Statements for subsequent execution
+### XII. Labelling Statements for subsequent utilization
 
 | Verb        | Action Type | Syntax Category | Required Arguments | Required Operators |
 | ----------- | ----------- | --------------- | ------------------ | :----------------: |
-| *save*      | implicit    | LABEL           | **1**: *label*     |  **\|\|** *label*  |
+| *apply*     | implicit    | LABEL           | **1**: *label*     |  **\|\|** *label*  |
 | **@delete** | independent | LABEL           | **1+**: *label*s   |      *label*       |
 | **@expand** | independent | LABEL           | **1**: *label      |      *label*       |
-| *execute*   | implicit    | LABEL           | **1+**: *labels*   |   **$** *label*    |
+| *utilize*   | implicit    | LABEL           | **1+**: *labels*   |   **$** *label*    |
 
-**TABLE 12-1** -- **Executing labelled statements and related commands**
+**TABLE 12-1** -- **Utilizing labelled statements and related commands**
 
-In this section, we will examine how user-defined macros are used in Quelle.  A macro in Quelle is a way for the user to label a statement for subsequent use.  By applying a label to a statement, a shorthand mechanism is created for subsequent execution. This gives rise to two new definitions:
+In this section, we will examine how user-defined macros are used in Quelle.  A macro in Quelle is a way for the user to label a statement for subsequent use.  By applying a label to a statement, a shorthand mechanism is created for subsequent utilization. This gives rise to two new definitions:
 
 1. Labelling a statement (or defining a macro)
 
-2. Utilization of a labelled statement (executing a macro)
+2. Utilization of a labelled statement (running a macro)
 
 
 Let’s say we want to name the search example from the previous section; We’ll call it *eternal-power*. To accomplish this, we would issue this command:
 
 %span::7 %exact::true + eternal power || eternal-power
 
-It’s that simple, now instead of typing the entire statement, we can use the label to execute our newly saved statement. Here is how we would execute the macro:
+It’s that simple, now instead of typing the entire statement, we can utilize the macro by referencing our previously applied label. Here is how the macro can be utilized. We might call this running the macro:
 
 $eternal-power
 
@@ -408,7 +414,7 @@ Later I can issue this command:
 
 $my-label-cannot-contain-spaces
 
-Which is equivalent to executing these labeled statements:
+Which is equivalent to these statements:
 
 %span::7  %exact::true + eternal power + godhead
 
@@ -422,7 +428,7 @@ To illustrate this further, here are four more examples of labeled statement def
 
 +eternal  || F2
 
-We can execute these as a compound statement by issuing this command:
+We can utilize these as a compound statement by issuing this command:
 
 $C1 $C2 $F1 $F2
 
@@ -436,16 +442,16 @@ This expands to:
 
 There are several restrictions on macro definitions:
 
-1. Macro definition must represent a valid Quelle statements:
-   - The syntax is verified prior to saving the statement label.
+1. Macro definition must represent a valid Quelle statement:
+   - The syntax is verified prior to applying the statement label.
 2. Macro definitions exclude output directives
    - Any portion of the statement that contains > is incompatible with a macro definition
 3. Macro definitions exclude print directives
    - Any portion of the statement that contains [ ] is incompatible with a macro definition
-4. The statement cannot contain explicit actions:
+4. The statement cannot represent an explicit action:
    - Only implicit actions are permitted in a labelled statement.
 
-Finally, any macros referenced within a macro definition are expanded prior to the definition. Therefore redefining a macro after it is utilized in a subsequent macro definition has no effect after it has already been referenced/expanded. We call this macro-determinism.  
+Finally, any macros referenced within a macro definition are expanded prior to applying the new label. Therefore redefining a macro after it has been referenced in a subsequent macro definition has no effect of the initial macro reference. We call this macro-determinism.  
 
 Two additional explicit commands exist whereby a macro can be manipulated. We saw above how they can be defined and referenced. There are two additional ways commands that operate on macros: expansion and deletion.  In the last macro definition above where we created  $another-macro, the user could preview an expansion by issuing this command:
 
