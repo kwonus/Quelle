@@ -8,7 +8,7 @@ Most modern search engines, provide a mechanism for searching via a text input b
 
 Quelle, IPA: [kɛl], in French means "What? or Which?". As Quelle HMI is designed to obtain search-results from search-engines, this interrogative nature befits its name. An earlier interpreter, Clarity, served as inspiration for defining Quelle.  You could think of the Quelle HMI as version 2 of the Clarity HMI specification.  However, in order to create linguistic consistency in Quelle's Human-to-Machine command language, the resulting syntax varies so significantly from the baseline specification that a new name was the best way forward.  Truly, Quelle HMI incorporates lessons learned after creating, implementing, and revising Clarity HMI for over a decade.
 
-While Quelle-AVX has been bumped to version 2, it is not a radical divergence from version 1. Most of the changes centered around macros, control variables, filters, and output directives. Search syntax has remained entire intact and in full conformance with version 1 of the spec. It turned out that the PEG grammar had too much ambiguity to differentiate some actions from the actual search text. To eliminate that ambiguity, new operators were introduced  [We added $ % and || to name a few] . This had the further desired effect of reducing the need for clause delimiters. The version 2 spec feels more streamlined, more intuitive, and comes with a working revision of the PEG grammar. Implicit actions for Macros have been reclassified as *apply* and *utilize* [those verbs replace *save* and *execute*] .  These new verbs align with the metaphor of labelling.  As Quelle-AVX is the only current known reference implementation of Quelle, it is likely that Vanilla-Quelle will eventually undergo this same evolution.
+While Quelle-AVX has been bumped to version 2, it is not a radical divergence from version 1. Most of the changes centered around macros, control variables, filters, and export directives. Search syntax has remained entire intact and in full conformance with version 1 of the spec. It turned out that the PEG grammar had too much ambiguity to differentiate some actions from the actual search text. To eliminate that ambiguity, new operators were introduced  [We added $ % and || to name a few] . This had the further desired effect of reducing the need for clause delimiters. The version 2 spec feels more streamlined, more intuitive, and comes with a working revision of the PEG grammar. Implicit actions for Macros have been reclassified as *apply* and *utilize* [those verbs replace *save* and *execute*] .  These new verbs align with the metaphor of labelling.  As Quelle-AVX is the only current known reference implementation of Quelle, it is likely that Vanilla-Quelle will eventually undergo this same evolution.
 
 Every attempt has been made to make Quelle consistent with itself. Some constructs are in place to make parsing unambiguous, other constructs are biased toward ease of typing (such as limiting keystrokes that require the shift key). Of course, other command languages also influence our syntax, to make things more intuitive for a polyglot. In all, Quelle represents an easy to type and easy to learn HMI.  Moreover, simple search statements look no different than they might appear today in a Google or Bing search box. Still, let's not get ahead of ourselves or even hint about where our simple specification might take us ;-)
 
@@ -28,7 +28,7 @@ Quelle Syntax comprises sixteen(16) verbs. Each verb corresponds to a basic acti
 - set
 - get
 - clear
-- output
+- export
 - show
 - apply
 - delete
@@ -51,9 +51,9 @@ In Quelle terminology, a statement is made up of one or more clauses. Each claus
    - *set*
    - *clear*
    - @get
-4. DISPLAY
+4. OUTPUT
    - *show*
-   - *output*
+   - *export*
 4. SYSTEM
    - @help
    - @version
@@ -78,7 +78,7 @@ Learning just six verbs is all that is necessary to effectively use Quelle. In t
 | *find*    |  implicit   | SEARCH          | *search spec*             |                         |
 | *filter*  |  implicit   | SEARCH          | **<** *scope*             |                         |
 | *set*     |  implicit   | CONTROL         | **%name** **::** *value*  | **%name** **=** *value* |
-| *show*    |  implicit   | DISPLAY         | **[** *row_indices* **]** |                         |
+| *show*    |  implicit   | OUTPUT          | **[** *row_indices* **]** |                         |
 | **@help** |  explicit   | SYSTEM          |                           |         *topic*         |
 | **@exit** |  explicit   | SYSTEM          |                           |                         |
 
@@ -217,7 +217,7 @@ Or for specific topics:
 
 *@help* set
 
-@help output
+@help export
 
 etc ...
 
@@ -232,11 +232,11 @@ Type this to terminate the Quelle interpreter:
 | Verb         | Action Type | Syntax Category | Parameters             | Alternate #1          | Alternate #2      |
 | ------------ | :---------: | --------------- | ---------------------- | :-------------------- | :---------------- |
 | *clear*      |  implicit   | CONTROL         | *%name* **:: default** | *%name* **= default** |                   |
-| *output*     |  implicit   | DISPLAY         | **>** *filename*       | **=>** *filename*     | **>>** *filename* |
+| *export*     |  implicit   | OUTPUT          | **>** *filename*       | **=>** *filename*     | **>>** *filename* |
 | **@get**     |  explicit   | CONTROL         | *name*                 |                       |                   |
 | **@version** |  explicit   | SYSTEM          |                        |                       |                   |
 
-**TABLE 10-1** -- **Listing of additional CONTROL, DISPLAY & SYSTEM actions**
+**TABLE 10-1** -- **Listing of additional CONTROL, OUTPUT & SYSTEM actions**
 
 **CONTROL::SETTING directives:**
 
@@ -287,11 +287,9 @@ Quelle-AVX manifests four control names. Each allows all three actions: ***set**
 
 **TABLE 10-4** -- **Summary of Quelle-AVX Control Names**
 
-The *@get* command fetches these values. The *@get* command requires a single argument. Examples are below (both the long form and the short form of control names are accepted):
+The *@get* command fetches these values. The *@get* command requires a single argument. Examples are below:
 
 *@get* search
-
-*@get* display
 
 @get format
 
@@ -446,7 +444,7 @@ There are several restrictions on macro definitions:
 
 1. Macro definition must represent a valid Quelle statement:
    - The syntax is verified prior to applying the statement label.
-2. Macro definitions exclude output directives
+2. Macro definitions exclude export directives
    - Any portion of the statement that contains > is incompatible with a macro definition
 3. Macro definitions exclude print directives
    - Any portion of the statement that contains [ ] is incompatible with a macro definition
@@ -493,7 +491,7 @@ The sequence above illustrates both macro-determinism and the ability to explici
 
 ---
 
-In general, AVX-Quelle can be thought of as a stateless server. The only exceptions of that stateless nature are non-default settings with persistent scope and and defined macro definitions. 
+In general, AVX-Quelle can be thought of as a stateless server. The only exceptions of that stateless nature are non-default settings with persistent scope and and defined macro labels. 
 
 Finally delimiters [ ; or + ] between two search clauses are always required. Yet, delimiters are ***not*** required between a search clause and any other type of clause. This makes a Quelle statement easy to read with minimal clutter within a statement. Still, the introduction of macros to a statement can instigate confusion about when to separate clauses with a delimiter. Therefore, delimiters can always be added between any two clauses. Likewise, any statement can end with a delimiter. These extra delimiters are silently ignored.
 
