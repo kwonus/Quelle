@@ -1,14 +1,21 @@
 # Quelle-AVX Specification
 
-##### version 2.0.3.407
+##### version 2.0.3.409
 
 ### I. Background
 
 Most modern search engines, provide a mechanism for searching via a text input box where the user is expected to type search terms. While primitive, this interface was pioneered by major web-search providers and represented an evolution from the far more complex interfaces that came earlier. When you search for multiple terms, however, there seems to be only one basic paradigm: “find every term”. The vast world of search is rife for a search-syntax that moves us past the ability to only search using basic search expressions. To this end, the Quelle specification is put forward an open Human-Machine-Interface (HMI) that can be invoked within a command shell or even within a simple text input box on a web page. The syntax fully supports basic Boolean operations such as AND, OR, and NOT. While great care has been taken to support the construction of complex queries, greater care has been taken to maintain a clear and concise syntax.
 
-Quelle, IPA: [kɛl], in French means "What? or Which?". As Quelle HMI is designed to obtain search-results from search-engines, this interrogative nature befits its name. An earlier interpreter, Clarity, served as inspiration for defining Quelle.  You could think of the Quelle HMI as version 2 of the Clarity HMI specification.  However, in order to create linguistic consistency in Quelle's Human-to-Machine command language, the resulting syntax varies so significantly from the baseline specification that a new name was the best way forward.  Truly, Quelle HMI incorporates lessons learned after creating, implementing, and revising Clarity HMI for over a decade.
+Quelle, IPA: [kɛl], in French means "What? or Which?". As Quelle HMI is designed to obtain search-results from search-engines, this interrogative nature befits its name. An earlier interpreter, Clarity, served as inspiration for defining Quelle.  You could think of the Quelle HMI as an evolution of Clarity HMI.  However, in order to create linguistic consistency in Quelle's Human-to-Machine command language, the resulting syntax varied so dramatically from the Clarity spec, that a new name was the best way forward.  Truly, Quelle HMI incorporates lessons learned after creating, implementing, and revising Clarity HMI for over a decade.
 
-While Quelle-AVX has been bumped to version 2, it is not a radical divergence from version 1. Most of the changes centered around macros, control variables, filters, and export directives. Search syntax has remained entire intact and in full conformance with version 1 of the spec. It turned out that the PEG grammar had too much ambiguity to differentiate some actions from the actual search text. To eliminate that ambiguity, new operators were introduced  [We added $ % and || to name a few] . This had the further desired effect of reducing the need for clause delimiters. The version 2 spec feels more streamlined, more intuitive, and comes with a working revision of the PEG grammar. Implicit actions for Macros have been reclassified as *apply* and *utilize* [those verbs replace *save* and *execute*] .  These new verbs align with the metaphor of labelling.  As Quelle-AVX is the only current known reference implementation of Quelle, it is likely that Vanilla-Quelle will eventually undergo this same evolution.
+In 2023, Quelle-AVX 2.0 was release. This new release is not a radical divergence from version 1. Most of the changes are centered around macros, control variables, filters, and export directives. Search syntax has remained almost entirely unchanged. It turned out that the PEG grammar had some  ambiguity differentiating between the various implicit actions. To eliminate that ambiguity, new operators were introduced  [We added $ % and || to name a few] . These additions also reduced the need for clause delimiters. The version 2 spec feels more streamlined, more intuitive, and comes with a working revision of the PEG grammar. Implicit actions for Macros have been reclassified as *apply* and *utilize* [those verbs replace *save* and *execute* respectively] .  These new verbs align with the metaphor of labelling.  As Quelle-AVX is the only current known reference implementation of Quelle, it is likely that Vanilla-Quelle will eventually undergo this same evolution.
+
+The one change to the search specification in Quelle 2.0 is the dropping of support for bracketed search terms. While parsing these artifacts was easy with the PEG grammar, implementing the search from the parse was quite complex. That seldom-used feature doubled the complexity of corresponding search-algorithms. Having successfully implemented bracketed terms in the AV-Bible Windows application, I make make two strong assessments:
+
+1. implementation was intensely complex.
+2. almost no one used it.
+
+For those two reasons, we have nixed the feature from the updated spec. An upcoming feature, that provides some overlapping functionality. is discussed in more detail in the ***Filtering Results*** section of this document.
 
 Every attempt has been made to make Quelle consistent with itself. Some constructs are in place to make parsing unambiguous, other constructs are biased toward ease of typing (such as limiting keystrokes that require the shift key). Of course, other command languages also influence our syntax, to make things more intuitive for a polyglot. In all, Quelle represents an easy to type and easy to learn HMI.  Moreover, simple search statements look no different than they might appear today in a Google or Bing search box. Still, let's not get ahead of ourselves or even hint about where our simple specification might take us ;-)
 
@@ -76,7 +83,7 @@ Learning just six verbs is all that is necessary to effectively use Quelle. In t
 | Verb      | Action Type | Syntax Category | Required Parameters       |  Alternate Parameters   |
 | --------- | :---------: | :-------------- | ------------------------- | :---------------------: |
 | *find*    |  implicit   | SEARCH          | *search spec*             |                         |
-| *filter*  |  implicit   | SEARCH          | **<** *scope*             |                         |
+| *filter*  |  implicit   | SEARCH          | **<** *domain*            |                         |
 | *set*     |  implicit   | CONTROL         | **%name** **::** *value*  | **%name** **=** *value* |
 | *show*    |  implicit   | OUTPUT          | **[** *row_indices* **]** |                         |
 | **@help** |  explicit   | SYSTEM          |                           |         *topic*         |
@@ -93,9 +100,7 @@ Quelle supports two types of actions:
 
 Implicit actions can be combined into compound statements.  However, compound statements are limited to contain ONLY implicit actions. This means that explicit actions cannot be used to construct a compound statement.
 
-Constructing a compound statement with multiple implicit actions, involves delimiting each action with semi-colons. As search is a fundamental concern of Quelle, it is optimized to make compound implicit actions easy to construct with a concise and intuitive syntax.
-
-Even before we describe Quelle syntax generally, let's examine these concepts using examples:
+As search is a fundamental concern of Quelle, it is optimized to make compound implicit actions easy to construct with a concise and intuitive syntax. Even before we describe Quelle syntax generally, let's examine a few concepts using examples:
 
 | Description                             | Example                                  |
 | --------------------------------------- | :--------------------------------------- |
@@ -150,25 +155,37 @@ The search criteria above is equivalent to this search:
 
 In all cases, “...” means “followed by”, but the ellipsis allows other words to appear between "said" and "Aaron". Likewise, it allows words to appear between "said" and "Miriam". 
 
-Quelle is designed to be intuitive. It provides the ability to invoke Boolean logic on how term matching should be performed. As we saw above, the pipe symbol ( | ) can be used to invoke an OR condition [Boolean multiplication upon the terms that compose a search expression].
+Quelle is designed to be intuitive. It provides the ability to invoke Boolean logic for term-matching linguistic feature-matching. As we saw above, the pipe symbol ( | ) can be used to invoke an *OR* condition In effect, this invokes Boolean multiplication on the terms and features that compose the expression.
 
-The ampersand symbol can similarly be used to represent AND conditions upon terms. Perhaps there are instances of "run" being used as a noun; we might issue this command:
+The ampersand symbol can similarly be used to represent *AND* conditions upon terms. As an example. the English language contains words that can sometimes as a noun , and other times as a noun or other part-of-speech. To determine if the bible text contains the word "part" where it is used as a verb, we can issue this command:
 
-"run&/noun/"
+"part&/noun/"
 
-If the corpus is marked for part-of-speech, this search would return only matching phrases where the word run was labelled as a noun.
+The SDK, provided by Digital-AV, has marked each word of the bible text for part-of-speech. With Quelle's rich syntax, make this type of search easy and intuitive.
 
-Of course, part-of-speech expressions can also be used independent of the an AND condition, as follows:
+Of course, part-of-speech expressions can also be used independently of the an AND condition, as follows:
 
 span = 6 + "/noun/ ... home"
 
-This would find phrases where a noun appeared within a span of six words, preceding the word "home"
+That search would find phrases where a noun appeared within a span of six words, preceding the word "home"
 
 **Another SEARCH Example:**
 
 Consider a query for all passages that contain a word beginning with lord, but subtract phrases containing lordship.
 
 *span = 15 + "Lord\* -- Lordship
+
+**Valid statement syntax, but no results:**
+
+this&that
+
+/noun/ & /verb/
+
+Both of the statements above are valid, but will not match any results. Search statements attempt to match actual words in  the actual bible text. A bord cannot be "this" **and** "that". Likewise, an individual word in a sentence does not operate as a /noun/ **and** a /verb/. Contrariwise, these searches are valid, but would also return numerous matches:
+
+this|that
+
+/noun/ | /verb/
 
 ### VI. Displaying Results
 
@@ -205,182 +222,35 @@ format=html ; "Jesus answered" [1 2 3]  => my-file.html // *export the first thr
 
 The => allows existing file to be overwritten. Quelle will not overwrite an existing file with > syntax. The => is required to force an overwrite.
 
-### VIII. Program Help
+### VIII. Filtering Results
 
-*@help*
+Sometimes we want to constrain the domain of where we are searching. Say that I want to find mentions of the serpent in Genesis. I can search only Genesis by executing this search:
 
-This will provide a help message in a Quelle interpreter.
+serpent < Genesis
 
-Or for specific topics:
+If I also want to search in Revelation, this works:
 
-*@help* find
+serpent < Genesis < Revelation
 
-*@help* set
+Filters do not allow spaces, but they do allow Chapter and Verse specifications. To search for the serpent in Genesis Chapter 3, we can do this:
 
-@help export
+serpent < Genesis:3
 
-etc ...
+And books that contain spaces are supported by eliminating the spaces. For example, this is a valid command:
 
-### IX. Exiting Quelle
+vanity < SongOfSolomon < 1Corinthians
 
-Type this to terminate the Quelle interpreter:
+Abbreviations are also supported:
 
-*@exit*
+vanity < sos < 1cor
 
-### X. Additional actions
+In the near future, we expect to expand the Quelle grammar to allow filtering based upon macros and history invocations. When that support is added (NOT AVAILABLE YET). This command would also be valid:
 
-| Verb         | Action Type | Syntax Category | Parameters             | Alternate #1          | Alternate #2      |
-| ------------ | :---------: | --------------- | ---------------------- | :-------------------- | :---------------- |
-| *clear*      |  implicit   | CONTROL         | *%name* **:: default** | *%name* **= default** |                   |
-| *export*     |  implicit   | OUTPUT          | **>** *filename*       | **=>** *filename*     | **>>** *filename* |
-| **@get**     |  explicit   | CONTROL         | *name*                 |                       |                   |
-| **@version** |  explicit   | SYSTEM          |                        |                       |                   |
+vanity < $MyFavoriteScopingMacro < $3
 
-**TABLE 10-1** -- **Listing of additional CONTROL, OUTPUT & SYSTEM actions**
+Filtering by macros will become a great augmentation to Quelle. Keep in mind, though, that filtering by macro is <u>not</u> yet available. Stay tuned, it's coming.
 
-**CONTROL::SETTING directives:**
-
-| **Markdown**   | **HTML**         | **Text**         | Json             |
-| -------------- | ---------------- | ---------------- | ---------------- |
-| *%format = md* | *%format = html* | *%format = text* | *%format = json* |
-
-**TABLE 10-2** -- **set** format command can be used to set the default content-formatting for for use with the export verb
-
-
-
-| **example**    | **explanation**                                              |
-| -------------- | ------------------------------------------------------------ |
-| span = 8       | Assign a control setting                                     |
-| **@get** span  | get a control setting                                        |
-| span = default | Clear the control setting; restoring the Quelle driver default setting |
-
-**TABLE 10-3** -- **set/clear/get** action operate on configuration settings
-
-
-
-**SETTINGS:**
-
-Otherwise, when multiple clauses contain the same setting, only the last setting in the list is preserved.  Example:
-
-format=md   format=default  format=text
-
-@get format
-
-The final command would return text.  We call this: "last assignment wins". However, there is one caveat to this precedence order: regardless of where in the statement a macro or history invocation is provided within a statement, it never has precedence over a setting that is actually visible within the statement.  Consider this sequence as an example:
-
-%exact = false || precedence_example
-
-%exact = true  $precedence_example
-
-@get exact
-
-The final command would return true, because it was visible in the compound statement.
-
-Quelle-AVX manifests four control names. Each allows all three actions: ***set***, ***clear***, and ***@get*** verbs. Table 10-4 lists all settings available in AVX-Quelle.
-
-| Setting | Meaning                       | Values                                 |
-| ------- | ----------------------------- | -------------------------------------- |
-| span    | proximity distance limit      | 0 to 999 or verse *[default is verse]* |
-| domain  | the domain of the search      | av/avx  *[default is av]*              |
-| exact   | exact match vs multi-matching | true/false  *[default is false]*       |
-| format  | format of results             | see Table 10-2  *[default is json]*    |
-
-**TABLE 10-4** -- **Summary of Quelle-AVX Control Names**
-
-The *@get* command fetches these values. The *@get* command requires a single argument. Examples are below:
-
-*@get* search
-
-@get format
-
-All settings can be cleared using an implicit wildcard:
-
-%settings = default
-
-It is exactly equivalent to this compound statement:
-
-%span=default ; %domain=default ; %exact=default ; %format=default
-
-This construct is also available to clear settings only at statement-level scope:
-
-%settings::default
-
-It is exactly equivalent to this compound statement:
-
-%span::default ; %domain::default ; %exact::default ; %format::default
-
-**Scope of Settings [Statement Scope vs Persistent Scope]**
-
-It should be noted that there is a distinction between name=value and name::value syntax variations. The first form is persistent with respect to subsequent statements. Contrariwise, the latter form affects only the single statement wherewith it is executed. We refer to this as variable scope, Consider these two very similar command sequences:
-
-| Example of Statement Scope | Example of Persistent Scope |
-| -------------------------- | --------------------------- |
-| %settings = default        | %settings = default         |
-| "Moses said" %span::7      | "Moses said" %span = 7      |
-| "Aaron said"               | "Aaron said"                |
-
-In the **statement scope** example, setting span to "7" only affects the search for "Moses said". The next search for "Aaron said" utilizes the default value for span, which is "verse".
-
-In the **persistent scope** example, setting span to "7" affects the search for "Moses said" <u>and all subsequent searches</u>. The next search for "Aaron said" continues to use a span value of "7'".   In other words, the setting **persists** <u>beyond statement execution</u>.
-
-
-
-**QUERYING DRIVER FOR VERSION INFORMATION**
-
-@version will query the Quelle Search Provider for version information:
-
-### XI. Reviewing Statement History and re-invoking statements
-
-| Verb        | Action Type | Syntax Category | Required Parameter | Optional Parameter |
-| ----------- | ----------- | --------------- | :----------------: | :----------------: |
-| **@review** | explicit    | HISTORY         |                    |    *max_coun*t     |
-| *invoke*    | implicit    | HISTORY         |     **$** *id*     |                    |
-
-##### **TABLE 11-1 -- Reviewing history and re-invoking previous commands**
-
-**REVIEW SEARCH HISTORY**
-
-*@review* gets the user's search activity for the current session.  To show the last ten searches, type:
-
-*@review*
-
-To show the last three searches, type:
-
-*@review* 3
-
-To show the last twenty searches, type:
-
-*@review* 20 
-
-**INVOKE**
-
-The *invoke* command works a little bit like a macro, albeit with different syntax.  After invoking a *@review* command, the user might receive a response as follows.
-
-*@review*
-
-1>  %span = 7
-
-2>  %exact = true
-
-3> eternal power
-
-And the invoke command can re-invoke any command listed.
-
-$3
-
-would be shorthand to re-invoke the search specified as:
-
-eternal power
-
-or we could re-invoke all three commands in a single statement as:
-
-$1 ; $2 ; $3
-
-which would be interpreted as:
-
-%span = 7 ; %exact = true ; eternal power
-
-### XII. Labelling Statements for subsequent utilization
+### IX. Labelling Statements for subsequent utilization
 
 | Verb        | Action Type | Syntax Category | Required Arguments | Required Operators |
 | ----------- | ----------- | --------------- | ------------------ | :----------------: |
@@ -389,7 +259,7 @@ which would be interpreted as:
 | **@expand** | independent | LABEL           | **1**: *label      |      *label*       |
 | *utilize*   | implicit    | LABEL           | **1+**: *labels*   |   **$** *label*    |
 
-**TABLE 12-1** -- **Utilizing labelled statements and related commands**
+**TABLE 9-1** -- **Utilizing labelled statements and related commands**
 
 In this section, we will examine how user-defined macros are used in Quelle.  A macro in Quelle is a way for the user to label a statement for subsequent use.  By applying a label to a statement, a shorthand mechanism is created for subsequent utilization. This gives rise to two new definitions:
 
@@ -430,15 +300,15 @@ To illustrate this further, here are four more examples of labeled statement def
 
 We can utilize these as a compound statement by issuing this command:
 
-$C1 $C2 $F1 $F2
+$C1  $C2  $F1  $F2
 
 Similarly, we could define another label from these, by issuing this command:
 
-$C1 $C2 $F1 $F2 || another-macro
+$C1 $C2  $F1  $F2 || another-macro
 
 This expands to:
 
-%exact::1  %span::8 +nation +eternal
+%exact::1  %span::8   nation + eternal
 
 There are several restrictions on macro definitions:
 
@@ -446,7 +316,7 @@ There are several restrictions on macro definitions:
    - The syntax is verified prior to applying the statement label.
 2. Macro definitions exclude export directives
    - Any portion of the statement that contains > is incompatible with a macro definition
-3. Macro definitions exclude print directives
+3. Macro definitions exclude output directives
    - Any portion of the statement that contains [ ] is incompatible with a macro definition
 4. The statement cannot represent an explicit action:
    - Only implicit actions are permitted in a labelled statement.
@@ -469,35 +339,219 @@ While macro definitions are deterministic, they can be overwritten/redefined: co
 
 "Mary said" || other_macro
 
-$jesus_macro + $other_macro || either_said
+$Jesus_macro  $other_macro || either_said
 
 @expand either_said
 
-***output:***	"Jesus said" + "Mary said"
+***result:***	"Jesus said"   "Mary said"
 
 "Peter said" || other_macro
 
 @expand either_said
 
-***output:***	"Jesus said" + "Mary said"
+***result:***	"Jesus said"   "Mary said"
 
-$jesus_macro + $other_macro || either_said
+$Jesus_macro   $other_macro || either_said
 
 @expand either_said
 
-***output:***	"Jesus said" + "Peter said"
+***result:***	"Jesus said"   "Peter said"
 
 The sequence above illustrates both macro-determinism and the ability to explicitly redefine a macro.
 
+### X. Reviewing Statement History and re-invoking statements
+
+| Verb        | Action Type | Syntax Category | Required Parameter | Optional Parameter |
+| ----------- | ----------- | --------------- | :----------------: | :----------------: |
+| **@review** | explicit    | HISTORY         |                    |    *max_coun*t     |
+| *invoke*    | implicit    | HISTORY         |     **$** *id*     |                    |
+
+##### **TABLE 10-1 -- Reviewing history and re-invoking previous commands**
+
+**REVIEW SEARCH HISTORY**
+
+*@review* gets the user's search activity for the current session.  To show the last ten searches, type:
+
+*@review*
+
+To show the last three searches, type:
+
+*@review* 3
+
+To show the last twenty searches, type:
+
+*@review* 20 
+
+**INVOKE**
+
+The *invoke* command works a little bit like a macro, albeit with different syntax.  After invoking a *@review* command, the user might receive a response as follows.
+
+*@review*
+
+1>  %span = 7
+
+2>  %exact = true
+
+3> eternal power
+
+And the invoke command can re-invoke any command listed.
+
+$3
+
+would be shorthand to re-invoke the search specified as:
+
+eternal power
+
+or we could re-invoke all three commands in a single statement as:
+
+$1  $2  $3
+
+which would be interpreted as:
+
+%span = 7  %exact = true   eternal power
+
+### XI. Program Help
+
+*@help*
+
+This will provide a help message in a Quelle interpreter.
+
+Or for specific topics:
+
+*@help* find
+
+*@help* set
+
+@help export
+
+etc ...
+
+### XII. Exiting Quelle
+
+Type this to terminate the Quelle interpreter:
+
+*@exit*
+
+### XIII. Control Settings
+
+| Verb     | Action Type | Syntax Category | Parameters             | Alternate #1          | Alternate #2      |
+| -------- | :---------: | --------------- | ---------------------- | :-------------------- | :---------------- |
+| *clear*  |  implicit   | CONTROL         | *%name* **:: default** | *%name* **= default** |                   |
+| *export* |  implicit   | OUTPUT          | **>** *filename*       | **=>** *filename*     | **>>** *filename* |
+| **@get** |  explicit   | CONTROL         | *name*                 |                       |                   |
+
+**TABLE 13-1** -- **Listing of additional CONTROL, OUTPUT & SYSTEM actions**
+
+**Export Format Options:**
+
+| **Markdown**   | **HTML**         | **Text**         | Json             |
+| -------------- | ---------------- | ---------------- | ---------------- |
+| *%format = md* | *%format = html* | *%format = text* | *%format = json* |
+
+**TABLE 13-2** -- **set** format command can be used to set the default content-formatting for for use with the export verb
+
+
+
+| **example**    | **explanation**                                              |
+| -------------- | ------------------------------------------------------------ |
+| span = 8       | Assign a control setting                                     |
+| **@get** span  | get a control setting                                        |
+| span = default | Clear the control setting; restoring the Quelle driver default setting |
+
+**TABLE 13-3** -- **set/clear/get** action operate on configuration settings
+
+
+
+**SETTINGS:**
+
+Otherwise, when multiple clauses contain the same setting, only the last setting in the list is preserved.  Example:
+
+format=md   format=default  format=text
+
+@get format
+
+The final command would return text.  We call this: "last assignment wins". However, there is one caveat to this precedence order: regardless of where in the statement a macro or history invocation is provided within a statement, it never has precedence over a setting that is actually visible within the statement.  Consider this sequence as an example:
+
+%exact = false || precedence_example
+
+%exact = true  $precedence_example
+
+@get exact
+
+The final command would return true, because it was visible in the compound statement.
+
+Quelle-AVX manifests four control names. Each allows all three actions: ***set***, ***clear***, and ***@get*** verbs. Table 13-4 lists all settings available in AVX-Quelle.
+
+| Setting | Meaning                       | Values            | Default Value |
+| ------- | ----------------------------- | ----------------- | ------------- |
+| span    | proximity distance limit      | 0 to 999 or verse | 0 [verse]     |
+| domain  | the domain of the search      | av/avx            | av            |
+| exact   | exact match vs multi-matching | true/false        | false         |
+| format  | format of results             | see Table 13-2    | json          |
+
+**TABLE 13-4** -- **Summary of Quelle-AVX Control Names**
+
+The *@get* command fetches these values. The *@get* command requires a single argument. Examples are below:
+
+*@get* search
+
+@get format
+
+All settings can be cleared using an implicit wildcard:
+
+%settings = default
+
+It is exactly equivalent to this compound statement:
+
+%span=default ; %domain=default ; %exact=default ; %format=default
+
+This construct is also available to clear settings only at statement-level scope:
+
+%settings::default
+
+It is exactly equivalent to this compound statement:
+
+%span::default ; %domain::default ; %exact::default ; %format::default
+
+**Scope of Settings [Statement Scope vs Persistent Scope]**
+
+It should be noted that there is a distinction between name=value and name::value syntax variations. The first form is persistent with respect to subsequent statements. Contrariwise, the latter form affects only the single statement wherewith it is executed. We refer to this as variable scope, Consider these two very similar command sequences:
+
+| Example of Statement Scope | Example of Persistent Scope |
+| -------------------------- | --------------------------- |
+| %settings :: default       | %settings = default         |
+| "Moses said" %span::7      | "Moses said" %span = 7      |
+| "Aaron said"               | "Aaron said"                |
+
+**TABLE 13-5** -- **Differing Scopes options for Control Settings**
+
+In the **statement scope** example, setting span to "7" only affects the search for "Moses said". The next search for "Aaron said" utilizes the default value for span, which is "verse".
+
+In the **persistent scope** example, setting span to "7" affects the search for "Moses said" <u>and all subsequent searches</u>. The next search for "Aaron said" continues to use a span value of "7'".   In other words, the setting **persists** <u>beyond statement execution</u>.
+
+### XIV. Miscellaneous Information
+
+| Verb         | Action Type | Syntax Category |
+| ------------ | :---------: | --------------- |
+| **@version** |  explicit   | SYSTEM          |
+
+**QUERYING DRIVER FOR VERSION INFORMATION**
+
+@version will query the Quelle Search Provider for version information:
+
 ---
 
-In general, AVX-Quelle can be thought of as a stateless server. The only exceptions of that stateless nature are non-default settings with persistent scope and and defined macro labels. 
+In general, AVX-Quelle can be thought of as a stateless server. The only exceptions of its stateless nature are:
 
-Finally delimiters [ ; or + ] between two search clauses are always required. Yet, delimiters are ***not*** required between a search clause and any other type of clause. This makes a Quelle statement easy to read with minimal clutter within a statement. Still, the introduction of macros to a statement can instigate confusion about when to separate clauses with a delimiter. Therefore, delimiters can always be added between any two clauses. Likewise, any statement can end with a delimiter. These extra delimiters are silently ignored.
+1) non-default settings with persistent scope
+2) defined macro labels. 
+3) command history
+
+Finally delimiters ( e.g.  ; or + ), between two distinct unquoted search clauses are ***required*** to identify the boundary between the two search clauses. A single delimiters <u>before</u> any search clause is always ***optional*** (e.g., Delimiters are permitted between quoted and unquoted clauses, and any other clause that precedes any search clause). They are ***unexpected*** anywhere else in the statement. This makes a Quelle statement a bit less cluttered than the version 1.0 specification
 
 ---
 
-An object model that can be manifested to support this grammar is depicted below:
+An object model that manifests a representation of Quelle grammar is depicted below:
 
 ![QCommand](./QCommand.png)
 
@@ -517,39 +571,25 @@ Like the earlier example, the subject is "you understood".  The object this time
 
 **Statement**: A statement is composed of one or more *actions*. If there is more than one SEARCH actions issued by the statement, then search action is logically OR’ed together.
 
-**Unquoted SEARCH clauses:** an unquoted search clause contains one or more search words. If there is more than one word in the clause, then each word is logically AND’ed together. Like all other types of clauses, the end of the clause terminates with a semicolon, a plus-sign, or a linefeed.
+**Unquoted SEARCH clauses:** an unquoted search clause contains one or more search words. If there is more than one word in the clause, then each word is logically AND’ed together. If two unquoted search clauses are adjacent with a statement, then a delimiter/separator is required between the two clauses. It can be either a semicolon or a plus-sign.
 
 - ; [semi-colon]
 - \+ [plus-sign]
-- the end-of-the-line [newline]
 
 **Quoted SEARCH clauses:** a quoted clause contains a single string of terms to search. An explicit match on the string is required. However, an ellipsis ( … ) can be used to indicate that wildcards may appear within the quoted string.
-
-**NOTES:**
 
 - It is called *quoted,* as the entire clause is sandwiched on both sides by double-quotes ( " )
 - The absence of double-quotes means that the statement is unquoted
 
-**Bracketed Terms:** When searching, there are part the order of some terms within a quoted are unknown. Square brackets can be used to identify such terms. For example, consider this SEARCH statement:
-
-*"/pronoun/ ... said|says|stated|replied ... [David|Solomon King]"*
-
-Bracketed terms differ from ordinary quoited terms, in that while all terms within brackets are required, the order is relaxed within the quoted phrase. As non-quoted clauses are always unordered, bracketed terms can only be invoked within a quoted search clause.  
-
-The serch clause above would match any of these phrases:
-
-- he stated that King David was ...
-- she replied to him that King Solomon ...
-
-// Bracketed terms need be adjacent to one another
+**Booleans and Negations:**
 
 **and:** In Boolean logic, **and** means that all terms must be found. With Quelle, *and* is represented by terms that appear within an unquoted clause. 
 
 **or:** In Boolean logic, **or** means that any term constitutes a match. With Quelle, *or* is represented by the semi-colon ( **;** ) or plus (+) between SEARCH clauses. 
 
-**not:** In Boolean logic, **not** means that the term must not be found. With Quelle, *not* is represented by a minus, minus ( **--** ) and applies to an entire clause (it cannot be applied to individual segments (e.g. discrete words) within the search clause. However, a search clause is permitted to contain a single segment, which easily circumvents that limitation. In short, -- means subtract results; it cancels-out matches against all matches of other clauses. Most clauses are additive as each additional clause increases search results. Contrariwise, a **not** clause is subtractive as it decreases search results.
+**not:** In Boolean logic, means that the feature must not be found. With Quelle, *not* is represented by a minus,minus ( **--** ) and applies to an entire clause (it cannot be applied to individual segments (e.g. discrete words) within the search clause. However, a search clause is permitted to contain a single segment, which easily circumvents that limitation. In short, -- means subtract results; it cancels-out matches against all matches of other clauses. Most clauses are additive as each additional clause increases search results. Contrariwise, a **not** clause is subtractive as it decreases search results. Incidentally, -- was chosen over a single minus - so to allow for searches of hyphenated words without making such words ambiguous with negation.
 
-Again, -- means that the clause will be subtracted from the search results.. When commands only contain a single search clause, it is always positive. A negative clause only makes sense when combined with another non-negative search clause or search filter. As a search domain acts a filter, single search clauses can execute and provide search results.
+Again, -- means that the clause will be subtracted from the search results.. When commands only contain a single search clause, it is always positive. A negative clause only makes sense when combined with another non-negative search clause as negative matches are subtracted from the search results. 
 
 ### Appendix B. Specialized Search tokens in Quelle-AVX
 
