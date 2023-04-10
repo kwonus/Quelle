@@ -321,7 +321,23 @@ There are several restrictions on macro definitions:
 4. The statement cannot represent an explicit action:
    - Only implicit actions are permitted in a labelled statement.
 
-Finally, any macros referenced within a macro definition are expanded prior to applying the new label. Therefore redefining a macro after it has been referenced in a subsequent macro definition has no effect of the initial macro reference. We call this macro-determinism.  
+Finally, any macros referenced within a macro definition are expanded prior to applying the new label. Therefore redefining a macro after it has been referenced in a subsequent macro definition has no effect of the initial macro reference. We call this macro-determinism.  A component of determinism for macros is that the macro definition saves all control settings at the time that the label was applied. This assure that the same sear4ch results are returned each time the macro is referenced. However, if the user desires the current settings to be used instead, just add %settings::current to the statement. Here is an example.
+
+%span = 2
+
+in beginning || in_beginning
+
+%span = 3
+
+$in_beginning [1] < genesis:1:1
+
+***result:*** none
+
+$in_beginning [1] settings::current < genesis:1:1
+
+***result:*** Gen 1:1 In the beginning, God created ...
+
+##### Additional explicit macro commands:
 
 Two additional explicit commands exist whereby a macro can be manipulated. We saw above how they can be defined and referenced. There are two additional ways commands that operate on macros: expansion and deletion.  In the last macro definition above where we created  $another-macro, the user could preview an expansion by issuing this command:
 
@@ -361,10 +377,10 @@ The sequence above illustrates both macro-determinism and the ability to explici
 
 ### X. Reviewing Statement History and re-invoking statements
 
-| Verb        | Action Type | Syntax Category | Required Parameter | Optional Parameter |
-| ----------- | ----------- | --------------- | :----------------: | :----------------: |
-| **@review** | explicit    | HISTORY         |                    |    *max_coun*t     |
-| *invoke*    | implicit    | HISTORY         |     **$** *id*     |                    |
+| Verb        | Action Type | Syntax Category | Required Parameter | Optional Parameters |
+| ----------- | ----------- | --------------- | :----------------: | :-----------------: |
+| **@review** | explicit    | HISTORY         |                    |     *max_coun*t     |
+| *invoke*    | implicit    | HISTORY         |     **$** *id*     |                     |
 
 ##### **TABLE 10-1 -- Reviewing history and re-invoking previous commands**
 
@@ -401,6 +417,10 @@ $3
 would be shorthand to re-invoke the search specified as:
 
 eternal power
+
+*Invoking* command history is very much analogous with *utilizing* a macro. Just like a macro, the control settings are saved to provide determinism. That means that the current control settings are ignored when invoking command history. Just like with macros, the current control settings can be utilizing by adding the %settings::current suffix. Example:
+
+$3  %settings::current
 
 or we could re-invoke all three commands in a single statement as:
 
@@ -497,6 +517,16 @@ The *@get* command fetches these values. The *@get* command requires a single ar
 
 @get format
 
+There are two additional global representations of "all settings"
+
+| Expressions         | Meaning / Usage                                              |
+| ------------------- | ------------------------------------------------------------ |
+| %settings = default | Reset all settings to default values (persistent scope)      |
+| %settings::default  | Reset all settings to default values (statement scope)       |
+| %default            | alias for %settings::default                                 |
+| %settings::current  | Special command for use with Macros. See "Labelling Statements for subsequent utilization" section of this document |
+| %current            | alias for %settings::current                                 |
+
 All settings can be cleared using an implicit wildcard:
 
 %settings = default
@@ -519,15 +549,13 @@ It should be noted that there is a distinction between name=value and name::valu
 
 | Example of Statement Scope | Example of Persistent Scope |
 | -------------------------- | --------------------------- |
-| %settings :: default       | %settings = default         |
+| %settings = default        | %settings = default         |
 | "Moses said" %span::7      | "Moses said" %span = 7      |
 | "Aaron said"               | "Aaron said"                |
 
-**TABLE 13-5** -- **Differing Scopes options for Control Settings**
-
 In the **statement scope** example, setting span to "7" only affects the search for "Moses said". The next search for "Aaron said" utilizes the default value for span, which is "verse".
 
-In the **persistent scope** example, setting span to "7" affects the search for "Moses said" <u>and all subsequent searches</u>. The next search for "Aaron said" continues to use a span value of "7'".   In other words, the setting **persists** <u>beyond statement execution</u>.
+In the **persistent scope** example, setting span to "7" affects the search for "Moses said" <u>and all subsequent searches</u>. The next search for "Aaron said" continues to use a span value of "7'".   In other words, the setting **persists** <u>beyond the scope of statement execution</u>.
 
 ### XIV. Miscellaneous Information
 
