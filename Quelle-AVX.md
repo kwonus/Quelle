@@ -1,6 +1,6 @@
 # Quelle-AVX Specification
 
-##### version 2.0.3.409
+##### version 2.0.3.411
 
 ### I. Background
 
@@ -28,13 +28,14 @@ Each section below identifies specialized constructs for parsing AVX commands us
 
 Just like the baseline Quelle specification, Quelle-AVX defines a declarative syntax for specifying search criteria using the *find* verb. Quelle also defines additional verbs to round out its syntax as a simple straightforward means to interact with custom applications where searching text is the fundamental problem at hand.
 
-Quelle Syntax comprises sixteen(16) verbs. Each verb corresponds to a basic action:
+Quelle Syntax comprises seventeen(17) verbs. Each verb corresponds to a basic action:
 
 - find
 - filter
 - set
 - get
 - clear
+- initialize
 - export
 - show
 - apply
@@ -49,7 +50,7 @@ Quelle Syntax comprises sixteen(16) verbs. Each verb corresponds to a basic acti
 
 Quelle is an open and extensible standard, additional verbs, and verbs for other languages can be defined without altering the overall syntax structure of the Quelle HMI. The remainder of this document describes Version 1.0 of the Quelle-HMI specification.  
 
-In Quelle terminology, a statement is made up of one or more clauses. Each clause represents an action. While there are sixteen action-verbs, there are only six syntax categories:
+In Quelle terminology, a statement is made up of one or more clauses. Each clause represents an action. While there are seventeen action-verbs, there are only six syntax categories:
 
 1. SEARCH
    - *find*
@@ -58,6 +59,7 @@ In Quelle terminology, a statement is made up of one or more clauses. Each claus
    - *set*
    - *clear*
    - @get
+   - @reset *(explicit alias for "**clear all control settings**")*
 4. OUTPUT
    - *show*
    - *export*
@@ -66,13 +68,14 @@ In Quelle terminology, a statement is made up of one or more clauses. Each claus
    - @version
    - @exit
 5. HISTORY
-   - @review
    - *invoke*
+   - @review
+   - @initialize
 6. LABEL
    - *apply*
+   - *utilize*
    - @delete
    - @expand
-   - *utilize*
 
 Each syntax category has either explicit and/or implicit actions.  Explicit actions begin with the @ symbol, immediately followed by the explicit verb.  Implicit actions are inferred by the syntax of the command.
 
@@ -244,7 +247,7 @@ Abbreviations are also supported:
 
 vanity < sos < 1cor
 
-In the near future, we expect to expand the Quelle grammar to allow filtering based upon macros and history invocations. When that support is added (NOT AVAILABLE YET). This command would also be valid:
+In the near future, we expect to extend the Quelle grammar to allow filtering based upon macros and history invocations. When that support is added (NOT AVAILABLE YET). This command would also be valid:
 
 vanity < $MyFavoriteScopingMacro < $3
 
@@ -321,7 +324,7 @@ There are several restrictions on macro definitions:
 4. The statement cannot represent an explicit action:
    - Only implicit actions are permitted in a labelled statement.
 
-Finally, any macros referenced within a macro definition are expanded prior to applying the new label. Therefore redefining a macro after it has been referenced in a subsequent macro definition has no effect of the initial macro reference. We call this macro-determinism.  A component of determinism for macros is that the macro definition saves all control settings at the time that the label was applied. This assure that the same sear4ch results are returned each time the macro is referenced. However, if the user desires the current settings to be used instead, just add %settings::current to the statement. Here is an example.
+Finally, any macros referenced within a macro definition are expanded prior to applying the new label. Therefore redefining a macro after it has been referenced in a subsequent macro definition has no effect of the initial macro reference. We call this macro-determinism.  A component of determinism for macros is that the macro definition saves all control settings at the time that the label was applied. This assure that the same search results are returned each time the macro is referenced. However, if the user desires the current settings to be used instead, just ***::current*** suffix after the macro. Here is an example.
 
 %span = 2
 
@@ -333,9 +336,11 @@ $in_beginning [1] < genesis:1:1
 
 ***result:*** none
 
-$in_beginning [1] settings::current < genesis:1:1
+$in_beginning::current [1] < genesis:1:1
 
 ***result:*** Gen 1:1 In the beginning, God created ...
+
+It should be noted that when a macro is paired with any other search clauses, it implicitly adds the settings::default suffix, otherwise, to make it easy to know which settings are applied to the statement. Incidentally, the @expand command for history and macros reveals which settings are bundled in the history or macro.
 
 ##### Additional explicit macro commands:
 
@@ -377,10 +382,11 @@ The sequence above illustrates both macro-determinism and the ability to explici
 
 ### X. Reviewing Statement History and re-invoking statements
 
-| Verb        | Action Type | Syntax Category | Required Parameter | Optional Parameters |
-| ----------- | ----------- | --------------- | :----------------: | :-----------------: |
-| **@review** | explicit    | HISTORY         |                    |     *max_coun*t     |
-| *invoke*    | implicit    | HISTORY         |     **$** *id*     |                     |
+| Verb            | Action Type | Required Parameter | Optional Parameters |
+| --------------- | ----------- | :----------------: | :-----------------: |
+| *invoke*        | implicit    |     **$** *id*     |                     |
+| **@review**     | explicit    |                    |     *max_coun*t     |
+| **@initialize** | explicit    |      history       |                     |
 
 ##### **TABLE 10-1 -- Reviewing history and re-invoking previous commands**
 
@@ -418,9 +424,9 @@ would be shorthand to re-invoke the search specified as:
 
 eternal power
 
-*Invoking* command history is very much analogous with *utilizing* a macro. Just like a macro, the control settings are saved to provide determinism. That means that the current control settings are ignored when invoking command history. Just like with macros, the current control settings can be utilizing by adding the %settings::current suffix. Example:
+*Invoking* command history is very much analogous with *utilizing* a macro. Just like a macro, the control settings are saved to provide determinism. That means that the current control settings are ignored when invoking command history. Just like with macros, the current control settings can be utilized by adding the ***::current*** suffix to the invocation. See **Table 13-5**. Example usage:
 
-$3  %settings::current
+$3::current
 
 or we could re-invoke all three commands in a single statement as:
 
@@ -429,6 +435,14 @@ $1  $2  $3
 which would be interpreted as:
 
 %span = 7  %exact = true   eternal power
+
+**RESETTING COMMAND HISTORY**
+
+The @reset command can be used to clear command history and/or reset all control variables to defaults.
+
+To clear all command history:
+
+@initialize history
 
 ### XI. Program Help
 
@@ -517,31 +531,24 @@ The *@get* command fetches these values. The *@get* command requires a single ar
 
 @get format
 
-There are two additional global representations of "all settings"
+There are additional actions that affect all control settings collectively
 
-| Expressions         | Meaning / Usage                                              |
-| ------------------- | ------------------------------------------------------------ |
-| %settings = default | Reset all settings to default values (persistent scope)      |
-| %settings::default  | Reset all settings to default values (statement scope)       |
-| %default            | alias for %settings::default                                 |
-| %settings::current  | Special command for use with Macros. See "Labelling Statements for subsequent utilization" section of this document |
-| %current            | alias for %settings::current                                 |
+| Expressions  | Meaning / Usage                                              |
+| ------------ | ------------------------------------------------------------ |
+| **@reset**   | Reset is an explicit command alias to *clear* all control settings, resetting them all to default values<br />(persistent scope: equivalent to span=default domain=default exact=default format=default) |
+| $X::defaults | Special suffix for use with History or Macro executed as a singleton statement:<br />See "Labelling Statements for subsequent utilization" section of this document.<br />Uses default settings for invocation/utilization on history/macro identified/labelled as "X". |
+| $X::current  | Special suffix for use with History or Macro executed as a singleton statement:<br />See "Labelling Statements for subsequent utilization" section of this document.<br />Uses current settings for invocation/utilization on history/macro identified/labelled as "X". |
+| $X::absorb   | Special suffix for use with History or Macro executed as a singleton statement.<br />See "Labelling Statements for subsequent utilization" section of this document.<br />In lieu of invocation/utilization, this command absorbs all settings for future statements<br />on history/macro identified/labelled as "X". |
 
-All settings can be cleared using an implicit wildcard:
+**TABLE 13-5** -- **Collective CONTROL operations**
 
-%settings = default
+All settings can be cleared using an explicit command:
 
-It is exactly equivalent to this compound statement:
-
-%span=default ; %domain=default ; %exact=default ; %format=default
-
-This construct is also available to clear settings only at statement-level scope:
-
-%settings::default
+@reset controls
 
 It is exactly equivalent to this compound statement:
 
-%span::default ; %domain::default ; %exact::default ; %format::default
+%span=default  %domain=default  %exact=default  %format=default
 
 **Scope of Settings [Statement Scope vs Persistent Scope]**
 
@@ -549,7 +556,7 @@ It should be noted that there is a distinction between name=value and name::valu
 
 | Example of Statement Scope | Example of Persistent Scope |
 | -------------------------- | --------------------------- |
-| %settings = default        | %settings = default         |
+| @reset controls            | @reset controls             |
 | "Moses said" %span::7      | "Moses said" %span = 7      |
 | "Aaron said"               | "Aaron said"                |
 
