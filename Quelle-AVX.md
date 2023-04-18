@@ -780,7 +780,7 @@ results:
         - feature: help 
           position: 0x58041624
     - result: 0x58041622
-      length: 5
+      length: 3
       - fragment: time|help
         - feature: help 
           position: 0x58041622
