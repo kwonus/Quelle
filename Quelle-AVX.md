@@ -1,6 +1,6 @@
 # Quelle-AVX Specification
 
-##### version 2.0.3.412
+##### version 2.0.3.417
 
 ### I. Background
 
@@ -118,23 +118,23 @@ As search is a fundamental concern of Quelle, it is optimized to make compound i
 
 Consider these two examples of Quelle statements (first CONTROL; then SEARCH):
 
-%domain = KJV
+%lexicon = KJV
 
 "Moses"
 
 Notice that both statements above are single actions.  We should have a way to express both of these in a single command. And this is the rationale behind a compound statement. To combine the previous two actions into one compound statement, issue this command:
 
-"Moses" + domain=KJV
+"Moses" + lexicon=KJV
 
 ### V. Deep Dive into Quelle SEARCH actions
 
 Consider this proximity search where the search using Quelle syntax:
 
-*domain=KJV + Moses*
+*lexicon=KJV + Moses*
 
 Quelle syntax can alter the span by also supplying an additional CONTROL action:
 
-*domain=KJV + Moses*
+*lexicon=KJV + Moses*
 
 The statement above has two CONTROL actions and one SEARCH action
 
@@ -516,12 +516,12 @@ The final command would return true, because it was visible in the compound stat
 
 Quelle-AVX manifests four control names. Each allows all three actions: ***set***, ***clear***, and ***@get*** verbs. Table 13-4 lists all settings available in AVX-Quelle.
 
-| Setting | Meaning                       | Values            | Default Value |
-| ------- | ----------------------------- | ----------------- | ------------- |
-| span    | proximity distance limit      | 0 to 999 or verse | 0 [verse]     |
-| domain  | the domain of the search      | av/avx            | av            |
-| exact   | exact match vs multi-matching | true/false        | false         |
-| format  | format of results             | see Table 13-2    | json          |
+| Setting | Meaning                               | Values                     | Default Value |
+| ------- | ------------------------------------- | -------------------------- | ------------- |
+| span    | proximity distance limit              | 0 to 999 or verse          | 0 [verse]     |
+| lexicon | the lexicon to be used for the search | av/avx  -- i.e. kjv/modern | av            |
+| exact   | exact match vs multi-matching         | true/false                 | false         |
+| format  | format of results                     | see Table 13-2             | json          |
 
 **TABLE 13-4** -- **Summary of Quelle-AVX Control Names**
 
@@ -535,7 +535,7 @@ There are additional actions that affect all control settings collectively
 
 | Expressions  | Meaning / Usage                                              |
 | ------------ | ------------------------------------------------------------ |
-| **@reset**   | Reset is an explicit command alias to *clear* all control settings, resetting them all to default values<br />(persistent scope: equivalent to span=default domain=default exact=default format=default) |
+| **@reset**   | Reset is an explicit command alias to *clear* all control settings, resetting them all to default values<br />(persistent scope: equivalent to span=default lexicon=default exact=default format=default) |
 | $X::defaults | Special suffix for use with History or Macro executed as a singleton statement:<br />See "Labelling Statements for subsequent utilization" section of this document.<br />Uses default settings for invocation/utilization on history/macro identified/labelled as "X". |
 | $X::current  | Special suffix for use with History or Macro executed as a singleton statement:<br />See "Labelling Statements for subsequent utilization" section of this document.<br />Uses current settings for invocation/utilization on history/macro identified/labelled as "X". |
 | $X::absorb   | Special suffix for use with History or Macro executed as a singleton statement.<br />See "Labelling Statements for subsequent utilization" section of this document.<br />In lieu of invocation/utilization, this command absorbs all settings for future statements<br />on history/macro identified/labelled as "X". |
@@ -548,7 +548,7 @@ All settings can be cleared using an explicit command:
 
 It is exactly equivalent to this compound statement:
 
-%span=default  %domain=default  %exact=default  %format=default
+%span=default  %lexicon=default  %exact=default  %format=default
 
 **Scope of Settings [Statement Scope vs Persistent Scope]**
 
@@ -628,7 +628,7 @@ Again, -- means that the clause will be subtracted from the search results.. Whe
 
 ### Appendix B. Specialized Search tokens in Quelle-AVX
 
-Search tokens in Quelle are normally any word in the lexicon for the domain being searched. In Quelle-AVX, this includes all words in the original KJV text and any modernized version of those words (e.g. hast and has).  The table below lists examples that are extensions of search terms
+Quelle-AVX, this includes all words in the original KJV text. It can optionally also search for modernized version of those words (e.g. hast and has; this is controllable with the %exact setting).  The table below lists additional linguistic extensions available in Quelle-AVX.
 
 | Search Term  | Operator Type      | Meaning                                                      | Maps To               | Mask     |
 | ------------ | ------------------ | ------------------------------------------------------------ | --------------------- | -------- |
@@ -688,10 +688,12 @@ Search tokens in Quelle are normally any word in the lexicon for the domain bein
 | /'/          | punctuation        | any word that is possessive, marked with an apostrophe       | PUNC::0x10            | 0x10     |
 | /)/          | parenthetical text | any word that is immediately followed by a close parenthesis | PUNC::0x0C            | 0x0C     |
 | /(/          | parenthetical text | any word contained within parenthesis                        | PUNC::0x04            | 0x04     |
-| /Italics/    | text decoration    | italisized words marked with this bit in puncutation byte    | PUNC::0x02            | 0x02     |
-| /Jesus/      | text decoration    | words of jesus marked with this bit in puncutation byte      | PUNC::0x01            | 0x01     |
-| \#FFFF       | PN+POS(12)         | hexdecimal representation of bits for a PN+POS(12) value.    | See Digital-AV SDK    | uint32   |
-| \#FFFFFFFF   | POS(32)            | hexdecimal representation of bits for a POS(32) value. See Digital-AV SDK | See Digital-AV SDK    | uint64   |
+| /Italics/    | text decoration    | italicized words marked with this bit in punctuation byte    | PUNC::0x02            | 0x02     |
+| /Jesus/      | text decoration    | words of Jesus marked with this bit in punctuation byte      | PUNC::0x01            | 0x01     |
+| /delta/      | lexicon            | [archaic] word can be transformed into modern American English |                       |          |
+| /!delta/     | lexicon            | a word is not archaic (spelling is consistent with modern American English) |                       |          |
+| \#FFFF       | PN+POS(12)         | hexadecimal representation of bits for a PN+POS(12) value.   | See Digital-AV SDK    | uint32   |
+| \#FFFFFFFF   | POS(32)            | hexadecimal representation of bits for a POS(32) value. See Digital-AV SDK | See Digital-AV SDK    | uint64   |
 | 99999:H      | Strongs Number     | decimal Strongs number for the Hebrew word in the Old Testament | One of Strongs\[4\]   | 0x7FFF   |
 | 99999:G      | Strongs Number     | decimal Strongs number for the Greek word in the New Testament | One of Strongs\[4\]   | 0x7FFF   |
 
@@ -702,3 +704,98 @@ Search tokens in Quelle are normally any word in the lexicon for the domain bein
 An object model to support specialized Search Tokens for Quelle-AVX is depicted below:
 
 ![QFind](./QFind.png)
+
+
+
+### Appendix D. YAML for search interop (a search-oriented simplified subset of Blueprint-Blue)
+
+[EXAMPLE YAML]
+
+```yaml
+settings:
+  exact: false
+  span: 7,
+  lexicon: av
+  format: html
+  
+scope:
+  - include: Hebrews
+
+search:
+  - find: time|help&/!verb/ ... need
+    negate: false
+    quoted: true
+    - segment: time|help&/!verb/
+      anchored: true
+      - fragment: time|help
+      - feature: time 
+        wkeys: [ 1316 ]
+      - feature: help
+        wkeys: [ 795 ]
+    - fragment: /!verb/
+      - feature: /!verb/
+        negate: true
+        pos16: 0x100
+    - segment: need
+      anchored: false,
+      - fragment: need
+        - feature: need
+          wkeys: [ 1026 ]
+	
+render: // if render is not specified, all match results are ret5urned via msgpack (no verses are rendered)
+    start: bcv // if v is not provided, it is implicitly verse 1 (book and chapter are required)
+    count: 0xFF // verse-count: 0xFF implies the whole chapter
+```
+
+
+
+​		
+
+### Appendix E. YAML representation of search result (msgpack result from yaml in Appendix D)
+
+[EXAMPLE depicted as YAML, but result will be msgpack]
+
+```yaml
+settings:
+  exact: false
+  span: 7,
+  lexicon: av
+  format: html
+  
+scope:
+  - include: Hebrews
+
+results:
+  - find: time|help&/!verb/ ... need
+    positive: true
+    - result: 0x58041620
+      length: 5
+      - fragment: time|help
+        - feature: time 
+          position: 0x58041620
+      - fragment: /!verb/
+        - feature: /!verb/
+          position: 0x58041621
+      - fragment: need
+        - feature: help 
+          position: 0x58041624
+    - result: 0x58041622
+      length: 5
+      - fragment: time|help
+        - feature: help 
+          position: 0x58041622
+      - fragment: /!verb/
+        - feature: /!verb/
+          position: 0x58041623
+      - fragment: need
+        - feature: help 
+          position: 0x58041624
+          
+render: // if render is not specified, all match results are ret5urned via msgpack (no verses are rendered)
+    start: bcv // if v is not provided, it is implicitly verse 1 (book and chapter are required)
+    count: 0xFF // verse-count: 0xFF implies the whole chapter
+```
+
+
+
+​	
