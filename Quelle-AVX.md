@@ -741,7 +741,7 @@ search:
       - fragment: need
         - feature: need
           wkeys: [ 1026 ]
-	
+
 render: // if render is not specified, all match results are ret5urned via msgpack (no verses are rendered)
     start: bcv // if v is not provided, it is implicitly verse 1 (book and chapter are required)
     count: 0xFF // verse-count: 0xFF implies the whole chapter
@@ -753,7 +753,7 @@ render: // if render is not specified, all match results are ret5urned via msgpa
 
 ### Appendix E. YAML representation of search result (msgpack result from yaml in Appendix D)
 
-[EXAMPLE depicted as YAML, but result will be msgpack]
+[EXAMPLE depicted as YAML, but result will be msgpack; this is what gets returned when render is unspecified]
 
 ```yaml
 settings:
@@ -790,10 +790,6 @@ results:
       - fragment: need
         - feature: help 
           position: 0x58041624
-          
-render: // if render is not specified, all match results are ret5urned via msgpack (no verses are rendered)
-    start: bcv // if v is not provided, it is implicitly verse 1 (book and chapter are required)
-    count: 0xFF // verse-count: 0xFF implies the whole chapter
 ```
 
 
