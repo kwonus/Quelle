@@ -1,6 +1,6 @@
 # Quelle-AVX Specification
 
-##### version 2.0.3.417
+##### version 2.0.3.419
 
 ### I. Background
 
@@ -707,9 +707,9 @@ An object model to support specialized Search Tokens for Quelle-AVX is depicted 
 
 
 
-### Appendix D. YAML for search interop (a search-oriented simplified subset of Blueprint-Blue)
+### Appendix D. Notional YAML for search interop (a search-oriented subset of Blueprint-Blue)
 
-[EXAMPLE YAML]
+[EXAMPLE depicted as YAML; see Appendix F for FlatBuffer IDL definition]
 
 ```yaml
 settings:
@@ -728,21 +728,21 @@ search:
     - segment: time|help&/!verb/
       anchored: true
       - fragment: time|help
-      - feature: time 
-        wkeys: [ 1316 ]
-      - feature: help
-        wkeys: [ 795 ]
-    - fragment: /!verb/
-      - feature: /!verb/
-        negate: true
-        pos16: 0x100
+        - feature: time 
+          wkeys: [ 1316 ]
+        - feature: help
+          wkeys: [ 795 ]
+      - fragment: /!verb/
+        - feature: /!verb/
+          negate: true
+          pos16: 0x100
     - segment: need
       anchored: false,
       - fragment: need
         - feature: need
           wkeys: [ 1026 ]
 
-render: // if render is not specified, all match results are ret5urned via msgpack (no verses are rendered)
+render: // if render is not specified, a summary of match results is returned as a FtatBuffer (see Appendix F)
     start: bcv // if v is not provided, it is implicitly verse 1 (book and chapter are required)
     count: 0xFF // verse-count: 0xFF implies the whole chapter
 ```
@@ -751,9 +751,9 @@ render: // if render is not specified, all match results are ret5urned via msgpa
 
 ​		
 
-### Appendix E. YAML representation of search result (msgpack result from yaml in Appendix D)
+### Appendix E. Notional YAML representation of search result (actual result is a flatbuffer)
 
-[EXAMPLE depicted as YAML, but result will be msgpack; this is what gets returned when render is unspecified]
+[EXAMPLE depicted as YAML; see Appendix F for FlatBuffer IDL definition]
 
 ```yaml
 settings:
@@ -762,36 +762,183 @@ settings:
   lexicon: av
   format: html
   
-scope:
+scope: 
   - include: Hebrews
 
 results:
   - find: time|help&/!verb/ ... need
-    positive: true
-    - result: 0x58041620
+    negate: false
+    - found: 0x58041620
       length: 5
       - fragment: time|help
-        - feature: time 
-          position: 0x58041620
+        feature: time 
+        match: 0x58041620
       - fragment: /!verb/
-        - feature: /!verb/
-          position: 0x58041621
+        feature: /!verb/
+        match: 0x58041621
       - fragment: need
-        - feature: help 
-          position: 0x58041624
-    - result: 0x58041622
+        feature: need 
+        match: 0x58041624
+    - found: 0x58041622
       length: 3
       - fragment: time|help
-        - feature: help 
-          position: 0x58041622
+        feature: help 
+        match: 0x58041622
       - fragment: /!verb/
-        - feature: /!verb/
-          position: 0x58041623
+        feature: /!verb/
+        match: 0x58041623
       - fragment: need
-        - feature: help 
-          position: 0x58041624
+        feature: need 
+        match: 0x58041624
+```
+
+### Appendix F. FlatBuffer schema for request/reply of searches to search-provider
+
+```protobuf
+attribute "fs_serializer";
+
+namespace Blueprint.FlatBuf;
+
+enum XLexEnum:  byte { AV = 0, AVX = 1 }
+enum XFmtEnum:  byte { JSON = 0, TEXT = 1, HTML = 2, MD = 3 }
+enum XLangEnum: byte { H = 1, G = 2, X = 0 }
+
+table XRequest (fs_serializer) {
+    settings:    XSettings   (required);
+    scope:     [ XScope ];
+    search:      XRequest    (required);
+    render:      XScope;
+}
+
+table XSearch (fs_serializer) {
+    search:      string      (required);
+    negate:      bool        = false;
+    quoted:      bool        = false;
+    segments:  [ XSegment ]  (required);
+}
+
+table XSegment (fs_serializer) {
+    anchored:    bool         = false;
+    segments:  [ XFragment ]  (required);
+}
+
+table XFragment (fs_serializer) {
+    features:  [ XFeature ]   (required);
+}
+
+table XFeature (fs_serializer) {
+    text:        string      (required);
+    rule:        string      (required);
+    negate:      bool        = false;
+    match:       XCompare    (required);
+}
+
+union XCompare (fs_serializer) {
+    text:        XWord,
+    lemma:       XLemma,
+    pos16:       XPOS16,
+    pos32:       XPOS32,
+    punctuation: XPunctuation,
+    strongs:     XStrongs,
+    delta:       XDelta
+}
+
+table XWord (fs_serializer) {
+    values:    [ uint16 ] (required);
+}
+
+table XLemma (fs_serializer) {
+    values:    [ uint16 ] (required);
+}
+
+table XPOS32 (fs_serializer) {
+    pos:         uint32;
+}
+
+table XPOS16 (fs_serializer) {
+    pnpos:       uint16;
+}
+
+table XPunctuation (fs_serializer) {
+    bits:        uint8;
+}
+
+table XStrongs (fs_serializer) {
+    lang:        XLangEnum = X;    
+    number:      uint16;
+}
+
+table XDelta (fs_serializer) {
+    differs:     bool      = true; // must be explicitly set to T or F
+}
+
+table XSettings (fs_serializer) {
+    exact:       bool     = false;
+    span:        uint16   = 0;
+    lexicon:     XLexEnum = AV;
+    format:      XFmtEnum = JSON;
+}
+
+table XScope (fs_serializer) {
+    book:        uint8 = 0;      // required
+    chapter:     uint8 = 0;      // required
+    verse:       uint8 = 1;      // optional
+    vcount:      uint8 = 255;    // optional: verse-count: defaults to all remaining verses in chapter
+}
+
+table XResults (fs_serializer) {
+    settings:    XSettings (required);
+    scope:     [ XScope ]  (required);
+    matches:   [ XFind ];
+    errors:    [ string ];
+    warnings:  [ string ];
+}
+
+table XFind (fs_serializer) {
+    search:      string    (required);
+    negate:      bool      = false;
+    found:     [ XFound ];
+}
+
+table XFound (fs_serializer) {
+    start:       uint32 = 0; // required;
+    until:       uint32 = 0; // required;
+    matches:   [ XMatch ]  (required);
+}
+
+table XMatch (fs_serializer) {
+    fragment:    string    (required);
+    feature:     string    (required);
+    match:       uint32 = 0; // required; match represents coordinates of matching feature: BB_CC_VV_WW
+}
+```
+
+### Appendix G. Extern C functions for Searching and Rendering
+
+```C++
+extern "C" __declspec(dllexport) const std::uint8_t* avx_create_search(const std::uint8_t* const request);
+extern "C" __declspec(dllexport) void avx_delete_search(const uint8_t* const* results);
+
+extern "C" __declspec(dllexport) const char* avx_create_rendering(const uint8_t* const spec);
+extern "C" __declspec(dllexport) void avx_delete_rendering(const char* const rendering);
+//
+// Notionally (pseudo-code / FlatBuffers not withstanding):
+//
+class xresults;
+class xrequest;
+class xrender;
+//
+// classes forward referenced above are defined in blueprint.fbs [i.e. FratBuffers IDL is depicted in Appendix F]
+//
+extern "C" xresults* avx_create_search(xrequest* request);
+extern "C" void avx_delete_search(xresults* results);
+
+extern "C" char* avx_create_rendering(xrender* spec);
+extern "C" void avx_delete_rendering(char* rendering);
 ```
 
 
+
+​	
 
 ​	
