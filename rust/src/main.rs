@@ -6,7 +6,7 @@ use pest::Parser;
 use pest::iterators::Pairs;
 
 #[derive(Parser)]
-#[grammar = "quelle-avx.pest"]
+#[grammar = "avx-quelle.pest"]
 struct QuelleParser;
 
 fn main() {
