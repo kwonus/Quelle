@@ -1,6 +1,6 @@
-# Quelle-AVX Specification
+# Quelle Specification
 
-##### version 2.0.3.511
+##### version 2.0.3.512
 
 ### I. Background
 
@@ -18,7 +18,10 @@ Every attempt has been made to make Quelle consistent with itself. Some construc
 
 ### II. Addendum
 
-A reference implementation of Quelle can be found in Quelle-AVX and related open source projects.
+A reference implementation of Quelle can be found in Quelle-AVX and related open source projects. There are two possible implementation levels:
+
+- Level 1 [basic search support]
+- Level 2 [search support includes also searching on part-of-speech tags]
 
 ### III. Quelle Syntax
 
@@ -549,15 +552,15 @@ Like the earlier example, the subject is "you understood".  The object this time
 
 Again, -- means that the clause will be subtracted from the search results.. When commands only contain a single search clause, it is always positive. A negative clause only makes sense when combined with another non-negative search clause as negative matches are subtracted from the search results. 
 
-### Appendix B. Specialized Search tokens in Quelle-AVX
+### Appendix B. Specialized Search tokens in Quelle (in Level-2 implementation)
 
 Quelle-AVX, this includes all words in the original KJV text. It can optionally also search for modernized version of those words (e.g. hast and has; this is controllable with the %exact setting).  The table below lists additional linguistic extensions available in Quelle-AVX.
 
 | Search Term  | Operator Type      | Meaning                                                      |
 | ------------ | ------------------ | ------------------------------------------------------------ |
-| Jer\*        | wildcard           | starts with Jer                                              |
-| \*iah        | wildcard           | ends with iah                                                |
-| Jer\*iah     | wildcard           | starts with Jer and ends with iah                            |
+| fab\*        | wildcard           | starts with fab                                              |
+| \*ous        | wildcard           | ends with ous                                                |
+| fab\*ous     | wildcard           | starts with fab and ends with ous                            |
 | \\is\\       | lemma              | search on all words that share the same lemma as is: be, is, are, were, etc |
 | /noun/       | lexical marker     | any word where part of speech is a noun                      |
 | /n/          | lexical marker     | synonym for /noun/                                           |
@@ -595,10 +598,10 @@ Quelle-AVX, this includes all words in the original KJV text. It can optionally 
 | /!EoB/       | transition marker  | any word where it is not the last word of the book           |
 | /!EoC/       | transition marker  | any word where it is not the last word of the chapter        |
 | /!EoV/       | transition marker  | any word where it is not the last word of the verse          |
-| /Hsm/        | segment marker     | Hard Segment Marker (end) ... one of \. \? \!                |
-| /Csm/        | segment marker     | Core Segment Marker (end) ... \:                             |
-| /Rsm/        | segment marker     | Real Segment Marker (end) ... one of \. \? \! \:             |
-| /Ssm/        | segment marker     | Soft Segment Marker (end) ... one of \, \; \( \) --          |
+| /Hsm/        | segment marker     | Hard Segment Marker (end) ... one of \. ? \!                 |
+| /Csm/        | segment marker     | Core Segment Marker (end) ... :                              |
+| /Rsm/        | segment marker     | Real Segment Marker (end) ... one of \. ? \! :               |
+| /Ssm/        | segment marker     | Soft Segment Marker (end) ... one of ,\; \( \) --            |
 | /sm/         | segment marker     | Any Segment Marker (end)  ... any of the above               |
 | /_/          | punctuation        | any word that is immediately marked for clausal punctuation  |
 | /!/          | punctuation        | any word that is immediately followed by an exclamation mark |
@@ -612,7 +615,7 @@ Quelle-AVX, this includes all words in the original KJV text. It can optionally 
 | /)/          | parenthetical text | any word that is immediately followed by a close parenthesis |
 | /(/          | parenthetical text | any word contained within parenthesis                        |
 
-### Appendix C. Object Model to example from Quelle-AVX
+### Appendix C. Object Model to example of Quelle (from the Blueprint-Blue implementation)
 
 An object model to support specialized Search Tokens for Quelle-AVX is depicted below:
 

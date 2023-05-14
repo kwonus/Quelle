@@ -24,6 +24,13 @@ Every attempt has been made to make Quelle consistent with itself. Some construc
 Quelle-AVX extends baseline Vanilla-Quelle to include AVX-specific constructs.
 Each section below identifies specialized constructs for parsing AVX commands using the Quelle parser.
 
+Vanilla Quelle specifies two possible implementation levels:
+
+- Level 1 [basic search support]
+- Level 2 [search support includes also searching on part-of-speech tags]
+
+AVX-Quelle is Level 2 implementation with few extra search capabilities.
+
 ### III. Quelle Syntax
 
 Just like the baseline Quelle specification, Quelle-AVX defines a declarative syntax for specifying search criteria using the *find* verb. Quelle also defines additional verbs to round out its syntax as a simple straightforward means to interact with custom applications where searching text is the fundamental problem at hand.
@@ -626,7 +633,7 @@ Like the earlier example, the subject is "you understood".  The object this time
 
 Again, -- means that the clause will be subtracted from the search results.. When commands only contain a single search clause, it is always positive. A negative clause only makes sense when combined with another non-negative search clause as negative matches are subtracted from the search results. 
 
-### Appendix B. Specialized Search tokens in Quelle-AVX
+### Appendix B. Specialized Search tokens in Quelle-AVX (a superset of Vanilla-Quelle Level 2)
 
 Quelle-AVX, this includes all words in the original KJV text. It can optionally also search for modernized version of those words (e.g. hast and has; this is controllable with the %exact setting).  The table below lists additional linguistic extensions available in Quelle-AVX.
 
