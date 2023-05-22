@@ -1,6 +1,6 @@
 # Quelle-AVX Specification
 
-##### version 2.0.3.511
+##### version 2.0.3.521
 
 ### I. Background
 
@@ -29,13 +29,16 @@ Vanilla Quelle specifies two possible implementation levels:
 - Level 1 [basic search support]
 - Level 2 [search support includes also searching on part-of-speech tags]
 
-AVX-Quelle is Level 2 implementation with few extra search capabilities.
+AVX-Quelle is Level 2 implementation with additional specialized search capabilities. However, there are two features of Vanilla-Quelle where AVX-Quelle diverges from the baseline specification.
+
+1.  AVX-Quelle drops support for polarity on search clauses. Vanilla-Quelle uses minus+minus ( -- ) to negate entire search clauses. AVX-Quelle does not support that operation. Instead, AVX-Quelle allows individual features within a search clause to be negated using Minus+colon ( -: )
+2. AVX-Quelle does not support the %exact setting of Vanilla-Quelle. Instead, it offers two thresholds: %threashold.text and %threshold.phonics. A setting of 100 (i.e. 100%) behaves much like %exact = true of Vanilla-Quelle. Yet, AVX-Quelle allows the specification of fuzziness thresholds using these enhanced settings. This in conjunction with the lexicon setting allow greater control over matching logic than Vanilla-Quelle.
 
 ### III. Quelle Syntax
 
 Just like the baseline Quelle specification, Quelle-AVX defines a declarative syntax for specifying search criteria using the *find* verb. Quelle also defines additional verbs to round out its syntax as a simple straightforward means to interact with custom applications where searching text is the fundamental problem at hand.
 
-Quelle Syntax comprises seventeen(17) verbs. Each verb corresponds to a basic action:
+Quelle Syntax comprises eighteen(18) verbs. Each verb corresponds to a basic action:
 
 - find
 - filter
@@ -57,7 +60,7 @@ Quelle Syntax comprises seventeen(17) verbs. Each verb corresponds to a basic ac
 
 Quelle is an open and extensible standard, additional verbs, and verbs for other languages can be defined without altering the overall syntax structure of the Quelle HMI. The remainder of this document describes Version 1.0 of the Quelle-HMI specification.  
 
-In Quelle terminology, a statement is made up of one or more clauses. Each clause represents an action. While there are seventeen action-verbs, there are only six syntax categories:
+In Quelle terminology, a statement is made up of one or more clauses. Each clause represents an action. While there are eighteen action-verbs, there are only six syntax categories:
 
 1. SEARCH
    - *find*
@@ -83,6 +86,7 @@ In Quelle terminology, a statement is made up of one or more clauses. Each claus
    - *utilize*
    - @delete
    - @expand
+   - @absorb
 
 Each syntax category has either explicit and/or implicit actions.  Explicit actions begin with the @ symbol, immediately followed by the explicit verb.  Implicit actions are inferred by the syntax of the command.
 
@@ -118,8 +122,8 @@ As search is a fundamental concern of Quelle, it is optimized to make compound i
 | SEARCH filters                          | < Genesis < Exodus < Revelation          |
 | SEARCH specification                    | this is some text expected to be found   |
 | Compound statement: two SEARCH actions  | "this quoted text" + other unquoted text |
-| Compound statement: two CONTROL actions | %span = 7 %exact = true                  |
-| Compound statement: CONTROL & SEARCH    | %span=7 + Moses said                     |
+| Compound statement: two CONTROL actions | %span = 7 %threshold.text = 85           |
+| Compound statement: CONTROL & SEARCH    | %span = 7 Moses said                     |
 
 **TABLE 4-2** -- **Examples of Quelle statement types**
 
@@ -137,11 +141,11 @@ Notice that both statements above are single actions.  We should have a way to e
 
 Consider this proximity search where the search using Quelle syntax:
 
-*lexicon=KJV + Moses*
+*lexicon=KJV  Moses*
 
 Quelle syntax can alter the span by also supplying an additional CONTROL action:
 
-*lexicon=KJV + Moses*
+*lexicon=KJV  Moses*
 
 The statement above has two CONTROL actions and one SEARCH action
 
@@ -175,21 +179,21 @@ The SDK, provided by Digital-AV, has marked each word of the bible text for part
 
 Of course, part-of-speech expressions can also be used independently of the an AND condition, as follows:
 
-span = 6 + "/noun/ ... home"
+%span = 6 + "/noun/ ... home"
 
 That search would find phrases where a noun appeared within a span of six words, preceding the word "home"
-
-**Another SEARCH Example:**
-
-Consider a query for all passages that contain a word beginning with lord, but subtract phrases containing lordship.
-
-*span = 15 + "Lord\* -- Lordship
 
 **Valid statement syntax, but no results:**
 
 this&that
 
 /noun/ & /verb/
+
+**Negating search-terms Example:**
+
+Consider a query for all passages that contain a word beginning, followed by any word that is neither a verb nor an adverb:
+
+%span = 15 "Lord\* -:/v/ & -:/adv/
 
 Both of the statements above are valid, but will not match any results. Search statements attempt to match actual words in  the actual bible text. A bord cannot be "this" **and** "that". Likewise, an individual word in a sentence does not operate as a /noun/ **and** a /verb/. Contrariwise, these searches are valid, but would also return numerous matches:
 
@@ -238,7 +242,7 @@ Sometimes we want to constrain the domain of where we are searching. Say that I 
 
 serpent < Genesis
 
-If I also want to search in Revelation, this works:
+If I also want to search in Genesis and Revelation, this works:
 
 serpent < Genesis < Revelation
 
@@ -252,35 +256,30 @@ vanity < SongOfSolomon < 1Corinthians
 
 Abbreviations are also supported:
 
-vanity < sos < 1cor
-
-In the near future, we expect to extend the Quelle grammar to allow filtering based upon macros and history invocations. When that support is added (NOT AVAILABLE YET). This command would also be valid:
-
-vanity < $MyFavoriteScopingMacro < $3
-
-Filtering by macros will become a great augmentation to Quelle. Keep in mind, though, that filtering by macro is <u>not</u> yet available. Stay tuned, it's coming.
+vanity < sos < 1co
 
 ### IX. Labelling Statements for subsequent utilization
 
-| Verb        | Action Type | Syntax Category | Required Arguments | Required Operators |
-| ----------- | ----------- | --------------- | ------------------ | :----------------: |
-| *apply*     | implicit    | LABEL           | **1**: *label*     |  **\|\|** *label*  |
-| **@delete** | independent | LABEL           | **1+**: *label*s   |      *label*       |
-| **@expand** | independent | LABEL           | **1**: *label      |      *label*       |
-| *utilize*   | implicit    | LABEL           | **1+**: *labels*   |   **$** *label*    |
+| Verb        | Action Type | Syntax Category  | Required Arguments     | Required Operators |
+| ----------- | ----------- | ---------------- | ---------------------- | :----------------: |
+| *apply*     | implicit    | LABEL            | **1**: *label*         |  **\|\|** *label*  |
+| **@delete** | explicit    | LABEL            | **1**: *label*         |      *label*       |
+| **@expand** | explicit    | LABEL or HISTORY | **1**: *label* or *id* |  *label* or *id*   |
+| **@absorb** | explicit    | LABEL or HISTORY | **1**: *label* or *id* |  *label* or *id*   |
+| *utilize*   | implicit    | LABEL            | **1+**: *labels*       |   **$** *label*    |
 
 **TABLE 9-1** -- **Utilizing labelled statements and related commands**
 
 In this section, we will examine how user-defined macros are used in Quelle.  A macro in Quelle is a way for the user to label a statement for subsequent use.  By applying a label to a statement, a shorthand mechanism is created for subsequent utilization. This gives rise to two new definitions:
 
-1. Labelling a statement (or defining a macro)
+1. Labelling a statement (or defining a macro; labels must begin with a letter; never a number, underscore, or hyphen)
 
 2. Utilization of a labelled statement (running a macro)
 
 
 Let’s say we want to name the search example from the previous section; We’ll call it *eternal-power*. To accomplish this, we would issue this command:
 
-%span::7 %exact::true + eternal power || eternal-power
+%span::7 %threshold.text::85 + eternal power || eternal-power
 
 It’s that simple, now instead of typing the entire statement, we can utilize the macro by referencing our previously applied label. Here is how the macro can be utilized. We might call this running the macro:
 
@@ -296,11 +295,11 @@ $my-label-cannot-contain-spaces
 
 Which is equivalent to these statements:
 
-%span::7  %exact::true + eternal power + godhead
+%span::7  %threshold.text::85 + eternal power + godhead
 
 To illustrate this further, here are four more examples of labeled statement definitions:
 
-%exact::1 || C1
+%threshold.text::85 || C1
 
 %span::8  || C2
 
@@ -318,7 +317,7 @@ $C1 $C2  $F1  $F2 || another-macro
 
 This expands to:
 
-%exact::1  %span::8   nation + eternal
+%threshold.text::85  %span::8   nation + eternal
 
 There are several restrictions on macro definitions:
 
@@ -331,7 +330,7 @@ There are several restrictions on macro definitions:
 4. The statement cannot represent an explicit action:
    - Only implicit actions are permitted in a labelled statement.
 
-Finally, any macros referenced within a macro definition are expanded prior to applying the new label. Therefore redefining a macro after it has been referenced in a subsequent macro definition has no effect of the initial macro reference. We call this macro-determinism.  A component of determinism for macros is that the macro definition saves all control settings at the time that the label was applied. This assure that the same search results are returned each time the macro is referenced. However, if the user desires the current settings to be used instead, just ***::current*** suffix after the macro. Here is an example.
+Finally, any macros referenced within a macro definition are expanded prior to applying the new label. Therefore redefining a macro after it has been referenced in a subsequent macro definition has no effect of the initial macro reference. We call this macro-determinism.  A component of determinism for macros is that the macro definition saves all control settings at the time that the label was applied. This assure that the same search results are returned each time the macro is referenced. Here is an example.
 
 %span = 2
 
@@ -343,11 +342,17 @@ $in_beginning [1] < genesis:1:1
 
 ***result:*** none
 
+However, if the user desires the current settings to be used instead, just include ***::current*** suffix after the macro. 
+
 $in_beginning::current [1] < genesis:1:1
 
 ***result:*** Gen 1:1 In the beginning, God created ...
 
-It should be noted that when a macro is paired with any other search clauses, it implicitly adds the settings::default suffix, otherwise, to make it easy to know which settings are applied to the statement. Incidentally, the @expand command for history and macros reveals which settings are bundled in the history or macro.
+It should be noted that when a macro is paired with any other search clauses, it implicitly adds the settings::current suffix to all macros. Incidentally, the @expand command for history and macros reveals which settings are bundled in the history or macro.
+
+##### Executing a macro remembers all settings, but always without side-effects:
+
+A macro definition captures all settings. We have already discussed macro-determinism (saving settings utilized for execution is needed to provide macro determinism). However, an setting with an equals sign (e.g. span=7) is treated as if it were (span::7). In other words, executing a macro never persists changes into your environment, unless you explicitly request such behavior with the @absorb command.
 
 ##### Additional explicit macro commands:
 
@@ -359,7 +364,13 @@ If the user wanted to remove this definition, the @delete action is used.  Here 
 
 @delete another-macro
 
-NOTE: Labels must begin with a letter [A-Z] or [a-z], but they may contain numbers, spaces, hyphens, periods, commas, underscores, and single-quotes (no other punctuation or special characters are supported).
+If you want the same settings to be persisted to your current session that were in place during macro definition, the @absorb command will persist all settings for the macro into your current session
+
+@absorb my-favorite-settings-macro 
+
+Both @absorb and @expand also work with command history.
+
+**NOTE:** Labels must begin with a letter [A-Z] or [a-z], but they may contain numbers, spaces, hyphens, periods, commas, underscores, and single-quotes (no other punctuation or special characters are supported).
 
 While macro definitions are deterministic, they can be overwritten/redefined: consider this sequence:
 
@@ -419,7 +430,7 @@ The *invoke* command works a little bit like a macro, albeit with different synt
 
 1>  %span = 7
 
-2>  %exact = true
+2>  %threshold.text::85
 
 3> eternal power
 
@@ -441,7 +452,7 @@ $1  $2  $3
 
 which would be interpreted as:
 
-%span = 7  %exact = true   eternal power
+%span = 7  %threshold.text::85   eternal power
 
 **RESETTING COMMAND HISTORY**
 
@@ -450,6 +461,10 @@ The @reset command can be used to clear command history and/or reset all control
 To clear all command history:
 
 @initialize history
+
+##### Invoking a command remembers all settings, but always without side-effects:
+
+Command history captures all settings. We have already discussed macro-determinism. Invoking commands by their review numbers behave exactly like macros. They are also deterministic. Just like macros, an setting with an equals sign (e.g. span=7) is treated as if it were (span::7). In other words, invoking command history never persists changes into your environment, unless you explicitly request such behavior with the @absorb command.
 
 ### XI. Program Help
 
@@ -513,22 +528,25 @@ format=md   format=default  format=text
 
 The final command would return text.  We call this: "last assignment wins". However, there is one caveat to this precedence order: regardless of where in the statement a macro or history invocation is provided within a statement, it never has precedence over a setting that is actually visible within the statement.  Consider this sequence as an example:
 
-%exact = false || precedence_example
+%threshold.text::none || precedence_example
 
-%exact = true  $precedence_example
+%threshold.text::85  $precedence_example
 
-@get exact
+@get %threshold.text
 
-The final command would return true, because it was visible in the compound statement.
+The final command would return 85, because it was visible in the compound statement.
 
-Quelle-AVX manifests four control names. Each allows all three actions: ***set***, ***clear***, and ***@get*** verbs. Table 13-4 lists all settings available in AVX-Quelle.
+Quelle-AVX manifests four control names. Each allows all three actions: ***set***, ***clear***, and ***@get*** verbs. Table 13-4 lists all settings available in AVX-Quelle. Quelle does not support the *exact* setting found in Vanilla Quelle. As AVX-Quelle can support two distinct orthographies [i.e. Contemporary Modern English (avx/modern), and Early Modern English (avx/modern)], the binary setting found in Vanilla-Quelle was not a sufficient designation.
 
-| Setting | Meaning                               | Values                     | Default Value |
-| ------- | ------------------------------------- | -------------------------- | ------------- |
-| span    | proximity distance limit              | 0 to 999 or verse          | 0 [verse]     |
-| lexicon | the lexicon to be used for the search | av/avx  -- i.e. kjv/modern | av            |
-| exact   | exact match vs multi-matching         | true/false                 | false         |
-| format  | format of results                     | see Table 13-2             | json          |
+| Setting           | Meaning                                                      | Values                                                       | Default Value |
+| ----------------- | ------------------------------------------------------------ | ------------------------------------------------------------ | ------------- |
+| span              | proximity distance limit                                     | 0 to 999 or verse                                            | 0 [verse]     |
+| lexicon           | the lexicon to be used for the searching                     | av/avx/dual (kjv/modern/both)                                | dual (both)   |
+| display           | the lexicon to be used for display/rendering                 | av/avx (kjv/modern)                                          | av (kjv)      |
+| format            | format of results on output                                  | see Table 13-2                                               | json          |
+| threshold.text    | fuzzy text matching threshold is a percentage between 33 and 99<br>0 or *none* means: do not match on text (use phonics only)<br>100 or *exact* means that an *exact* text match is expected | 33 to 99 [fuzzy] **or** ...<br>0 **or** *none*<br>100 **or** *exact* | 100 (exact)   |
+| threshold.phonics | fuzzy phonetics matching threshold is between 33 and 99<br/>0 or *none* means: do not match on phonetics (use text only)<br/>100 or *exact* means that an *exact* phonetics match is expected | 33 to 99 [fuzzy] **or** ...<br>0 **or** *none*<br>100 **or** *exact* | 0 (none)      |
+| ~~exact~~         | ~~exact vs approximate match~~ [replaced by thresholds & lexicon settings] | ~~true/false~~                                               | ~~false~~     |
 
 **TABLE 13-4** -- **Summary of Quelle-AVX Control Names**
 
@@ -540,12 +558,10 @@ The *@get* command fetches these values. The *@get* command requires a single ar
 
 There are additional actions that affect all control settings collectively
 
-| Expressions  | Meaning / Usage                                              |
-| ------------ | ------------------------------------------------------------ |
-| **@reset**   | Reset is an explicit command alias to *clear* all control settings, resetting them all to default values<br />(persistent scope: equivalent to span=default lexicon=default exact=default format=default) |
-| $X::defaults | Special suffix for use with History or Macro executed as a singleton statement:<br />See "Labelling Statements for subsequent utilization" section of this document.<br />Uses default settings for invocation/utilization on history/macro identified/labelled as "X". |
-| $X::current  | Special suffix for use with History or Macro executed as a singleton statement:<br />See "Labelling Statements for subsequent utilization" section of this document.<br />Uses current settings for invocation/utilization on history/macro identified/labelled as "X". |
-| $X::absorb   | Special suffix for use with History or Macro executed as a singleton statement.<br />See "Labelling Statements for subsequent utilization" section of this document.<br />In lieu of invocation/utilization, this command absorbs all settings for future statements<br />on history/macro identified/labelled as "X". |
+| Expressions | Meaning / Usage                                              |
+| ----------- | ------------------------------------------------------------ |
+| **@reset**  | Reset is an explicit command alias to *clear* all control settings, resetting them all to default values<br />equivalent to: %span=default %lexicon=default %display=default %threshold.text=default %threshold.phonics=default %format=default |
+| $X::current | Special suffix for use with History or Macro executed as a singleton statement:<br />See "Labelling Statements for subsequent utilization" section of this document.<br />Uses current settings for invocation/utilization on history/macro identified/labelled as "X". |
 
 **TABLE 13-5** -- **Collective CONTROL operations**
 
@@ -629,9 +645,9 @@ Like the earlier example, the subject is "you understood".  The object this time
 
 **or:** In Boolean logic, **or** means that any term constitutes a match. With Quelle, *or* is represented by the semi-colon ( **;** ) or plus (+) between SEARCH clauses. 
 
-**not:** In Boolean logic, means that the feature must not be found. With Quelle, *not* is represented by a minus,minus ( **--** ) and applies to an entire clause (it cannot be applied to individual segments (e.g. discrete words) within the search clause. However, a search clause is permitted to contain a single segment, which easily circumvents that limitation. In short, -- means subtract results; it cancels-out matches against all matches of other clauses. Most clauses are additive as each additional clause increases search results. Contrariwise, a **not** clause is subtractive as it decreases search results. Incidentally, -- was chosen over a single minus - so to allow for searches of hyphenated words without making such words ambiguous with negation.
+**not:** In Boolean logic, means that the feature must not be found. With Quelle, *not* is represented by a hyphen+colon ( **-:** ) and applies to individual features within a search segment within the search clause. It is best used in conjunction with other features, because any non-match will be included in results. 
 
-Again, -- means that the clause will be subtracted from the search results.. When commands only contain a single search clause, it is always positive. A negative clause only makes sense when combined with another non-negative search clause as negative matches are subtracted from the search results. 
+hyphen+colon ( **-:** ) means that any non-match satisfies the search condition. Used by itself, it would likely return every verse. Therfeore, it should be used judiciously.
 
 ### Appendix B. Specialized Search tokens in Quelle-AVX (a superset of Vanilla-Quelle Level 2)
 
