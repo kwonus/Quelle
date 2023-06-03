@@ -1,6 +1,6 @@
 # Quelle-AVX Specification
 
-##### version 2.0.3.521
+##### version 2.0.3.602
 
 ### I. Background
 
@@ -8,7 +8,7 @@ Most modern search engines, provide a mechanism for searching via a text input b
 
 Quelle, IPA: [kɛl], in French means "What? or Which?". As Quelle HMI is designed to obtain search-results from search-engines, this interrogative nature befits its name. An earlier interpreter, Clarity, served as inspiration for defining Quelle.  You could think of the Quelle HMI as an evolution of Clarity HMI.  However, in order to create linguistic consistency in Quelle's Human-to-Machine command language, the resulting syntax varied so dramatically from the Clarity spec, that a new name was the best way forward.  Truly, Quelle HMI incorporates lessons learned after creating, implementing, and revising Clarity HMI for over a decade.
 
-In 2023, Quelle-AVX 2.0 was released. This new release is not a radical divergence from version 1. Most of the changes are centered around macros, control variables, filters, and export directives. Search syntax has remained almost entirely unchanged. It turned out that the PEG grammar had some  ambiguity differentiating between the various implicit actions. To eliminate that ambiguity, new operators were introduced  [We added $ % and || to name a few] . These additions also reduced the need for clause delimiters. The version 2 spec feels more streamlined, more intuitive, and comes with a working revision of the PEG grammar. Implicit actions for Macros have been reclassified as *apply* and *utilize* [those verbs replace *save* and *execute* respectively] .  These new verbs align with the metaphor of labelling.  As Quelle-AVX is the only current known reference implementation of Quelle, it is likely that Vanilla-Quelle will eventually undergo this same evolution.
+In 2023, Quelle-AVX 2.0 was released. This new release is not a radical divergence from version 1. Most of the changes are centered around macros, control variables, filters, and export directives. Search syntax has remained almost entirely unchanged. It turned out that the PEG grammar had some  ambiguity differentiating between the various implicit actions. To eliminate that ambiguity, new operators were introduced  [We added $ % and || to name a few] . These additions also reduced the need for clause delimiters. The version 2 spec feels more streamlined, more intuitive, and comes with a working revision of the PEG grammar. Implicit actions for Macros have been reclassified as *apply* and *invoke* [those verbs replace *save* and *execute* respectively] .  These new verbs align with the metaphor of labeling.  As Quelle-AVX is the only current known reference implementation of Quelle, it is likely that Vanilla-Quelle will eventually undergo this same evolution.
 
 The one change to the search specification in Quelle 2.0 is the dropping of support for bracketed search terms. While parsing these artifacts was easy with the PEG grammar, implementing the search from the parse was quite complex. That seldom-used feature doubled the complexity of corresponding search-algorithms. Having successfully implemented bracketed terms in the AV-Bible Windows application, I make make two strong assessments:
 
@@ -38,7 +38,7 @@ AVX-Quelle is Level 2 implementation with additional specialized search capabili
 
 Just like the baseline Quelle specification, Quelle-AVX defines a declarative syntax for specifying search criteria using the *find* verb. Quelle also defines additional verbs to round out its syntax as a simple straightforward means to interact with custom applications where searching text is the fundamental problem at hand.
 
-Quelle Syntax comprises eighteen(18) verbs. Each verb corresponds to a basic action:
+Quelle Syntax comprises seventeen (17) verbs. Each verb corresponds to a basic action:
 
 - find
 - filter
@@ -50,8 +50,8 @@ Quelle Syntax comprises eighteen(18) verbs. Each verb corresponds to a basic act
 - show
 - apply
 - delete
-- utilize
 - expand
+- absorb
 - help
 - review
 - invoke
@@ -60,7 +60,7 @@ Quelle Syntax comprises eighteen(18) verbs. Each verb corresponds to a basic act
 
 Quelle is an open and extensible standard, additional verbs, and verbs for other languages can be defined without altering the overall syntax structure of the Quelle HMI. The remainder of this document describes Version 1.0 of the Quelle-HMI specification.  
 
-In Quelle terminology, a statement is made up of one or more clauses. Each clause represents an action. While there are eighteen action-verbs, there are only six syntax categories:
+In Quelle terminology, a statement is made up of one or more clauses. Each clause represents an action. While there are seventeen action-verbs, there are only five syntax categories:
 
 1. SEARCH
    - *find*
@@ -69,7 +69,7 @@ In Quelle terminology, a statement is made up of one or more clauses. Each claus
    - *set*
    - *clear*
    - @get
-   - @reset *(explicit alias for "**clear all control settings**")*
+   - @reset *(explicit alias for **clear all control settings**)*
 4. OUTPUT
    - *show*
    - *export*
@@ -77,16 +77,14 @@ In Quelle terminology, a statement is made up of one or more clauses. Each claus
    - @help
    - @version
    - @exit
-5. HISTORY
-   - *invoke*
-   - @review
-   - @initialize
-6. LABEL
-   - *apply*
-   - *utilize*
-   - @delete
-   - @expand
-   - @absorb
+5. HISTORY & LABELING
+   - *invoke*			  (history **or** macro)
+   - *apply*				(apply a label to a macro)
+   - @delete		  (delete a label)
+   - @expand		(history **or** label)
+   - @absorb		 (history **or** label)
+   - @review		 (review history)
+   - @initialize	  (initialize/reinitialize history)
 
 Each syntax category has either explicit and/or implicit actions.  Explicit actions begin with the @ symbol, immediately followed by the explicit verb.  Implicit actions are inferred by the syntax of the command.
 
@@ -258,34 +256,36 @@ Abbreviations are also supported:
 
 vanity < sos < 1co
 
-### IX. Labelling Statements for subsequent utilization
+### IX. Labeling & Reviewing Statements for subsequent invocation
 
-| Verb        | Action Type | Syntax Category  | Required Arguments     | Required Operators |
-| ----------- | ----------- | ---------------- | ---------------------- | :----------------: |
-| *apply*     | implicit    | LABEL            | **1**: *label*         |  **\|\|** *label*  |
-| **@delete** | explicit    | LABEL            | **1**: *label*         |      *label*       |
-| **@expand** | explicit    | LABEL or HISTORY | **1**: *label* or *id* |  *label* or *id*   |
-| **@absorb** | explicit    | LABEL or HISTORY | **1**: *label* or *id* |  *label* or *id*   |
-| *utilize*   | implicit    | LABEL            | **1+**: *labels*       |   **$** *label*    |
+| Verb            | Action Type | Syntax Category           | Expected Arguments        | Required Operators |
+| --------------- | ----------- | ------------------------- | ------------------------- | :----------------: |
+| *invoke*        | implicit    | HISTORY & LABELING        | *label* or *id*           |   **$** *label*    |
+| *apply*         | implicit    | HISTORY & <u>LABELING</u> | *label*                   |  **\|\|** *label*  |
+| **@delete**     | explicit    | HISTORY & <u>LABELING</u> | *label*                   |      *label*       |
+| **@expand**     | explicit    | HISTORY & LABELIN         | *label* or *id*           |  *label* or *id*   |
+| **@absorb**     | explicit    | HISTORY & LABELING        | *label* or *id*           |  *label* or *id*   |
+| **@review**     | explicit    | <u>HISTORY</u> & LABELING | **optional:** *max_count* |                    |
+| **@initialize** | explicit    | <u>HISTORY</u> & LABELING |                           |                    |
 
-**TABLE 9-1** -- **Utilizing labelled statements and related commands**
+**TABLE 9-1** -- **Labeling statements and reviewing statement history**
 
-In this section, we will examine how user-defined macros are used in Quelle.  A macro in Quelle is a way for the user to label a statement for subsequent use.  By applying a label to a statement, a shorthand mechanism is created for subsequent utilization. This gives rise to two new definitions:
+In this section, we will examine how user-defined macros are used in Quelle.  A macro in Quelle is a way for the user to label a statement for subsequent use.  By applying a label to a statement, a shorthand mechanism is created for subsequent invocation. This gives rise to two new definitions:
 
-1. Labelling a statement (or defining a macro; labels must begin with a letter; never a number, underscore, or hyphen)
+1. Labeling a statement (or defining a macro; labels must begin with a letter; never a number, underscore, or hyphen)
 
-2. Utilization of a labelled statement (running a macro)
+2. Invoking a labeled statement (running a macro)
 
 
 Let’s say we want to name the search example from the previous section; We’ll call it *eternal-power*. To accomplish this, we would issue this command:
 
 %span::7 %threshold.text::85 + eternal power || eternal-power
 
-It’s that simple, now instead of typing the entire statement, we can utilize the macro by referencing our previously applied label. Here is how the macro can be utilized. We might call this running the macro:
+It’s that simple, now instead of typing the entire statement, we can utilize the macro by referencing our previously applied label. Here is how the macro can be invoked. We might call this running the macro:
 
 $eternal-power
 
-Labelled statements also support compounding using the semi-colon ( ; ), as follows; we will label it also:
+Labeled statements also support compounding using the semi-colon ( ; ), as follows; we will label it also:
 
 $eternal-power + godhead|| my-label-cannot-contain-spaces
 
@@ -297,28 +297,6 @@ Which is equivalent to these statements:
 
 %span::7  %threshold.text::85 + eternal power + godhead
 
-To illustrate this further, here are four more examples of labeled statement definitions:
-
-%threshold.text::85 || C1
-
-%span::8  || C2
-
-+nation || F1
-
-+eternal  || F2
-
-We can utilize these as a compound statement by issuing this command:
-
-$C1  $C2  $F1  $F2
-
-Similarly, we could define another label from these, by issuing this command:
-
-$C1 $C2  $F1  $F2 || another-macro
-
-This expands to:
-
-%threshold.text::85  %span::8   nation + eternal
-
 There are several restrictions on macro definitions:
 
 1. Macro definition must represent a valid Quelle statement:
@@ -328,7 +306,7 @@ There are several restrictions on macro definitions:
 3. Macro definitions exclude output directives
    - Any portion of the statement that contains [ ] is incompatible with a macro definition
 4. The statement cannot represent an explicit action:
-   - Only implicit actions are permitted in a labelled statement.
+   - Only implicit actions are permitted in a labeled statement.
 
 Finally, any macros referenced within a macro definition are expanded prior to applying the new label. Therefore redefining a macro after it has been referenced in a subsequent macro definition has no effect of the initial macro reference. We call this macro-determinism.  A component of determinism for macros is that the macro definition saves all control settings at the time that the label was applied. This assure that the same search results are returned each time the macro is referenced. Here is an example.
 
@@ -352,7 +330,7 @@ It should be noted that when a macro is paired with any other search clauses, it
 
 ##### Executing a macro remembers all settings, but always without side-effects:
 
-A macro definition captures all settings. We have already discussed macro-determinism (saving settings utilized for execution is needed to provide macro determinism). However, an setting with an equals sign (e.g. span=7) is treated as if it were (span::7). In other words, executing a macro never persists changes into your environment, unless you explicitly request such behavior with the @absorb command.
+A macro definition captures all settings. We have already discussed macro-determinism (saving settings utilized for execution is needed to provide macro determinism). However, when a macro is saved, any setting with an equals sign (e.g. span=7) is treated as if it were (span::7). In other words, executing a macro never persists changes into your environment, unless you explicitly request such behavior with the @absorb command.
 
 ##### Additional explicit macro commands:
 
@@ -398,16 +376,6 @@ $Jesus_macro   $other_macro || either_said
 
 The sequence above illustrates both macro-determinism and the ability to explicitly redefine a macro.
 
-### X. Reviewing Statement History and re-invoking statements
-
-| Verb            | Action Type | Required Parameter | Optional Parameters |
-| --------------- | ----------- | :----------------: | :-----------------: |
-| *invoke*        | implicit    |     **$** *id*     |                     |
-| **@review**     | explicit    |                    |     *max_coun*t     |
-| **@initialize** | explicit    |      history       |                     |
-
-##### **TABLE 10-1 -- Reviewing history and re-invoking previous commands**
-
 **REVIEW SEARCH HISTORY**
 
 *@review* gets the user's search activity for the current session.  To show the last ten searches, type:
@@ -424,7 +392,7 @@ To show the last twenty searches, type:
 
 **INVOKE**
 
-The *invoke* command works a little bit like a macro, albeit with different syntax.  After invoking a *@review* command, the user might receive a response as follows.
+The *invoke* command works for command-history works exactly the same way as it does for macros.  After issuing a *@review* command, the user might receive a response as follows.
 
 *@review*
 
@@ -442,7 +410,7 @@ would be shorthand to re-invoke the search specified as:
 
 eternal power
 
-*Invoking* command history is very much analogous with *utilizing* a macro. Just like a macro, the control settings are saved to provide determinism. That means that the current control settings are ignored when invoking command history. Just like with macros, the current control settings can be utilized by adding the ***::current*** suffix to the invocation. See **Table 13-5**. Example usage:
+Again, *invoking* command from your command history is *invoked* just like a macro. Moreover, as with macros, control settings are persisted within your command history to provide invocation determinism. That means that the current control settings are ignored when invoking command history. Just like with macros, the current control settings can be utilized by adding the ***::current*** suffix to the invocation. See **Table 12-5**. Example usage:
 
 $3::current
 
@@ -466,7 +434,7 @@ To clear all command history:
 
 Command history captures all settings. We have already discussed macro-determinism. Invoking commands by their review numbers behave exactly like macros. They are also deterministic. Just like macros, an setting with an equals sign (e.g. span=7) is treated as if it were (span::7). In other words, invoking command history never persists changes into your environment, unless you explicitly request such behavior with the @absorb command.
 
-### XI. Program Help
+### X. Program Help
 
 *@help*
 
@@ -482,13 +450,13 @@ Or for specific topics:
 
 etc ...
 
-### XII. Exiting Quelle
+### XI. Exiting Quelle
 
 Type this to terminate the Quelle interpreter:
 
 *@exit*
 
-### XIII. Control Settings
+### XII. Control Settings
 
 | Verb     | Action Type | Syntax Category | Parameters             | Alternate #1          | Alternate #2      |
 | -------- | :---------: | --------------- | ---------------------- | :-------------------- | :---------------- |
@@ -496,7 +464,7 @@ Type this to terminate the Quelle interpreter:
 | *export* |  implicit   | OUTPUT          | **>** *filename*       | **=>** *filename*     | **>>** *filename* |
 | **@get** |  explicit   | CONTROL         | *name*                 |                       |                   |
 
-**TABLE 13-1** -- **Listing of additional CONTROL, OUTPUT & SYSTEM actions**
+**TABLE 12-1** -- **Listing of additional CONTROL, OUTPUT & SYSTEM actions**
 
 **Export Format Options:**
 
@@ -504,7 +472,7 @@ Type this to terminate the Quelle interpreter:
 | -------------- | ---------------- | ---------------- | ---------------- |
 | *%format = md* | *%format = html* | *%format = text* | *%format = json* |
 
-**TABLE 13-2** -- **set** format command can be used to set the default content-formatting for for use with the export verb
+**TABLE 12-2** -- **set** format command can be used to set the default content-formatting for for use with the export verb
 
 
 
@@ -514,7 +482,7 @@ Type this to terminate the Quelle interpreter:
 | **@get** span  | get a control setting                                        |
 | span = default | Clear the control setting; restoring the Quelle driver default setting |
 
-**TABLE 13-3** -- **set/clear/get** action operate on configuration settings
+**TABLE 12-3** -- **set/clear/get** action operate on configuration settings
 
 
 
@@ -536,19 +504,19 @@ The final command would return text.  We call this: "last assignment wins". Howe
 
 The final command would return 85, because it was visible in the compound statement.
 
-Quelle-AVX manifests four control names. Each allows all three actions: ***set***, ***clear***, and ***@get*** verbs. Table 13-4 lists all settings available in AVX-Quelle. Quelle does not support the *exact* setting found in Vanilla Quelle. As AVX-Quelle can support two distinct orthographies [i.e. Contemporary Modern English (avx/modern), and Early Modern English (avx/modern)], the binary setting found in Vanilla-Quelle was not a sufficient designation.
+Quelle-AVX manifests four control names. Each allows all three actions: ***set***, ***clear***, and ***@get*** verbs. Table 12-4 lists all settings available in AVX-Quelle. Quelle does not support the *exact* setting found in Vanilla Quelle. As AVX-Quelle can support two distinct orthographies [i.e. Contemporary Modern English (avx/modern), and Early Modern English (avx/modern)], the binary setting found in Vanilla-Quelle was not a sufficient designation.
 
 | Setting           | Meaning                                                      | Values                                                       | Default Value |
 | ----------------- | ------------------------------------------------------------ | ------------------------------------------------------------ | ------------- |
 | span              | proximity distance limit                                     | 0 to 999 or verse                                            | 0 [verse]     |
 | lexicon           | the lexicon to be used for the searching                     | av/avx/dual (kjv/modern/both)                                | dual (both)   |
 | display           | the lexicon to be used for display/rendering                 | av/avx (kjv/modern)                                          | av (kjv)      |
-| format            | format of results on output                                  | see Table 13-2                                               | json          |
+| format            | format of results on output                                  | see Table 12-2                                               | json          |
 | threshold.text    | fuzzy text matching threshold is a percentage between 33 and 99<br>0 or *none* means: do not match on text (use phonics only)<br>100 or *exact* means that an *exact* text match is expected | 33 to 99 [fuzzy] **or** ...<br>0 **or** *none*<br>100 **or** *exact* | 100 (exact)   |
 | threshold.phonics | fuzzy phonetics matching threshold is between 33 and 99<br/>0 or *none* means: do not match on phonetics (use text only)<br/>100 or *exact* means that an *exact* phonetics match is expected | 33 to 99 [fuzzy] **or** ...<br>0 **or** *none*<br>100 **or** *exact* | 0 (none)      |
 | ~~exact~~         | ~~exact vs approximate match~~ [replaced by thresholds & lexicon settings] | ~~true/false~~                                               | ~~false~~     |
 
-**TABLE 13-4** -- **Summary of Quelle-AVX Control Names**
+**TABLE 12-4** -- **Summary of Quelle-AVX Control Names**
 
 The *@get* command fetches these values. The *@get* command requires a single argument. Examples are below:
 
@@ -561,13 +529,13 @@ There are additional actions that affect all control settings collectively
 | Expressions | Meaning / Usage                                              |
 | ----------- | ------------------------------------------------------------ |
 | **@reset**  | Reset is an explicit command alias to *clear* all control settings, resetting them all to default values<br />equivalent to: %span=default %lexicon=default %display=default %threshold.text=default %threshold.phonics=default %format=default |
-| $X::current | Special suffix for use with History or Macro executed as a singleton statement:<br />See "Labelling Statements for subsequent utilization" section of this document.<br />Uses current settings for invocation/utilization on history/macro identified/labelled as "X". |
+| $X::current | Special suffix for use with History or Macro invocation as a singleton statement:<br />See "Labeling Statements for subsequent invocation" section of this document.<br />Uses current settings for invocation on history/macro identified/labeled as "X".<br>(On non-singleton invocations, environment settings on the macro/history is **always** ignored, making the ::current suffix superfluous on compound macro satements) |
 
-**TABLE 13-5** -- **Collective CONTROL operations**
+**TABLE 12-5** -- **Collective CONTROL operations**
 
 All settings can be cleared using an explicit command:
 
-@reset controls
+@reset
 
 It is exactly equivalent to this compound statement:
 
@@ -587,7 +555,7 @@ In the **statement scope** example, setting span to "7" only affects the search 
 
 In the **persistent scope** example, setting span to "7" affects the search for "Moses said" <u>and all subsequent searches</u>. The next search for "Aaron said" continues to use a span value of "7'".   In other words, the setting **persists** <u>beyond the scope of statement execution</u>.
 
-### XIV. Miscellaneous Information
+### XIII. Miscellaneous Information
 
 | Verb         | Action Type | Syntax Category |
 | ------------ | :---------: | --------------- |
@@ -661,22 +629,16 @@ Quelle-AVX, this includes all words in the original KJV text. It can optionally 
 | \\is\\       | lemma              | search on all words that share the same lemma as is: be, is, are, art, etc | be\|is\|are\|art\|...                  | 0x3FFF   |
 | /noun/       | lexical marker     | any word where part of speech is a noun                      | POS12::0x010                           | 0x0FF0   |
 | /n/          | lexical marker     | synonym for /noun/                                           | POS12::0x010                           | 0x0FF0   |
-| /!n/         | lexical marker     | any word where part of speech is not a noun                  | POS12::0x010                           | 0x0FF0^  |
 | /verb/       | lexical marker     | any word where part of speech is a verb                      | POS12::0x100                           | 0x0FF0   |
 | /v/          | lexical marker     | synonym for /verb/                                           | POS12::0x100                           | 0x0FF0   |
-| /!v/         | lexical marker     | any word where part of speech is not a verb                  | POS12::0x100                           | 0x0FF0^  |
 | /pronoun/    | lexical marker     | any word where part of speech is a pronoun                   | POS12::0x020                           | 0x0FF0   |
 | /pn/         | lexical marker     | synonym for /pronoun/                                        | POS12::0x020                           | 0x0FF0   |
-| /!pn/        | lexical marker     | any word where part of speech is not a pronoun               | POS12::0x020                           | 0x0FF0^  |
 | /adjective/  | lexical marker     | any word where part of speech is an adjective                | POS12::0xF00                           | 0x0FFF   |
 | /adj/        | lexical marker     | synonym for /adjective/                                      | POS12::0xF00                           | 0x0FFF   |
-| /!adj/       | lexical marker     | any word where part of speech is not an adjective            | POS12::0xF00                           | 0x0FFF^  |
 | /adverb/     | lexical marker     | any word where part of speech is an adverb                   | POS12::0xA00                           | 0x0FFF   |
 | /adv/        | lexical marker     | synonym for /adverb/                                         | POS12::0xA00                           | 0x0FFF   |
-| /!adv/       | lexical marker     | any word where part of speech is not an adverb               | POS12::0xA00                           | 0x0FFF^  |
 | /determiner/ | lexical marker     | any word where part of speech is a determiner                | POS12::0xD00                           | 0x0FF0   |
 | /det/        | lexical marker     | synonym for /determiner/                                     | POS12::0xD00                           | 0x0FF0   |
-| /!det/       | lexical marker     | any word where part of speech is not a determiner            | POS12::0xD00                           | 0x0FF0^  |
 | /1p/         | lexical marker     | any word where it is inflected for 1st person (pronouns and verbs) | POS12::0x100                           | 0x3000   |
 | /2p/         | lexical marker     | any word where it is inflected for 2nd person (pronouns and verbs) | POS12::0x200                           | 0x3000   |
 | /3p/         | lexical marker     | any word where it is inflected for 3rd person (pronouns, verbs, and nouns) | POS12::0x300                           | 0x3000   |
@@ -689,12 +651,6 @@ Quelle-AVX, this includes all words in the original KJV text. It can optionally 
 | /EoB/        | transition marker  | any word where it is the last word of the book (e.g. last word in revelation) | TRAN::0xF0                             | 0xF0     |
 | /EoC/        | transition marker  | any word where it is the last word of the chapter            | TRAN::0x70                             | 0xF0     |
 | /EoV/        | transition marker  | any word where it is the last word of the verse              | TRAN::0x30                             | 0xF0     |
-| /!BoB/       | transition marker  | any word where it is not the first word of the book          | TRAN::0xE0                             | 0xF0^    |
-| /!BoC/       | transition marker  | any word where it is not the first word of the chapter       | TRAN::0x60                             | 0xF0^    |
-| /!BoV/       | transition marker  | any word where it is not the first word of the verse         | TRAN::0x20                             | 0xF0^    |
-| /!EoB/       | transition marker  | any word where it is not the last word of the book           | TRAN::0xF0                             | 0xF0^    |
-| /!EoC/       | transition marker  | any word where it is not the last word of the chapter        | TRAN::0x70                             | 0xF0^    |
-| /!EoV/       | transition marker  | any word where it is not the last word of the verse          | TRAN::0x30                             | 0xF0^    |
 | /Hsm/        | segment marker     | Hard Segment Marker (end) ... one of \. \? \!                | TRAN::0x40                             | 0x07     |
 | /Csm/        | segment marker     | Core Segment Marker (end) ... \:                             | TRAN::0x20                             | 0x07     |
 | /Rsm/        | segment marker     | Real Segment Marker (end) ... one of \. \? \! \:             | TRAN::0x60                             | 0x07     |
@@ -714,7 +670,6 @@ Quelle-AVX, this includes all words in the original KJV text. It can optionally 
 | /Italics/    | text decoration    | italicized words marked with this bit in punctuation byte    | PUNC::0x02                             | 0x02     |
 | /Jesus/      | text decoration    | words of Jesus marked with this bit in punctuation byte      | PUNC::0x01                             | 0x01     |
 | /delta/      | lexicon            | [archaic] word can be transformed into modern American English |                                        |          |
-| /!delta/     | lexicon            | a word is not archaic (spelling is consistent with modern American English) |                                        |          |
 | \#FFFF       | PN+POS(12)         | hexadecimal representation of bits for a PN+POS(12) value.   | See Digital-AV SDK                     | uint16   |
 | \#FFFFFFFF   | POS(32)            | hexadecimal representation of bits for a POS(32) value.      | See Digital-AV SDK                     | uint32   |
 | #string      | nupos-string       | NUPOS string representing part-of-speech. This is the preferred syntax over POS(32), even though they are equivalent. NUPOS part-of-speech values have higher fidelity than the 16-bit PN+POS(12) representations. | See Part-of-Speech-for-Digital-AV.docx | uint64   |
