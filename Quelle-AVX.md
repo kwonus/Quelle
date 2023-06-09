@@ -1,6 +1,6 @@
-# Quelle-AVX Specification
+# Quelle Specification for AVXLib
 
-##### version 2.0.3.602
+##### AVX-Quelle version 2.0.3.607
 
 ### I. Background
 
@@ -8,20 +8,20 @@ Most modern search engines, provide a mechanism for searching via a text input b
 
 Quelle, IPA: [kɛl], in French means "What? or Which?". As Quelle HMI is designed to obtain search-results from search-engines, this interrogative nature befits its name. An earlier interpreter, Clarity, served as inspiration for defining Quelle.  You could think of the Quelle HMI as an evolution of Clarity HMI.  However, in order to create linguistic consistency in Quelle's Human-to-Machine command language, the resulting syntax varied so dramatically from the Clarity spec, that a new name was the best way forward.  Truly, Quelle HMI incorporates lessons learned after creating, implementing, and revising Clarity HMI for over a decade.
 
-In 2023, Quelle-AVX 2.0 was released. This new release is not a radical divergence from version 1. Most of the changes are centered around macros, control variables, filters, and export directives. Search syntax has remained almost entirely unchanged. It turned out that the PEG grammar had some  ambiguity differentiating between the various implicit actions. To eliminate that ambiguity, new operators were introduced  [We added $ % and || to name a few] . These additions also reduced the need for clause delimiters. The version 2 spec feels more streamlined, more intuitive, and comes with a working revision of the PEG grammar. Implicit actions for Macros have been reclassified as *apply* and *invoke* [those verbs replace *save* and *execute* respectively] .  These new verbs align with the metaphor of labeling.  As Quelle-AVX is the only current known reference implementation of Quelle, it is likely that Vanilla-Quelle will eventually undergo this same evolution.
+In 2023, Quelle 2.0 was released. This new release is not a radical divergence from version 1. Most of the changes are centered around macros, control variables, filters, and export directives. Search syntax has remained largely unchanged. It turned out that the PEG grammar had some  ambiguity differentiating between the various implicit actions. To eliminate that ambiguity, new operators were introduced  [We added $ % and || to name a few] . These additions also reduce the need for clause delimiters. The version 2 spec feels more streamlined, more intuitive, and comes with a working revision of the PEG grammar. Implicit actions for Macros are now referred to as *apply* and *invoke* [those verbs replace *save* and *execute* respectively].
 
-The one change to the search specification in Quelle 2.0 is the dropping of support for bracketed search terms. While parsing these artifacts was easy with the PEG grammar, implementing the search from the parse was quite complex. That seldom-used feature doubled the complexity of corresponding search-algorithms. Having successfully implemented bracketed terms in the AV-Bible Windows application, I make make two strong assessments:
+The one change to the search specification in Quelle 2.0 is the dropping of support for bracketed search terms. While parsing these artifacts was easy within the PEG grammar, implementing the search from the parse was quite complex. That seldom-used feature doubled the complexity of corresponding search-algorithms. Having successfully implemented bracketed terms in the AV-Bible Windows application, I will make two strong assertions about bracketed terms:
 
 1. implementation was intensely complex
 2. almost no one used it.
 
-For those two reasons, we have nixed the feature from the updated spec. An upcoming feature, that provides some overlapping functionality. is discussed in more detail in the ***Filtering Results*** section of this document.
+For those two reasons, we have nixed bracketed terms from the grammar in the updated spec.
 
-Every attempt has been made to make Quelle consistent with itself. Some constructs are in place to make parsing unambiguous, other constructs are biased toward ease of typing (such as limiting keystrokes that require the shift key). Of course, other command languages also influence our syntax, to make things more intuitive for a polyglot. In all, Quelle represents an easy to type and easy to learn HMI.  Moreover, simple search statements look no different than they might appear today in a Google or Bing search box. Still, let's not get ahead of ourselves or even hint about where our simple specification might take us ;-)
+Every attempt has been made to make Quelle consistent with itself. Some constructs are in place to make parsing unambiguous, other constructs are biased toward ease of typing (such as limiting keystrokes that require the shift key). Of course, other command languages also influence our syntax, to make things more intuitive for a polyglot. In all, Quelle represents an easy to type and easy to learn HMI.  Moreover, simple search statements look no different than they might appear today in Google or Bing. Still, let's not get ahead of ourselves or even hint about where our simple specification might take us ;-)
 
 ### II. Addendum
 
-Quelle-AVX extends baseline Vanilla-Quelle to include AVX-specific constructs.
+AVX-Quelle extends baseline Vanilla-Quelle to include AVX-specific constructs.
 Each section below identifies specialized constructs for parsing AVX commands using the Quelle parser.
 
 Vanilla Quelle specifies two possible implementation levels:
@@ -29,14 +29,21 @@ Vanilla Quelle specifies two possible implementation levels:
 - Level 1 [basic search support]
 - Level 2 [search support includes also searching on part-of-speech tags]
 
-AVX-Quelle is Level 2 implementation with additional specialized search capabilities. However, there are two features of Vanilla-Quelle where AVX-Quelle diverges from the baseline specification.
+AVX-Quelle is a Level 2 implementation with additional specialized search capabilities. However, there are two features of Vanilla-Quelle where AVX-Quelle diverges from the baseline specification.
 
-1.  AVX-Quelle drops support for polarity on search clauses. Vanilla-Quelle uses minus+minus ( -- ) to negate entire search clauses. AVX-Quelle does not support that operation. Instead, AVX-Quelle allows individual features within a search clause to be negated using Minus+colon ( -: )
-2. AVX-Quelle does not support the %exact setting of Vanilla-Quelle. Instead, it offers two thresholds: %threashold.text and %threshold.phonics. A setting of 100 (i.e. 100%) behaves much like %exact = true of Vanilla-Quelle. Yet, AVX-Quelle allows the specification of fuzziness thresholds using these enhanced settings. This in conjunction with the lexicon setting allow greater control over matching logic than Vanilla-Quelle.
+1. AVX-Quelle drops support for negation on the entire search clause. Vanilla-Quelle used minus_minus ( -- ) to negate entire search clauses. AVX-Quelle does not support that operation. Instead, AVX-Quelle supports negation of individual features within a search clause using minus_colon ( -: )
+
+2. AVX-Quelle does not support the %exact setting of Vanilla-Quelle. Instead, it offers two distinct settings that provide finer grain control on non-exact matches. The first setting is the lexicon (there are two lexicons available). The exact match can be on either lexicon **or** on both lexicons. Exact lexical match is expected when %similarity is set to none or 0. Approximate matches are considered when similarity is set between 33 and 99 (33 to 99%). Similarity is calculated based upon the phonetic representation for the word (either or both lexicons can be considered and is controlled via the %lexicon setting).
+
+   Any similarity threshold between 1 and 32 is treated as a syntax error. The minimum permitted similarity threshold is 33%. Similarity below 50% does not seem to be useful, but AVX-Quelle allows you to set it as low as 33%. 0 is not really a similarity threshold, but rather zero ( 0 ) is a synonym for none.
+
+   A %similarity  setting of 100 is a special case that still uses phonetics, but expects an exact phonetic match (e.g. "there" and "their" are a 100% phonetic match).
+
+3. When %lexicon is set to *modern* **or** *both* (alternatively, *avx* **or** *dual*) **and** %similarity is 75% or greater, then this automatically triggers similarity searches upon the modern lemma of the word. Automatic similarity matching on lemmas can be disabled by appending an exclamation mark ( ! ) to the similarity threshold (e.g. %similarity = 75!). Likewise, automatic similarity matching on lemmas is effectively disabled when %similarity is less than 75%, **or** when the %lexicon is set to *kjv* **or** *av*.
 
 ### III. Quelle Syntax
 
-Just like the baseline Quelle specification, Quelle-AVX defines a declarative syntax for specifying search criteria using the *find* verb. Quelle also defines additional verbs to round out its syntax as a simple straightforward means to interact with custom applications where searching text is the fundamental problem at hand.
+Quelle defines a declarative syntax for specifying search criteria using the *find* verb. Quelle also defines additional verbs to round out its syntax as a simple straightforward means to interact with custom applications where searching text is the fundamental problem at hand.
 
 Quelle Syntax comprises seventeen (17) verbs. Each verb corresponds to a basic action:
 
@@ -79,10 +86,10 @@ In Quelle terminology, a statement is made up of one or more clauses. Each claus
    - @exit
 5. HISTORY & LABELING
    - *invoke*			  (history **or** macro)
-   - *apply*				(apply a label to a macro)
-   - @delete		  (delete a label)
-   - @expand		(history **or** label)
-   - @absorb		 (history **or** label)
+   - *apply*			   (apply a label to a macro)
+   - @delete		  (delete a label/macro)
+   - @expand		(history **or** label/macro)
+   - @absorb		 (history **or** label/macro)
    - @review		 (review history)
    - @initialize	  (initialize/reinitialize history)
 
@@ -92,18 +99,18 @@ Each syntax category has either explicit and/or implicit actions.  Explicit acti
 
 Learning just six verbs is all that is necessary to effectively use Quelle. In the table below, each verb is identified with required and optional parameters/operators.
 
-| Verb      | Action Type | Syntax Category | Required Parameters       |  Alternate Parameters   |
-| --------- | :---------: | :-------------- | ------------------------- | :---------------------: |
-| *find*    |  implicit   | SEARCH          | *search spec*             |                         |
-| *filter*  |  implicit   | SEARCH          | **<** *domain*            |                         |
-| *set*     |  implicit   | CONTROL         | **%name** **::** *value*  | **%name** **=** *value* |
-| *show*    |  implicit   | OUTPUT          | **[** *row_indices* **]** |                         |
-| **@help** |  explicit   | SYSTEM          |                           |         *topic*         |
-| **@exit** |  explicit   | SYSTEM          |                           |                         |
+| Verb      | Action Type | Syntax Category | Required Parameters       | Alternate/Optional Parameters |
+| --------- | :---------: | :-------------- | ------------------------- | :---------------------------: |
+| *find*    |  implicit   | SEARCH          | *search spec*             |                               |
+| *filter*  |  implicit   | SEARCH          | **<** *domain*            |                               |
+| *set*     |  implicit   | CONTROL         | **%name** **::** *value*  |    **%name** **=** *value*    |
+| *show*    |  implicit   | OUTPUT          | **[** *row_indices* **]** |                               |
+| **@help** |  explicit   | SYSTEM          |                           |            *topic*            |
+| **@exit** |  explicit   | SYSTEM          |                           |                               |
 
-**TABLE 4-1** -- **The six fundamental Quelle commands with corresponding syntax summaries**
+**TABLE 4-1** -- **Fundamental Quelle commands with corresponding syntax summaries**
 
-From a linguistic standpoint, all Quelle commands are issued in the imperative. The subject of the verb is always "you understood". As the user, you are commanding Quelle what to do. Some verbs have direct objects [aka required parameters]. These parameters instruct Quelle <u>what</u> to act upon. The syntax category of the verb dictates the required parameters.
+From a linguistic standpoint, all Quelle commands are issued in the imperative. The subject of the verb is always "you understood". As the user, you are commanding Quelle what to do. Some verbs have direct objects [aka required parameters]. These parameters instruct Quelle <u>what</u> to act upon. The verb dictates the required parameters: in linguistic terms, this is referred to as the valence of the verb.
 
 Quelle supports two types of actions:
 
@@ -120,7 +127,7 @@ As search is a fundamental concern of Quelle, it is optimized to make compound i
 | SEARCH filters                          | < Genesis < Exodus < Revelation          |
 | SEARCH specification                    | this is some text expected to be found   |
 | Compound statement: two SEARCH actions  | "this quoted text" + other unquoted text |
-| Compound statement: two CONTROL actions | %span = 7 %threshold.text = 85           |
+| Compound statement: two CONTROL actions | %span = 7 %similarity = 85               |
 | Compound statement: CONTROL & SEARCH    | %span = 7 Moses said                     |
 
 **TABLE 4-2** -- **Examples of Quelle statement types**
@@ -279,7 +286,7 @@ In this section, we will examine how user-defined macros are used in Quelle.  A 
 
 Let’s say we want to name the search example from the previous section; We’ll call it *eternal-power*. To accomplish this, we would issue this command:
 
-%span::7 %threshold.text::85 + eternal power || eternal-power
+%span::7 %similarity::85 + eternal power || eternal-power
 
 It’s that simple, now instead of typing the entire statement, we can utilize the macro by referencing our previously applied label. Here is how the macro can be invoked. We might call this running the macro:
 
@@ -295,7 +302,7 @@ $my-label-cannot-contain-spaces
 
 Which is equivalent to these statements:
 
-%span::7  %threshold.text::85 + eternal power + godhead
+%span::7  %similarity::85 + eternal power + godhead
 
 There are several restrictions on macro definitions:
 
@@ -398,7 +405,7 @@ The *invoke* command works for command-history works exactly the same way as it 
 
 1>  %span = 7
 
-2>  %threshold.text::85
+2>  %similarity::85
 
 3> eternal power
 
@@ -420,7 +427,7 @@ $1  $2  $3
 
 which would be interpreted as:
 
-%span = 7  %threshold.text::85   eternal power
+%span = 7  %similarity::85   eternal power
 
 **RESETTING COMMAND HISTORY**
 
@@ -496,27 +503,26 @@ format=md   format=default  format=text
 
 The final command would return text.  We call this: "last assignment wins". However, there is one caveat to this precedence order: regardless of where in the statement a macro or history invocation is provided within a statement, it never has precedence over a setting that is actually visible within the statement.  Consider this sequence as an example:
 
-%threshold.text::none || precedence_example
+%similarity::none || precedence_example
 
-%threshold.text::85  $precedence_example
+%similarity::85  $precedence_example
 
-@get %threshold.text
+@get %similarity
 
 The final command would return 85, because it was visible in the compound statement.
 
-Quelle-AVX manifests four control names. Each allows all three actions: ***set***, ***clear***, and ***@get*** verbs. Table 12-4 lists all settings available in AVX-Quelle. Quelle does not support the *exact* setting found in Vanilla Quelle. As AVX-Quelle can support two distinct orthographies [i.e. Contemporary Modern English (avx/modern), and Early Modern English (avx/modern)], the binary setting found in Vanilla-Quelle was not a sufficient designation.
+AVX-Quelle manifests five control names. Each allows all three actions: ***set***, ***clear***, and ***@get*** verbs. Table 12-4 lists all settings available in AVX-Quelle. Quelle does not support the *exact* setting found in Vanilla-Quelle. As AVX-Quelle can support two distinct orthographies [i.e. Contemporary Modern English (avx/modern), and Early Modern English (avx/kjv)], the binary setting found in Vanilla-Quelle was not a sufficient designation.
 
-| Setting           | Meaning                                                      | Values                                                       | Default Value |
-| ----------------- | ------------------------------------------------------------ | ------------------------------------------------------------ | ------------- |
-| span              | proximity distance limit                                     | 0 to 999 or verse                                            | 0 [verse]     |
-| lexicon           | the lexicon to be used for the searching                     | av/avx/dual (kjv/modern/both)                                | dual (both)   |
-| display           | the lexicon to be used for display/rendering                 | av/avx (kjv/modern)                                          | av (kjv)      |
-| format            | format of results on output                                  | see Table 12-2                                               | json          |
-| threshold.text    | fuzzy text matching threshold is a percentage between 33 and 99<br>0 or *none* means: do not match on text (use phonics only)<br>100 or *exact* means that an *exact* text match is expected | 33 to 99 [fuzzy] **or** ...<br>0 **or** *none*<br>100 **or** *exact* | 100 (exact)   |
-| threshold.phonics | fuzzy phonetics matching threshold is between 33 and 99<br/>0 or *none* means: do not match on phonetics (use text only)<br/>100 or *exact* means that an *exact* phonetics match is expected | 33 to 99 [fuzzy] **or** ...<br>0 **or** *none*<br>100 **or** *exact* | 0 (none)      |
-| ~~exact~~         | ~~exact vs approximate match~~ [replaced by thresholds & lexicon settings] | ~~true/false~~                                               | ~~false~~     |
+| Setting    | Meaning                                                      | Values                                                       | Default Value |
+| ---------- | ------------------------------------------------------------ | ------------------------------------------------------------ | ------------- |
+| span       | proximity distance limit                                     | 0 to 999 or verse                                            | 0 [verse]     |
+| lexicon    | the lexicon to be used for the searching                     | av/avx/dual (kjv/modern/both)                                | dual (both)   |
+| display    | the lexicon to be used for display/rendering                 | av/avx (kjv/modern)                                          | av (kjv)      |
+| format     | format of results on output                                  | see Table 12-2                                               | json          |
+| similarity | fuzzy phonetics matching threshold is between 1 and 99<br/>0 or *none* means: do not match on phonetics (use text only)<br/>100 or *exact* means that an *exact* phonetics match is expected | 33 to 99 [fuzzy] **or** ...<br>0 **or** *none*<br>100 **or** *exact*<br>Exclamation ( ! ) after the value disable automatic lemma matching (see Section II / item #3) | 0 (none)      |
+| ~~exact~~  | ~~exact vs approximate match~~ [replaced by similarity & lexicon settings] | ~~true/false~~                                               | ~~false~~     |
 
-**TABLE 12-4** -- **Summary of Quelle-AVX Control Names**
+**TABLE 12-4** -- **Summary of AVX-Quelle Control Names**
 
 The *@get* command fetches these values. The *@get* command requires a single argument. Examples are below:
 
@@ -528,7 +534,7 @@ There are additional actions that affect all control settings collectively
 
 | Expressions | Meaning / Usage                                              |
 | ----------- | ------------------------------------------------------------ |
-| **@reset**  | Reset is an explicit command alias to *clear* all control settings, resetting them all to default values<br />equivalent to: %span=default %lexicon=default %display=default %threshold.text=default %threshold.phonics=default %format=default |
+| **@reset**  | Reset is an explicit command alias to *clear* all control settings, resetting them all to default values<br />equivalent to: %span=default %lexicon=default %display=default %similarity=default %format=default |
 | $X::current | Special suffix for use with History or Macro invocation as a singleton statement:<br />See "Labeling Statements for subsequent invocation" section of this document.<br />Uses current settings for invocation on history/macro identified/labeled as "X".<br>(On non-singleton invocations, environment settings on the macro/history is **always** ignored, making the ::current suffix superfluous on compound macro satements) |
 
 **TABLE 12-5** -- **Collective CONTROL operations**
@@ -615,11 +621,11 @@ Like the earlier example, the subject is "you understood".  The object this time
 
 **not:** In Boolean logic, means that the feature must not be found. With Quelle, *not* is represented by a hyphen+colon ( **-:** ) and applies to individual features within a search segment within the search clause. It is best used in conjunction with other features, because any non-match will be included in results. 
 
-hyphen+colon ( **-:** ) means that any non-match satisfies the search condition. Used by itself, it would likely return every verse. Therfeore, it should be used judiciously.
+hyphen+colon ( **-:** ) means that any non-match satisfies the search condition. Used by itself, it would likely return every verse. Therefore, it should be used judiciously.
 
-### Appendix B. Specialized Search tokens in Quelle-AVX (a superset of Vanilla-Quelle Level 2)
+### Appendix B. Specialized Search tokens in AVX-Quelle
 
-Quelle-AVX, this includes all words in the original KJV text. It can optionally also search for modernized version of those words (e.g. hast and has; this is controllable with the %exact setting).  The table below lists additional linguistic extensions available in Quelle-AVX.
+The lexical search domain of AVX-Quelle includes all words in the original KJV text. It can also optionally search using a modernized lexicon of the KJV (e.g. hast and has; this is controllable with the %lexicon setting).  The table below lists additional linguistic extensions available in AVX-Quelle, which happens to be a Level-II Quelle implementation.
 
 | Search Term  | Operator Type      | Meaning                                                      | Maps To                                | Mask     |
 | ------------ | ------------------ | ------------------------------------------------------------ | -------------------------------------- | -------- |
