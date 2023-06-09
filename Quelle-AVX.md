@@ -355,7 +355,7 @@ If you want the same settings to be persisted to your current session that were 
 
 Both @absorb and @expand also work with command history.
 
-**NOTE:** Labels must begin with a letter [A-Z] or [a-z], but they may contain numbers, spaces, hyphens, periods, commas, underscores, and single-quotes (no other punctuation or special characters are supported).
+**NOTE:** Labels must begin with a letter [A-Z] or [a-z], but they may contain numbers, hyphens, periods, commas, underscores, and single-quotes (no other punctuation or special characters are supported).
 
 While macro definitions are deterministic, they can be overwritten/redefined: consider this sequence:
 
