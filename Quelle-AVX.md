@@ -270,8 +270,8 @@ vanity < sos < 1co
 | *invoke*        | implicit    | HISTORY & LABELING        | *label* or *id*           |   **$** *label*    |
 | *apply*         | implicit    | HISTORY & <u>LABELING</u> | *label*                   |  **\|\|** *label*  |
 | **@delete**     | explicit    | HISTORY & <u>LABELING</u> | *label*                   |      *label*       |
-| **@expand**     | explicit    | HISTORY & LABELIN         | *label* or *id*           |  *label* or *id*   |
-| **@absorb**     | explicit    | HISTORY & LABELING        | *label* or *id*           |  *label* or *id*   |
+| **@expand**     | explicit    | HISTORY & LABELING        | *label* or *id*           |  *label* or *id*   |
+| **@absorb**     | explicit    | CONTROL                   | *label* or *id*           |  *label* or *id*   |
 | **@review**     | explicit    | <u>HISTORY</u> & LABELING | **optional:** *max_count* |                    |
 | **@initialize** | explicit    | <u>HISTORY</u> & LABELING |                           |                    |
 
