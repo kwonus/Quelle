@@ -1,6 +1,6 @@
 # Quelle Specification for AVXLib
 
-##### AVX-Quelle version 2.0.3.607
+##### AVX-Quelle version 2.0.3.608
 
 ### I. Background
 
@@ -54,7 +54,7 @@ Quelle Syntax comprises seventeen (17) verbs. Each verb corresponds to a basic a
 - clear
 - initialize
 - export
-- show
+- limit
 - apply
 - delete
 - expand
@@ -77,21 +77,21 @@ In Quelle terminology, a statement is made up of one or more clauses. Each claus
    - *clear*
    - @get
    - @reset *(explicit alias for **clear all control settings**)*
+   - @absorb *(use history **or** label/macro to **absorb all control settings**)*
 4. OUTPUT
-   - *show*
+   - *limit*
    - *export*
 4. SYSTEM
    - @help
    - @version
    - @exit
-5. HISTORY & LABELING
-   - *invoke*			  (history **or** macro)
-   - *apply*			   (apply a label to a macro)
-   - @delete		  (delete a label/macro)
-   - @expand		(history **or** label/macro)
-   - @absorb		 (history **or** label/macro)
+5. HISTORY & MACROS
+   - *invoke*			  (invoke macro by its label **or** invoke a previous command by its id)
+   - *apply*			   (apply label to macro)
+   - @delete		  (delete macro by its label)
+   - @expand		(label **or** id)
    - @review		 (review history)
-   - @initialize	  (initialize/reinitialize history)
+   - @initialize	  (clear all history)
 
 Each syntax category has either explicit and/or implicit actions.  Explicit actions begin with the @ symbol, immediately followed by the explicit verb.  Implicit actions are inferred by the syntax of the command.
 
@@ -104,7 +104,7 @@ Learning just six verbs is all that is necessary to effectively use Quelle. In t
 | *find*    |  implicit   | SEARCH          | *search spec*             |                               |
 | *filter*  |  implicit   | SEARCH          | **<** *domain*            |                               |
 | *set*     |  implicit   | CONTROL         | **%name** **::** *value*  |    **%name** **=** *value*    |
-| *show*    |  implicit   | OUTPUT          | **[** *row_indices* **]** |                               |
+| *limit*   |  implicit   | OUTPUT          | **[** *row_indices* **]** |                               |
 | **@help** |  explicit   | SYSTEM          |                           |            *topic*            |
 | **@exit** |  explicit   | SYSTEM          |                           |                               |
 
