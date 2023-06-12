@@ -1,6 +1,6 @@
 # Quelle Specification for AVXLib
 
-##### AVX-Quelle version 2.0.3.608
+##### AVX-Quelle version 2.0.3.611
 
 ### I. Background
 
@@ -705,7 +705,7 @@ scope:
   - include: Hebrews
 
 search:
-  - find: time|help&/!verb/ ... need
+  - find: time|help&-:/verb/ ... need
     negate: false
     quoted: true
     - segment: time|help&/!verb/
@@ -715,8 +715,8 @@ search:
           wkeys: [ 1316 ]
         - feature: help
           wkeys: [ 795 ]
-      - fragment: /!verb/
-        - feature: /!verb/
+      - fragment: -:/verb/
+        - feature: -:/verb/
           negate: true
           pos16: 0x100
     - segment: need
@@ -749,15 +749,15 @@ scope:
   - include: Hebrews
 
 results:
-  - find: time|help&/!verb/ ... need
+  - find: time|help&-:/verb/ ... need
     negate: false
     - found: 0x58041620
       length: 5
       - fragment: time|help
         feature: time 
         match: 0x58041620
-      - fragment: /!verb/
-        feature: /!verb/
+      - fragment: -:/verb/
+        feature: -:/verb/
         match: 0x58041621
       - fragment: need
         feature: need 
