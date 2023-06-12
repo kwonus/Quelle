@@ -241,6 +241,14 @@ format=html ; "Jesus answered" [1 2 3]  => my-file.html // *export the first thr
 
 The => allows existing file to be overwritten. Quelle will not overwrite an existing file with > syntax. The => is required to force an overwrite.
 
+
+
+| Verb     | Action Type | Syntax Category | Parameters       | Alternate #1      | Alternate #2      |
+| -------- | :---------: | --------------- | ---------------- | :---------------- | :---------------- |
+| *export* |  implicit   | OUTPUT          | **>** *filename* | **=>** *filename* | **>>** *filename* |
+
+**TABLE 7-1** -- **The implicit export action**
+
 ### VIII. Filtering Results
 
 Sometimes we want to constrain the domain of where we are searching. Say that I want to find mentions of the serpent in Genesis. I can search only Genesis by executing this search:
@@ -465,13 +473,14 @@ Type this to terminate the Quelle interpreter:
 
 ### XII. Control Settings
 
-| Verb     | Action Type | Syntax Category | Parameters             | Alternate #1          | Alternate #2      |
-| -------- | :---------: | --------------- | ---------------------- | :-------------------- | :---------------- |
-| *clear*  |  implicit   | CONTROL         | *%name* **:: default** | *%name* **= default** |                   |
-| *export* |  implicit   | OUTPUT          | **>** *filename*       | **=>** *filename*     | **>>** *filename* |
-| **@get** |  explicit   | CONTROL         | *name*                 |                       |                   |
+| Verb     | Action Type | Syntax Category | Parameters             | Alternate #1          | Alternate #2 |
+| -------- | :---------: | --------------- | ---------------------- | :-------------------- | :----------- |
+| *clear*  |  implicit   | CONTROL         | *%name* **:: default** | *%name* **= default** |              |
+| **@get** |  explicit   | CONTROL         | *name*                 |                       |              |
 
-**TABLE 12-1** -- **Listing of additional CONTROL, OUTPUT & SYSTEM actions**
+**TABLE 12-1** -- **Listing of additional CONTROL actions**
+
+
 
 **Export Format Options:**
 
@@ -579,11 +588,11 @@ In general, AVX-Quelle can be thought of as a stateless server. The only excepti
 2) defined macro labels. 
 3) command history
 
-Finally delimiters ( e.g.  ; or + ), between two distinct unquoted search clauses are ***required*** to identify the boundary between the two search clauses. A single delimiters <u>before</u> any search clause is always ***optional*** (e.g., Delimiters are permitted between quoted and unquoted clauses, and any other clause that precedes any search clause). They are ***unexpected*** anywhere else in the statement. This makes a Quelle statement a bit less cluttered than the version 1.0 specification
+Finally delimiters ( e.g.  ; or + ), between two distinct unquoted search clauses are ***required*** to identify the boundary between the two search clauses. A single delimiter <u>before</u> any search clause is always ***optional*** (e.g., Delimiters are permitted between quoted and unquoted clauses, and any other clause that precedes any search clause). They are ***unexpected*** anywhere else in the statement. This makes a Quelle statement a bit less cluttered than the version 1.0 specification
 
 ---
 
-An object model that manifests a representation of Quelle grammar is depicted below:
+An object model to manifest the Quelle grammar is depicted below:
 
 ![QCommand](./QCommand.png)
 
