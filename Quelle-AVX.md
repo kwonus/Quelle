@@ -1,6 +1,6 @@
 # Quelle Specification for AVXLib
 
-##### AVX-Quelle version 2.0.3.611
+##### AVX-Quelle version 2.0.3.612
 
 ### I. Background
 
@@ -10,7 +10,7 @@ Quelle, IPA: [kɛl], in French means "What? or Which?". As Quelle HMI is designe
 
 In 2023, Quelle 2.0 was released. This new release is not a radical divergence from version 1. Most of the changes are centered around macros, control variables, filters, and export directives. Search syntax has remained largely unchanged. It turned out that the PEG grammar had some  ambiguity differentiating between the various implicit actions. To eliminate that ambiguity, new operators were introduced  [We added $ % and || to name a few] . These additions also reduce the need for clause delimiters. The version 2 spec feels more streamlined, more intuitive, and comes with a working revision of the PEG grammar. Implicit actions for Macros are now referred to as *apply* and *invoke* [those verbs replace *save* and *execute* respectively].
 
-The one change to the search specification in Quelle 2.0 is the dropping of support for bracketed search terms. While parsing these artifacts was easy within the PEG grammar, implementing the search from the parse was quite complex. That seldom-used feature doubled the complexity of corresponding search-algorithms. Having successfully implemented bracketed terms in the AV-Bible Windows application, I will make two strong assertions about bracketed terms:
+One fundamental change to the search specification in Quelle 2.0 is the dropping of support for bracketed search terms. While parsing these artifacts was easy within the PEG grammar, implementing the search from the parse was quite complex. That seldom-used feature doubled the complexity of corresponding search-algorithms. Having successfully implemented bracketed terms in the AV-Bible Windows application, I will make two strong assertions about bracketed terms:
 
 1. implementation was intensely complex
 2. almost no one used it.
@@ -33,13 +33,13 @@ AVX-Quelle is a Level 2 implementation with additional specialized search capabi
 
 1. AVX-Quelle drops support for negation on the entire search clause. Vanilla-Quelle used minus_minus ( -- ) to negate entire search clauses. AVX-Quelle does not support that operation. Instead, AVX-Quelle supports negation of individual features within a search clause using minus_colon ( -: )
 
-2. AVX-Quelle does not support the %exact setting of Vanilla-Quelle. Instead, it offers two distinct settings that provide finer grain control on non-exact matches. The first setting is the lexicon (there are two lexicons available). The exact match can be on either lexicon **or** on both lexicons. Exact lexical match is expected when %similarity is set to none or 0. Approximate matches are considered when similarity is set between 33 and 99 (33 to 99%). Similarity is calculated based upon the phonetic representation for the word (either or both lexicons can be considered and is controlled via the %lexicon setting).
+2. AVX-Quelle provides support for fuzzy-match-logic. it offers two distinct settings that provide fine grain control for approximate matching. The first setting is the lexicon (there are two lexicons available). The exact match can be on either lexicon **or** on both lexicons. Exact lexical match is expected when %similarity is set to none or 0. Approximate matches are considered when similarity is set between 33 and 99 (33 to 99%). Similarity is calculated based upon the phonetic representation for the word (either or both lexicons can be considered and is controlled via the %lexicon setting).
 
-   Any similarity threshold between 1 and 32 is treated as a syntax error. The minimum permitted similarity threshold is 33%. Similarity below 50% does not seem to be useful, but AVX-Quelle allows you to set it as low as 33%. 0 is not really a similarity threshold, but rather zero ( 0 ) is a synonym for none.
+   Any similarity threshold between 1 and 32 is equated to none or 0. The minimum permitted similarity threshold is 33%. 0 is not really a similarity threshold, but rather zero ( 0 ) is a synonym for none.
 
    A %similarity  setting of 100 is a special case that still uses phonetics, but expects an exact phonetic match (e.g. "there" and "their" are a 100% phonetic match).
 
-3. When %lexicon is set to *modern* **or** *both* (alternatively, *avx* **or** *dual*) **and** %similarity is 75% or greater, then this automatically triggers similarity searches upon the modern lemma of the word. Automatic similarity matching on lemmas can be disabled by appending an exclamation mark ( ! ) to the similarity threshold (e.g. %similarity = 75!). Likewise, automatic similarity matching on lemmas is effectively disabled when %similarity is less than 75%, **or** when the %lexicon is set to *kjv* **or** *av*.
+3. When %lexicon is set to *modern* **or** *both* (alternatively, *avx* **or** *dual*), then this automatically triggers similarity searches upon the modern lemma of the word. Automatic similarity matching on lemmas can be disabled by appending an exclamation mark ( ! ) to the similarity threshold (e.g. %similarity = 75!). Likewise, automatic similarity matching on lemmas is effectively disabled when the %lexicon is set to *kjv* **or** *av*.
 
 ### III. Quelle Syntax
 
@@ -198,7 +198,7 @@ this&that
 
 Consider a query for all passages that contain a word beginning, followed by any word that is neither a verb nor an adverb:
 
-%span = 15 "Lord\* -:/v/ & -:/adv/
+%span = 15 "Lord\* -:/v/ & -:/adv/"
 
 Both of the statements above are valid, but will not match any results. Search statements attempt to match actual words in  the actual bible text. A bord cannot be "this" **and** "that". Likewise, an individual word in a sentence does not operate as a /noun/ **and** a /verb/. Contrariwise, these searches are valid, but would also return numerous matches:
 
@@ -471,12 +471,12 @@ Type this to terminate the Quelle interpreter:
 
 *@exit*
 
-### XII. Control Settings
+### XII. Control Settings & additional related cpmmands
 
 | Verb     | Action Type | Syntax Category | Parameters             | Alternate #1          | Alternate #2 |
 | -------- | :---------: | --------------- | ---------------------- | :-------------------- | :----------- |
 | *clear*  |  implicit   | CONTROL         | *%name* **:: default** | *%name* **= default** |              |
-| **@get** |  explicit   | CONTROL         | *name*                 |                       |              |
+| **@get** |  explicit   | CONTROL         | **optional:** *name*   |                       |              |
 
 **TABLE 12-1** -- **Listing of additional CONTROL actions**
 
@@ -520,7 +520,7 @@ The final command would return text.  We call this: "last assignment wins". Howe
 
 The final command would return 85, because it was visible in the compound statement.
 
-AVX-Quelle manifests five control names. Each allows all three actions: ***set***, ***clear***, and ***@get*** verbs. Table 12-4 lists all settings available in AVX-Quelle. Quelle does not support the *exact* setting found in Vanilla-Quelle. As AVX-Quelle can support two distinct orthographies [i.e. Contemporary Modern English (avx/modern), and Early Modern English (avx/kjv)], the binary setting found in Vanilla-Quelle was not a sufficient designation.
+AVX-Quelle manifests five control names. Each allows all three actions: ***set***, ***clear***, and ***@get*** verbs. Table 12-4 lists all settings available in AVX-Quelle. AVX-Quelle can support two distinct orthographies [i.e. Contemporary Modern English (avx/modern), and/or Early Modern English (avx/kjv).
 
 | Setting    | Meaning                                                      | Values                                                       | Default Value |
 | ---------- | ------------------------------------------------------------ | ------------------------------------------------------------ | ------------- |
@@ -529,7 +529,6 @@ AVX-Quelle manifests five control names. Each allows all three actions: ***set**
 | display    | the lexicon to be used for display/rendering                 | av/avx (kjv/modern)                                          | av (kjv)      |
 | format     | format of results on output                                  | see Table 12-2                                               | json          |
 | similarity | fuzzy phonetics matching threshold is between 1 and 99<br/>0 or *none* means: do not match on phonetics (use text only)<br/>100 or *exact* means that an *exact* phonetics match is expected | 33 to 99 [fuzzy] **or** ...<br>0 **or** *none*<br>100 **or** *exact*<br>Exclamation ( ! ) after the value disable automatic lemma matching (see Section II / item #3) | 0 (none)      |
-| ~~exact~~  | ~~exact vs approximate match~~ [replaced by similarity & lexicon settings] | ~~true/false~~                                               | ~~false~~     |
 
 **TABLE 12-4** -- **Summary of AVX-Quelle Control Names**
 
@@ -554,7 +553,7 @@ All settings can be cleared using an explicit command:
 
 It is exactly equivalent to this compound statement:
 
-%span=default  %lexicon=default  %exact=default  %format=default
+%span=default  %lexicon=default  %display=default  %similarity = default %format=default
 
 **Scope of Settings [Statement Scope vs Persistent Scope]**
 
@@ -705,7 +704,7 @@ An object model to support specialized Search Tokens for Quelle-AVX is depicted 
 
 ```yaml
 settings:
-  exact: false
+  similarity: none
   span: 7,
   lexicon: av
   format: html
@@ -749,7 +748,7 @@ render: // if render is not specified, a summary of match results is returned as
 
 ```yaml
 settings:
-  exact: false
+  similarity: none
   span: 7,
   lexicon: av
   format: html
@@ -865,7 +864,7 @@ table XDelta (fs_serializer) {
 }
 
 table XSettings (fs_serializer) {
-    exact:       bool     = false;
+    similarity:  byte     = 0;
     span:        uint16   = 0;
     lexicon:     XLexEnum = AV;
     format:      XFmtEnum = JSON;
