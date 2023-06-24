@@ -93,7 +93,7 @@ Learning just six verbs is all that is necessary to effectively use Quelle. In t
 | **@help** |  explicit   | SYSTEM          |                           |            *topic*            |
 | **@exit** |  explicit   | SYSTEM          |                           |                               |
 
-**TABLE 4-1** -- **Fundamental Quelle commands with corresponding syntax summaries**
+**TABLE 4-1****Fundamental Quelle commands with corresponding syntax summaries**
 
 From a linguistic standpoint, all Quelle commands are issued in the imperative. The subject of the verb is always "you understood". As the user, you are commanding Quelle what to do. Some verbs have direct objects [aka required parameters]. These parameters instruct Quelle <u>what</u> to act upon. The verb dictates the required parameters: in linguistic terms, this is referred to as the valence of the verb.
 
@@ -115,7 +115,7 @@ As search is a fundamental concern of Quelle, it is optimized to make compound i
 | Compound statement: two CONTROL actions | %span = 7 %similarity = 85               |
 | Compound statement: CONTROL & SEARCH    | %span = 7 Moses said                     |
 
-**TABLE 4-2** -- **Examples of Quelle statement types**
+**TABLE 4-2****Examples of Quelle statement types**
 
 ### V. Deep Dive into Quelle SEARCH actions
 
@@ -160,14 +160,6 @@ Of course, part-of-speech expressions can also be used independent of the an AND
 span = 6 "/noun/ ... home run"
 
 This would find phrases where a noun appeared within a span of six words and preceded "home run"
-
-**Another SEARCH Example:**
-
-Consider a query for all passages that contain a word beginning with pres, followed by Bush, but subtract phrases containing H W Bush.
-
-*span = 15 ; "Pres** ... Bush" -- "H W Bush"*
-
-*(this could be read as: find all references to a wildcard Pres [e.g. Pres. or President] Bush, but subtract phrases that also contain "HW Bush"*
 
 **Valid statement syntax, but no results:**
 
