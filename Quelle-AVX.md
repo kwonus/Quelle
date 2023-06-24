@@ -29,17 +29,15 @@ Vanilla Quelle specifies two possible implementation levels:
 - Level 1 [basic search support]
 - Level 2 [search support includes also searching on part-of-speech tags]
 
-AVX-Quelle is a Level 2 implementation with additional specialized search capabilities. However, there are two features of Vanilla-Quelle where AVX-Quelle diverges from the baseline specification.
+AVX-Quelle is a Level 2 implementation with additional specialized search capabilities. However, there are two features of AVX-Quelle that extend the baseline Vanilla-Quelle specification.
 
-1. AVX-Quelle drops support for negation on the entire search clause. Vanilla-Quelle used minus_minus ( -- ) to negate entire search clauses. AVX-Quelle does not support that operation. Instead, AVX-Quelle supports negation of individual features within a search clause using minus_colon ( -: )
-
-2. AVX-Quelle provides support for fuzzy-match-logic. it offers two distinct settings that provide fine grain control for approximate matching. The first setting is the lexicon (there are two lexicons available). The exact match can be on either lexicon **or** on both lexicons. Exact lexical match is expected when %similarity is set to none or 0. Approximate matches are considered when similarity is set between 33 and 99 (33 to 99%). Similarity is calculated based upon the phonetic representation for the word (either or both lexicons can be considered and is controlled via the %lexicon setting).
+1. AVX-Quelle provides support for fuzzy-match-logic. it offers two distinct settings that provide fine grain control for approximate matching. The first setting is the lexicon (there are two lexicons available). The exact match can be on either lexicon **or** on both lexicons. Exact lexical match is expected when %similarity is set to none or 0. Approximate matches are considered when similarity is set between 33 and 99 (33 to 99%). Similarity is calculated based upon the phonetic representation for the word (either or both lexicons can be considered and is controlled via the %lexicon setting).
 
    Any similarity threshold between 1 and 32 is equated to none or 0. The minimum permitted similarity threshold is 33%. 0 is not really a similarity threshold, but rather zero ( 0 ) is a synonym for none.
 
    A %similarity  setting of 100 is a special case that still uses phonetics, but expects an exact phonetic match (e.g. "there" and "their" are a 100% phonetic match).
 
-3. When %lexicon is set to *modern* **or** *both* (alternatively, *avx* **or** *dual*), then this automatically triggers similarity searches upon the modern lemma of the word. Automatic similarity matching on lemmas can be disabled by appending an exclamation mark ( ! ) to the similarity threshold (e.g. %similarity = 75!). Likewise, automatic similarity matching on lemmas is effectively disabled when the %lexicon is set to *kjv* **or** *av*.
+2. When %lexicon is set to *modern* **or** *both* (alternatively, *avx* **or** *dual*), then this automatically triggers similarity searches upon the modern lemma of the word. Automatic similarity matching on lemmas can be disabled by appending an exclamation mark ( ! ) to the similarity threshold (e.g. %similarity = 75!). Likewise, automatic similarity matching on lemmas is effectively disabled when the %lexicon is set to *kjv* **or** *av*.
 
 ### III. Quelle Syntax
 
