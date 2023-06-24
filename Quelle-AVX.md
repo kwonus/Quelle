@@ -146,11 +146,11 @@ Notice that both statements above are single actions.  We should have a way to e
 
 Consider this proximity search where the search using Quelle syntax:
 
-*lexicon=KJV  Moses*
+*span=7  Moses Aaron*
 
 Quelle syntax can define the lexicon by also supplying an additional CONTROL action:
 
-*lexicon=KJV  Moses*
+*span=7 lexicon=KJV  Moses Aaron*
 
 The statement above has two CONTROL actions and one SEARCH action
 
@@ -174,13 +174,13 @@ The search criteria above is equivalent to this search:
 
 In all cases, “...” means “followed by”, but the ellipsis allows other words to appear between "said" and "Aaron". Likewise, it allows words to appear between "said" and "Miriam". 
 
-Quelle is designed to be intuitive. It provides the ability to invoke Boolean logic for term-matching linguistic feature-matching. As we saw above, the pipe symbol ( | ) can be used to invoke an *OR* condition In effect, this invokes Boolean multiplication on the terms and features that compose the expression.
+Quelle is designed to be intuitive. It provides the ability to invoke Boolean logic for term-matching and/or linguistic feature-matching. As we saw above, the pipe symbol ( | ) can be used to invoke an *OR* condition In effect, this invokes Boolean multiplication on the terms and features that compose the expression.
 
 The ampersand symbol can similarly be used to represent *AND* conditions upon terms. As an example. the English language contains words that can sometimes as a noun , and other times as a noun or other part-of-speech. To determine if the bible text contains the word "part" where it is used as a verb, we can issue this command:
 
 "part&/noun/"
 
-The SDK, provided by Digital-AV, has marked each word of the bible text for part-of-speech. With Quelle's rich syntax, make this type of search easy and intuitive.
+The SDK, provided by Digital-AV, has marked each word of the bible text for part-of-speech. With Quelle's rich syntax, this type of search is easy and intuitive.
 
 Of course, part-of-speech expressions can also be used independently of the an AND condition, as follows:
 
@@ -194,13 +194,13 @@ this&that
 
 /noun/ & /verb/
 
+Both of the statements above are valid, but will not match any results. Search statements attempt to match actual words in  the actual bible text. A bord cannot be "this" **and** "that". Likewise, an individual word in a sentence does not operate as a /noun/ **and** a /verb/.
+
 **Negating search-terms Example:**
 
-Consider a query for all passages that contain a word beginning, followed by any word that is neither a verb nor an adverb:
+Consider a query for all passages that contain a word neginning with "Lord", followed by any word that is neither a verb nor an adverb:
 
 %span = 15 "Lord\* -:/v/ & -:/adv/"
-
-Both of the statements above are valid, but will not match any results. Search statements attempt to match actual words in  the actual bible text. A bord cannot be "this" **and** "that". Likewise, an individual word in a sentence does not operate as a /noun/ **and** a /verb/. Contrariwise, these searches are valid, but would also return numerous matches:
 
 this|that
 
