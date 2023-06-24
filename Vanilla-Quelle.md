@@ -109,7 +109,7 @@ As search is a fundamental concern of Quelle, it is optimized to make compound i
 | Description                             | Example                                  |
 | --------------------------------------- | :--------------------------------------- |
 | SYSTEM command                          | @help                                    |
-| SEARCH filters                          | < Genesis < Exodus < Revelation          |
+| SEARCH filters                          | < Wall-Street-Jornal < Washington-Post   |
 | SEARCH specification                    | this is some text expected to be found   |
 | Compound statement: two SEARCH actions  | "this quoted text" + other unquoted text |
 | Compound statement: two CONTROL actions | %span = 7 %similarity = 85               |
