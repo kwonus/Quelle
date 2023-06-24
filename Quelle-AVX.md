@@ -148,7 +148,7 @@ Consider this proximity search where the search using Quelle syntax:
 
 *lexicon=KJV  Moses*
 
-Quelle syntax can alter the span by also supplying an additional CONTROL action:
+Quelle syntax can define the lexicon by also supplying an additional CONTROL action:
 
 *lexicon=KJV  Moses*
 
