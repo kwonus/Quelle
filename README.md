@@ -21,5 +21,5 @@ That said, a dialect of Quelle, optimized for the Digital-AV, can be found here:
 
 <br/></br>
 # What's Available?
-- A REST implementation is available in the project named [pin-shot-blue](https://github.com/kwonus/Pin-Shot-Blue) in my github repo
-- A DLL (library) implementation is available in the project named [pin-shot-avx](https://github.com/kwonus/pin-shot-avx) in my github repo
+- A REST implementation is available in the project named [pinshot-svc](https://github.com/kwonus/pinshot-SVC) in my github repo
+- A DLL (library) implementation is available in the project named [pinshot-blue](https://github.com/kwonus/pinshot-blue) in my github repo
