@@ -785,59 +785,105 @@ results:
 
 ```protobuf
 attribute "fs_serializer";
+attribute "fs_rpcInterface";
+attribute "fs_sharedString";
 
-namespace Blueprint.FlatBuf;
+namespace XBlueprintBlue;
 
-enum XLexEnum:  byte { AV = 0, AVX = 1 }
-enum XFmtEnum:  byte { JSON = 0, TEXT = 1, HTML = 2, MD = 3 }
-enum XLangEnum: byte { H = 1, G = 2, X = 0 }
+enum XThreshold: byte { NONE = 0, FUZZY_MIN = 33, FUZZY_MAX = 99, EXACT = 100 }
+enum XOutEnum:   byte { AV = 1, AVX = 2 }
+enum XLexEnum:   byte { AV = 1, AVX = 2, BOTH = 3 }
+enum XFmtEnum:   byte { JSON = 0, TEXT = 1, HTML = 2, MD = 3 }
+enum XLangEnum:  byte { H = 1, G = 2, X = 0 }
+enum XUserEnum:  byte { ANONYMOUS = 0, EXISTING = 1, NEW = 2, RESET = 3, UNKNOWN = 4 }
+enum XStatusEnum:byte { COMPLETED = 0, FEEDBACK_EXPECTED = 1, ERROR = 2, UNKNOWN = 3 }
+//   When Status == COMPLETED: there is no further action required by avx-command [same is true for ERROR and UNKNOWN] // although reporting status or error to the user may still be warrented
+//   When Status == ACTION_REQUIRED: the verb will not be complete until avx-command performs additional actions
+//   When Status == FEEDBACK_REQUESTED: this is similar to ACTION_REQUIRED, but a return message from avx-command is also expected subsequently
+//   (feedback message facillitates search summaries to be written into the command history; blueprint-blue manages all user-persisted data)
 
-table XRequest (fs_serializer) {
+table XUser (fs_serializer) {
+    username:    string      (required);
+    disposition: XUserEnum   = ANONYMOUS;
+}
+
+table XBlueprint (fs_serializer) { // was: XRequest
     settings:    XSettings   (required);
+    search:    [ XSearch ];
     scope:     [ XScope ];
-    search:      XRequest    (required);
-    render:      XScope;
+    singleton:   XCommand;
+    status:      XStatusEnum = UNKNOWN;  // required
+    help:        string      (required); // url of help-file for singleton.command xor search.expression  [likely on github for automatic markdown to html conversion]
+    warnings:  [ string ];
+    errors:    [ string ];
+}
+
+table XCommand (fs_serializer) { // for singleton expressions
+    command:     string      (required);
+    verb:        string      (required);
+    arguments: [ string ];
+    reply:       XReply;
+}
+
+table XReply (fs_serializer) {
+    version:     string;      // for @version
+    help:        string;      // for @help
+    value:       string;      // for @get
+    macro:       XStatement;  // for @expand
+    history:   [ XStatement ];// for @review (history)
+}
+
+table XStatement (fs_serializer) {
+    id:          uint32 = 0;  // required for @review (history)
+    label:       string;      // required for @expand reply
+    time:        uint64 = 0;  // required
+    stmt:        string      (required);
+    expd:        string      (required);
+    summary:     string;      // defined only for searches
+    settings:    XSettings   (required);
 }
 
 table XSearch (fs_serializer) {
-    search:      string      (required);
-    negate:      bool        = false;
+    expression:  string      (required);
     quoted:      bool        = false;
     segments:  [ XSegment ]  (required);
 }
 
 table XSegment (fs_serializer) {
-    anchored:    bool         = false;
-    segments:  [ XFragment ]  (required);
+    segment:     string      (required);
+    anchored:    bool        = false;
+    fragments:  [ XFragment ] (required);
 }
 
 table XFragment (fs_serializer) {
-    features:  [ XFeature ]   (required);
+    fragment:    string      (required);
+    features:  [ XFeature ]  (required);
 }
 
-table XFeature (fs_serializer) {
-    text:        string      (required);
-    rule:        string      (required);
-    negate:      bool        = false;
-    match:       XCompare    (required);
-}
-
-union XCompare (fs_serializer) {
+union XCompare {
     text:        XWord,
     lemma:       XLemma,
     pos16:       XPOS16,
     pos32:       XPOS32,
     punctuation: XPunctuation,
+    transition:  XTransition,
     strongs:     XStrongs,
     delta:       XDelta
 }
 
+table XFeature (fs_serializer) {
+    feature:     string      (required);
+    rule:        string      (required);
+    negate:      bool        = false;
+    match:       XCompare    (required);
+}
+
 table XWord (fs_serializer) {
-    values:    [ uint16 ] (required);
+    wkeys:     [ uint16 ] (required);
 }
 
 table XLemma (fs_serializer) {
-    values:    [ uint16 ] (required);
+    lemmata:   [ uint16 ] (required);
 }
 
 table XPOS32 (fs_serializer) {
@@ -852,6 +898,10 @@ table XPunctuation (fs_serializer) {
     bits:        uint8;
 }
 
+table XTransition (fs_serializer) {
+    bits:        uint8;
+}
+
 table XStrongs (fs_serializer) {
     lang:        XLangEnum = X;    
     number:      uint16;
@@ -862,9 +912,10 @@ table XDelta (fs_serializer) {
 }
 
 table XSettings (fs_serializer) {
-    similarity:  byte     = 0;
+    similarity:  string   (required);
     span:        uint16   = 0;
-    lexicon:     XLexEnum = AV;
+    lexicon:     XLexEnum = BOTH;
+    display:     XOutEnum = AV;
     format:      XFmtEnum = JSON;
 }
 
@@ -875,31 +926,7 @@ table XScope (fs_serializer) {
     vcount:      uint8 = 255;    // optional: verse-count: defaults to all remaining verses in chapter
 }
 
-table XResults (fs_serializer) {
-    settings:    XSettings (required);
-    scope:     [ XScope ]  (required);
-    matches:   [ XFind ];
-    errors:    [ string ];
-    warnings:  [ string ];
-}
-
-table XFind (fs_serializer) {
-    search:      string    (required);
-    negate:      bool      = false;
-    found:     [ XFound ];
-}
-
-table XFound (fs_serializer) {
-    start:       uint32 = 0; // required;
-    until:       uint32 = 0; // required;
-    matches:   [ XMatch ]  (required);
-}
-
-table XMatch (fs_serializer) {
-    fragment:    string    (required);
-    feature:     string    (required);
-    match:       uint32 = 0; // required; match represents coordinates of matching feature: BB_CC_VV_WW
-}
+root_type XBlueprint;
 ```
 
 ### Appendix G. Extern C functions for Searching and Rendering
