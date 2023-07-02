@@ -63,7 +63,7 @@ Quelle Syntax comprises seventeen (17) verbs. Each verb corresponds to a basic a
 - version
 - exit
 
-Quelle is an open and extensible standard, additional verbs, and verbs for other languages can be defined without altering the overall syntax structure of the Quelle HMI. The remainder of this document describes Version 1.0 of the Quelle-HMI specification.  
+Quelle is an open and extensible standard, additional verbs, and verbs for other languages can be defined without altering the overall syntax structure of the Quelle HMI. The remainder of this document describes Version 2.0 of the Quelle-HMI Level-II specification with AVX extemsions.  Moreover, there is no need to consult the Vanilla-Quelle documention, as all simililarities are likeliwise documented here.
 
 In Quelle terminology, a statement is made up of one or more clauses. Each clause represents an action. While there are seventeen action-verbs, there are only five syntax categories:
 
