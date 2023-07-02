@@ -192,7 +192,7 @@ this&that
 
 /noun/ & /verb/
 
-Both of the statements above are valid, but will not match any results. Search statements attempt to match actual words in  the actual bible text. A bord cannot be "this" **and** "that". Likewise, an individual word in a sentence does not operate as a /noun/ **and** a /verb/.
+Both of the statements above are valid, but will not match any results. Search statements attempt to match actual words in  the actual bible text. A word cannot be "this" **and** "that". Likewise, an individual word in a sentence does not operate as a /noun/ **and** a /verb/.
 
 **Negating search-terms Example:**
 
