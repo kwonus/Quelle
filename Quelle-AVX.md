@@ -215,7 +215,7 @@ Due to the latter condition above, SEARCH summarizes results (it does NOT displa
 
 "Jesus answered"			*summarize documents that contain this phrase, with paragraph references*
 
-"Jesus answered" [ ]        *display every matching phrase* // equivalent to Jesus answered"
+"Jesus answered" [ ]        *display every matching phrase*
 
 "Jesus answered" [1]  *this would would display only the first matching phrase*
 
