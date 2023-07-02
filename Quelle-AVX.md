@@ -91,7 +91,7 @@ In Quelle terminology, a statement is made up of one or more clauses. Each claus
    - @review		 (review history)
    - @initialize	  (clear all history)
 
-Each syntax category has either explicit and/or implicit actions.  Explicit actions begin with the @ symbol, immediately followed by the explicit verb.  Implicit actions are inferred by the syntax of the command.
+Each command has either a single explicit action or any number of implicit actions.  Explicit actions begin with the @ symbol, immediately followed by the explicit verb.  Implicit actions are inferred by the syntax of the command.
 
 ### IV. Fundamental Quelle Commands
 
