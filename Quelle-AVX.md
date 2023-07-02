@@ -176,7 +176,7 @@ Quelle is designed to be intuitive. It provides the ability to invoke Boolean lo
 
 The ampersand symbol can similarly be used to represent *AND* conditions upon terms. As an example. the English language contains words that can sometimes as a noun , and other times as a noun or other part-of-speech. To determine if the bible text contains the word "part" where it is used as a verb, we can issue this command:
 
-"part&/noun/"
+"part&/verb/"
 
 The SDK, provided by Digital-AV, has marked each word of the bible text for part-of-speech. With Quelle's rich syntax, this type of search is easy and intuitive.
 
