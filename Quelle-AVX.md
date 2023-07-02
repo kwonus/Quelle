@@ -1,6 +1,6 @@
 # Quelle Specification for AVXLib
 
-##### AVX-Quelle version 2.0.3.612
+##### AVX-Quelle version 2.0.3.701
 
 ### I. Background
 
@@ -271,15 +271,15 @@ vanity < sos < 1co
 
 ### IX. Labeling & Reviewing Statements for subsequent invocation
 
-| Verb            | Action Type | Syntax Category           | Expected Arguments        | Required Operators |
-| --------------- | ----------- | ------------------------- | ------------------------- | :----------------: |
-| *invoke*        | implicit    | HISTORY & LABELING        | *label* or *id*           |   **$** *label*    |
-| *apply*         | implicit    | HISTORY & <u>LABELING</u> | *label*                   |  **\|\|** *label*  |
-| **@delete**     | explicit    | HISTORY & <u>LABELING</u> | *label*                   |      *label*       |
-| **@expand**     | explicit    | HISTORY & LABELING        | *label* or *id*           |  *label* or *id*   |
-| **@absorb**     | explicit    | CONTROL                   | *label* or *id*           |  *label* or *id*   |
-| **@review**     | explicit    | <u>HISTORY</u> & LABELING | **optional:** *max_count* |                    |
-| **@initialize** | explicit    | <u>HISTORY</u> & LABELING |                           |                    |
+| Verb            | Action Type | Syntax Category           | Expected Arguments                   | Required Operators |
+| --------------- | ----------- | ------------------------- | ------------------------------------ | :----------------: |
+| *invoke*        | implicit    | HISTORY & LABELING        | *label* or *id*                      |   **$** *label*    |
+| *apply*         | implicit    | HISTORY & <u>LABELING</u> | *label*                              |  **\|\|** *label*  |
+| **@delete**     | explicit    | HISTORY & <u>LABELING</u> | *label*                              |      *label*       |
+| **@expand**     | explicit    | HISTORY & LABELING        | *label* or *id*                      |  *label* or *id*   |
+| **@absorb**     | explicit    | CONTROL                   | *label* or *id*                      |  *label* or *id*   |
+| **@review**     | explicit    | <u>HISTORY</u> & LABELING | **optional:** *max_count date_range* |                    |
+| **@initialize** | explicit    | <u>HISTORY</u> & LABELING |                                      |                    |
 
 **TABLE 9-1** -- **Labeling statements and reviewing statement history**
 
@@ -402,6 +402,18 @@ To show the last three searches, type:
 To show the last twenty searches, type:
 
 *@review* 20 
+
+To show the last twenty searches using date ranges, type any of:
+
+*@review* after since 2023/07/04
+
+*@review* until 2023/07/04
+
+*@review* after 2023/07/04 until 2024/07/04 
+
+*@review* 20 after 2023/07/04 until 2024/07/04 
+
+All ranges are inclusive. Therefore, commands on July 4th would also be included.
 
 **INVOKE**
 
