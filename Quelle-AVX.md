@@ -795,7 +795,7 @@ results:
 
 ### Appendix F. FlatBuffer schema for request/reply of searches to search-provider
 
-```protobuf
+```yaml
 attribute "fs_serializer";
 attribute "fs_rpcInterface";
 attribute "fs_sharedString";
