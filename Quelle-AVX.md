@@ -180,7 +180,7 @@ The ampersand symbol can similarly be used to represent *AND* conditions upon te
 
 The SDK, provided by Digital-AV, has marked each word of the bible text for part-of-speech. With Quelle's rich syntax, this type of search is easy and intuitive.
 
-Of course, part-of-speech expressions can also be used independently of the an AND condition, as follows:
+Of course, part-of-speech expressions can also be used independently of an AND condition, as follows:
 
 %span = 6 + "/noun/ ... home"
 
