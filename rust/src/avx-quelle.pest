@@ -10,10 +10,11 @@
 // fragments contain [>= 1] features
 // fragments are used to match terms (i.e. word tokens) across the corpus being searched; match logic should consider all features of the fragment/token when deeming it to be matched
 //
-// Version: 2.0.3.708
 
 WHITESPACE = _ { " " | "\t" | "\r" | "\n" }
-statement = { singleton | macro_vector | vector }
+statement = { singleton | macro_vector | vector | avx_rev }
+AVX_QUERY = _{ ^"_AVX_REV_" ~  ":=" }
+avx_rev = { AVX_QUERY ~ "2.0.3.901" }   // unpublished grammar rule allows clients to assert expected version compatibility via extern C function call
 
 invocation = ${ invoke ~ control_suffix? }
 macro_vector = { IMPLICIT+ ~ apply }
@@ -23,12 +24,15 @@ singleton = { exit | help | history | expand | delete | absorb | version | get |
 IMPLICIT = _{ IMPLICIT_OTHER | IMPLICIT_SEARCH }
 implicit_singletons = { (print ~ export?) | (export ~ print?) }
 export = { (output | append | overwrite) }
-IMPLICIT_SEARCH = _{ DELIMITER? ~ search }
+IMPLICIT_SEARCH = _{ search ~ SEARCH_EXPLICIT_TERMINATOR? }
 IMPLICIT_OTHER = _{ filter | setting | invocation }
 filter = { FILTER_OP ~ (bookName | bookNum) ~ (verse | chapter)? }
 
 item = { (text | pos | pn_pos12 | pos32 | nupos | greek | hebrew | loc | seg | lemma | wildcard | punc | decoration | delta ) }
 feature = { not? ~ item}
+fragment = { feature ~ (OR ~ feature)* } // Fragments have >= 1 features, separated by OR( | ) // Each single token need only match a single feature in the fragment to be deemed a full-match
+
+
 delta = { ^"/delta/" }
 
 pn = { ^"/1p/" | ^"/2p/" | ^"/3p/" | "/indefinite/" }
@@ -113,8 +117,7 @@ var = { span_key | lexicon_key | display_key | match_key | format_key }
 
 search = { ordered | unordered }   // quoted-searches are ordered // unquoted-searches are unordered
 
-segment = { fragment ~ (AND ~ fragment)* } // Segments have >= 1 Unquoted (unordered) fragments <xor> have >= quoted (ordered) fragments
-fragment = { feature+ } // Fragments have >= 1 features, separated by AND( & ) // A single token in a document must match all features to be deemed a full-match // partial-matches are not designed into the grammar
+segment = { fragment ~ (AND ~ fragment)* } // Segments have one or more unquoted (unordered) fragments <xor> have one or more quoted (ordered) fragments // Fragments are anded .... ALL MUST MATCH
 
 ordered = { QUOTE ~ (segment ~ (unanchored | segment)*) ~ QUOTE } // Quoted/Ordered segment
 unanchored = { ellipsis ~ segment }
@@ -149,9 +152,9 @@ match_key = @{ ^"similarity" }
 MATCH_VAR = _{ match_key }
 match_var = { VAR ~ MATCH_VAR ~ SETTING ~ match_option }
 match_set = { VAR ~ MATCH_VAR ~ EQUALS ~ match_option }
-match_option =${ ((FUZZY | EXACT) ~ disable_lemma_match) | NONE }
-EXACT = ${ ^"exact" ~ "100" }
-NONE = ${ ^"none" ~ "0" }
+match_option =${ ((FUZZY | PRECISE) ~ disable_lemma_match) | EXACT }
+PRECISE = ${ ^"precise" ~ "100" }
+EXACT = ${ ^"exact" ~ "0" }
 THIRTY_THREE_PLUS = ${ ("3" ~ ('3' .. '9')) }
 THIRTY_SOMETHING = _{ THIRTY_THREE_PLUS }
 FUZZY = ${ ( (('4' .. '9') ~ ('0' .. '9')) | ('1' .. '9') ) | THIRTY_SOMETHING } // legal thresholds are from 33 to 99 (100% is excluded because that would represent an exact-match
@@ -189,7 +192,7 @@ greek = ${ DIGITS ~ ^":G" }
 hebrew = ${ DIGITS ~ ^":H" }
 
 lemma = { "\\" ~ text ~ "\\" }
-wildcard = ${ (text ~ "*" ~ text) | ("*" ~text) | (text ~ "*" ) }
+wildcard = ${ text? ~ "*" ~ text? }
 ELLIPSIS = @{ "..." }
 ellipsis = _{ "..." }
 
@@ -500,7 +503,7 @@ HEX32 = ${ HEX ~ HEX ~ HEX ~ HEX ~ HEX ~ HEX ~ HEX ~ HEX }
 ALPHA = _{ 'a' .. 'z' | 'A' .. 'Z' }
 AND = _{ "&" }
 OR = _{ "|" }
-DELIMITER = _{ "+" | ";" }
+SEARCH_EXPLICIT_TERMINATOR = _{ "+" | ";" }
 EQUALS = _{ "=" }
 OPEN_BRACE = _{ "[" }
 CLOSE_BRACE = _{ "]" }
