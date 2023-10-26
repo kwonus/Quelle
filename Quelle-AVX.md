@@ -214,7 +214,7 @@ Both of the statements above are valid, but will not match any results. Search s
 
 **Negating search-terms Example:**
 
-Consider a query for all passages that contain a word neginning with "Lord", followed by any word that is neither a verb nor an adverb:
+Consider a query for all passages that contain a word beginning with "Lord", followed by any word that is neither a verb nor an adverb:
 
 %span = 15 "Lord\* -:/v/ & -:/adv/"
 
