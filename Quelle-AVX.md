@@ -156,7 +156,7 @@ Consider these two examples of Quelle statements (first CONTROL; then SEARCH):
 
 Notice that both statements above are single actions.  We should have a way to express both of these in a single command. And this is the rationale behind a compound statement. To combine the previous two actions into one compound statement, issue this command:
 
-"Moses" lexicon=KJV
+"Moses" %lexicon=KJV
 
 ### V. Deep Dive into Quelle SEARCH actions
 
@@ -166,7 +166,7 @@ Consider this proximity search where the search using Quelle syntax:
 
 Quelle syntax can define the lexicon by also supplying an additional CONTROL action:
 
-*span=7 lexicon=KJV  Moses Aaron*
+*%span=7 %lexicon=KJV  Moses Aaron*
 
 The statement above has two CONTROL actions and one SEARCH action
 
