@@ -1,4 +1,4 @@
-# Quelle Specification for AVXLib
+# Quelle Specification for AVX Framework
 
 ##### AVX-Quelle version 2.0.3.901
 
@@ -10,11 +10,11 @@ The vast world of search is rife for a standardized search-syntax that moves us 
 
 Quelle, IPA: [kɛl], in French means "What? or Which?". As Quelle HMI is designed to obtain search-results from search-engines, this interrogative nature befits its name. An earlier interpreter, Clarity, served as inspiration for defining Quelle.  You could think of the Quelle HMI as the next generation of Clarity HMI.  Yet, in order to produce linguistic consistency, Quelle syntax varied dramatically from the Clarity spec. Therefore, a new name was the best way forward.  Truly, Quelle HMI incorporates lessons learned after creating, implementing, and revising Clarity HMI for over a decade.
 
-In 2023, Quelle 2.0 was released. This new release is not a radical divergence from version 1. Most of the updates to the specification are related to macros, control variables, filters, and export directives. Search syntax has remained largely unchanged. We discovered some ambiguity in the PEG grammar that implements the Quelle parser. Certain implicit actions could not be defined deterministically. To resolve those ambiguities, Quelle syntax was refined and updated. Consequently, new operators were introduced  [We added $ % and || to name a few] . These revisions mostly eliminated the need for clause delimiters. As a result, the version 2 spec feels more streamlined, more intuitive, and comes with a reference implementation in Rust, along with a fully specified PEG grammar.  Implicit actions for Macros are now referred to as *apply* and *invoke* [those verbs replace *save* and *execute* respectively].
+In 2023, Quelle 2.0 was released. This new release is not a radical divergence from version 1. Most of the updates to the specification are related to macros, control variables, filters, and export directives. Search syntax has remained largely unchanged. We discovered some ambiguity in the PEG grammar that implements the Quelle parser. Certain implicit actions could not be defined deterministically. To resolve those ambiguities, Quelle syntax was refined and updated. Consequently, new operators were introduced  [We added $ % and || to name a few] . These new operators eliminate the need for clause delimiters, in most circumstances. As a result, the version 2 syntax is more streamlined and more intuitive. It comes with a reference implementation in Rust and a fully specified PEG grammar.  Implicit actions for Macros are now referred to as *apply* and *invoke* [those verbs replace *save* and *execute* respectively].
 
-Every attempt has been made to make Quelle consistent with itself. Some constructs are in place to make parsing unambiguous; other constructs are biased toward ease of typing (such as limiting keystrokes that require the shift key). Naturally, existing scripting languages also influence our syntax. In all, Quelle represents an easy to type and easy to learn HMI.  Moreover, simple search statements look no different than they might appear today in a Google or Bing search box. Still, let's not get ahead of ourselves or even hint about where our simple specification might take us ;-)
+Quelle is consistent with itself, to make it feel intuitive. Some constructs make parsing unambiguous; other constructs increase ease of typing (Specifically, we attempt to minimize the need to press the shift-key). Naturally, existing scripting languages also influence our syntax. Quelle represents an easy to type and easy to learn HMI.  Moreover, simple search statements look no different than they might appear today in a Google or Bing search box. Still, let's not get ahead of ourselves or even hint about where our simple specification might take us ;-)
 
-Incidentally, a fundamental change in Quelle 2.0 is that support for bracketed search terms has been dropped. While parsing bracketed terms was easily specified by a PEG grammar, the search implementation itself was complex and quite confusing. In short, we have nixed bracketed terms from the grammar in the 2.0 specification.
+Finally, Quelle 2.0 has dropped support for "bracketed search terms". Bracketed search terms allowed some terms within a quoted string to be unordered. Bracketing signaled that those terms could be in any order. Issues surfaced when defining the blueprint-blue object model. Some terms needed to be in a specific order and others did not, all within the same search construct. To make matters worse, the construct was seldom used. Notwithstanding, bracketed terms were even difficult to explain. Rather than tackle these problems for such a minor feature, we elected to nix bracketed terms altogether in Quelle.
 
 ### II. Addendum
 
@@ -55,7 +55,7 @@ AVX-Quelle uses the AV-1769 edition of the sacred text. It substantially agrees 
 
 These releases were found at the [older/legacy] avbible.net website. Initially [decades ago], these releases were found on internet bulletin boards and the [now defunct] bible.advocate.com website.
 
-Please see https://Digital-AV.org for additional information and history.
+Please see https://Digital-AV.org for additional information about the SDK.
 
 ### III. Quelle Syntax
 
@@ -520,11 +520,11 @@ Type this to terminate the Quelle interpreter:
 
 
 
-| **example**    | **explanation**                                              |
-| -------------- | ------------------------------------------------------------ |
-| span = 8       | Assign a control setting                                     |
-| **@get** span  | get a control setting                                        |
-| span = default | Clear the control setting; restoring the Quelle driver default setting |
+| **example**     | **explanation**                                              |
+| --------------- | ------------------------------------------------------------ |
+| %span = 8       | Assign a control setting                                     |
+| **@get** span   | get a control setting                                        |
+| %span = default | Clear the control setting; restoring the Quelle driver default setting |
 
 **TABLE 12-3** -- **set/clear/get** action operate on configuration settings
 
@@ -663,62 +663,62 @@ hyphen+colon ( **-:** ) means that any non-match satisfies the search condition.
 
 The lexical search domain of AVX-Quelle includes all words in the original KJV text. It can also optionally search using a modernized lexicon of the KJV (e.g. hast and has; this is controllable with the %lexicon setting).  The table below lists additional linguistic extensions available in AVX-Quelle, which happens to be a Level-II Quelle implementation.
 
-| Search Term   | Operator Type      | Meaning                                                      | Maps To                                | Mask     |
-| ------------- | ------------------ | ------------------------------------------------------------ | -------------------------------------- | -------- |
-| Jer\*         | wildcard           | starts with Jer                                              | selects from lexicon                   | 0x3FFF   |
-| \*iah         | wildcard           | ends with iah                                                | selects from lexicon                   | 0x3FFF   |
-| Jer\*iah      | wildcard           | starts with Jer and ends with iah                            | Jer\* & \*iah                          | as above |
-| \\is\\        | lemma              | search on all words that share the same lemma as is: be, is, are, art, etc | be\|is\|are\|art\|...                  | 0x3FFF   |
-| /noun/        | lexical marker     | any word where part of speech is a noun                      | POS12::0x010                           | 0x0FF0   |
-| /n/           | lexical marker     | synonym for /noun/                                           | POS12::0x010                           | 0x0FF0   |
-| /verb/        | lexical marker     | any word where part of speech is a verb                      | POS12::0x100                           | 0x0FF0   |
-| /v/           | lexical marker     | synonym for /verb/                                           | POS12::0x100                           | 0x0FF0   |
-| /pronoun/     | lexical marker     | any word where part of speech is a pronoun                   | POS12::0x020                           | 0x0FF0   |
-| /pn/          | lexical marker     | synonym for /pronoun/                                        | POS12::0x020                           | 0x0FF0   |
-| /adjective/   | lexical marker     | any word where part of speech is an adjective                | POS12::0xF00                           | 0x0FFF   |
-| /adj/         | lexical marker     | synonym for /adjective/                                      | POS12::0xF00                           | 0x0FFF   |
-| /adverb/      | lexical marker     | any word where part of speech is an adverb                   | POS12::0xA00                           | 0x0FFF   |
-| /adv/         | lexical marker     | synonym for /adverb/                                         | POS12::0xA00                           | 0x0FFF   |
-| /determiner/  | lexical marker     | any word where part of speech is a determiner                | POS12::0xD00                           | 0x0FF0   |
-| /det/         | lexical marker     | synonym for /determiner/                                     | POS12::0xD00                           | 0x0FF0   |
-| /preposition/ | lexical marker     | any word where part of speech is a preposition               | POS12::0x400                           | 0x0FF0   |
-| /prep/        | lexical marker     | any word where part of speech is a preposition               | POS12::0x400                           | 0x0FF0   |
-| /1p/          | lexical marker     | any word where it is inflected for 1st person (pronouns and verbs) | POS12::0x100                           | 0x3000   |
-| /2p/          | lexical marker     | any word where it is inflected for 2nd person (pronouns and verbs) | POS12::0x200                           | 0x3000   |
-| /3p/          | lexical marker     | any word where it is inflected for 3rd person (pronouns, verbs, and nouns) | POS12::0x300                           | 0x3000   |
-| /singular/    | lexical marker     | any word that is known to be singular (pronouns, verbs, and nouns) | POS12::0x400                           | 0xC000   |
-| /plural/      | lexical marker     | any word that is known to be plural (pronouns, verbs, and nouns) | POS12::0x800                           | 0xC000   |
-| /WH/          | lexical marker     | any word that is a WH word (e.g., Who, What, When, Where, How) | POS12::0xC00                           | 0xC000   |
-| /BoB/         | transition marker  | any word where it is the first word of the book (e.g. first word in Genesis) | TRAN::0xE0                             | 0xF0     |
-| /BoC/         | transition marker  | any word where it is the first word of the chapter           | TRAN::0x60                             | 0xF0     |
-| /BoV/         | transition marker  | any word where it is the first word of the verse             | TRAN::0x20                             | 0xF0     |
-| /EoB/         | transition marker  | any word where it is the last word of the book (e.g. last word in revelation) | TRAN::0xF0                             | 0xF0     |
-| /EoC/         | transition marker  | any word where it is the last word of the chapter            | TRAN::0x70                             | 0xF0     |
-| /EoV/         | transition marker  | any word where it is the last word of the verse              | TRAN::0x30                             | 0xF0     |
-| /Hsm/         | segment marker     | Hard Segment Marker (end) ... one of \. \? \!                | TRAN::0x40                             | 0x07     |
-| /Csm/         | segment marker     | Core Segment Marker (end) ... \:                             | TRAN::0x20                             | 0x07     |
-| /Rsm/         | segment marker     | Real Segment Marker (end) ... one of \. \? \! \:             | TRAN::0x60                             | 0x07     |
-| /Ssm/         | segment marker     | Soft Segment Marker (end) ... one of \, \; \( \) --          | TRAN::0x10                             | 0x07     |
-| /sm/          | segment marker     | Any Segment Marker (end)  ... any of the above               | TRAN::!=0x00                           | 0x07     |
-| /_/           | punctuation        | any word that is immediately marked for clausal punctuation  | PUNC::!=0x00                           | 0xE0     |
-| /!/           | punctuation        | any word that is immediately followed by an exclamation mark | PUNC::0x80                             | 0xE0     |
-| /?/           | punctuation        | any word that is immediately followed by a question mark     | PUNC::0xC0                             | 0xE0     |
-| /./           | punctuation        | any word that is immediately followed by a period (declarative) | PUNC::0xE0                             | 0xE0     |
-| /-/           | punctuation        | any word that is immediately followed by a hyphen/dash       | PUNC::0xA0                             | 0xE0     |
-| /;/           | punctuation        | any word that is immediately followed by a semicolon         | PUNC::0x20                             | 0xE0     |
-| /,/           | punctuation        | any word that is immediately followed by a comma             | PUNC::0x40                             | 0xE0     |
-| /:/           | punctuation        | any word that is immediately followed by a colon (information follows) | PUNC::0x60                             | 0xE0     |
-| /'/           | punctuation        | any word that is possessive, marked with an apostrophe       | PUNC::0x10                             | 0x10     |
-| /)/           | parenthetical text | any word that is immediately followed by a close parenthesis | PUNC::0x0C                             | 0x0C     |
-| /(/           | parenthetical text | any word contained within parenthesis                        | PUNC::0x04                             | 0x04     |
-| /Italics/     | text decoration    | italicized words marked with this bit in punctuation byte    | PUNC::0x02                             | 0x02     |
-| /Jesus/       | text decoration    | words of Jesus marked with this bit in punctuation byte      | PUNC::0x01                             | 0x01     |
-| /delta/       | lexicon            | [archaic] word can be transformed into modern American English |                                        |          |
-| \#FFFF        | PN+POS(12)         | hexadecimal representation of bits for a PN+POS(12) value.   | See Digital-AV SDK                     | uint16   |
-| \#FFFFFFFF    | POS(32)            | hexadecimal representation of bits for a POS(32) value.      | See Digital-AV SDK                     | uint32   |
-| #string       | nupos-string       | NUPOS string representing part-of-speech. This is the preferred syntax over POS(32), even though they are equivalent. NUPOS part-of-speech values have higher fidelity than the 16-bit PN+POS(12) representations. | See Part-of-Speech-for-Digital-AV.docx | uint64   |
-| 99999:H       | Strongs Number     | decimal Strongs number for the Hebrew word in the Old Testament | One of Strongs\[4\]                    | 0x7FFF   |
-| 99999:G       | Strongs Number     | decimal Strongs number for the Greek word in the New Testament | One of Strongs\[4\]                    | 0x7FFF   |
+| Search Term   | Operator Type      | Meaning                                                      | Maps To                                | Mask   |
+| ------------- | ------------------ | ------------------------------------------------------------ | -------------------------------------- | ------ |
+| Jer\*         | wildcard           | starts with Jer                                              | selects from lexicon                   | 0x3FFF |
+| \*iah         | wildcard           | ends with iah                                                | selects from lexicon                   | 0x3FFF |
+| Jer\*iah      | wildcard           | starts with Jer and ends with iah                            | Jer\* & \*iah                          | 0x3FFF |
+| \\is\\        | lemma              | search on all words that share the same lemma as is: be, is, are, art, ... | be\|is\|are\|art\|...                  | 0x3FFF |
+| /noun/        | lexical marker     | any word where part of speech is a noun                      | POS12::0x010                           | 0x0FF0 |
+| /n/           | lexical marker     | synonym for /noun/                                           | POS12::0x010                           | 0x0FF0 |
+| /verb/        | lexical marker     | any word where part of speech is a verb                      | POS12::0x100                           | 0x0FF0 |
+| /v/           | lexical marker     | synonym for /verb/                                           | POS12::0x100                           | 0x0FF0 |
+| /pronoun/     | lexical marker     | any word where part of speech is a pronoun                   | POS12::0x020                           | 0x0FF0 |
+| /pn/          | lexical marker     | synonym for /pronoun/                                        | POS12::0x020                           | 0x0FF0 |
+| /adjective/   | lexical marker     | any word where part of speech is an adjective                | POS12::0xF00                           | 0x0FFF |
+| /adj/         | lexical marker     | synonym for /adjective/                                      | POS12::0xF00                           | 0x0FFF |
+| /adverb/      | lexical marker     | any word where part of speech is an adverb                   | POS12::0xA00                           | 0x0FFF |
+| /adv/         | lexical marker     | synonym for /adverb/                                         | POS12::0xA00                           | 0x0FFF |
+| /determiner/  | lexical marker     | any word where part of speech is a determiner                | POS12::0xD00                           | 0x0FF0 |
+| /det/         | lexical marker     | synonym for /determiner/                                     | POS12::0xD00                           | 0x0FF0 |
+| /preposition/ | lexical marker     | any word where part of speech is a preposition               | POS12::0x400                           | 0x0FF0 |
+| /prep/        | lexical marker     | any word where part of speech is a preposition               | POS12::0x400                           | 0x0FF0 |
+| /1p/          | lexical marker     | any word where it is inflected for 1st person (pronouns and verbs) | POS12::0x100                           | 0x3000 |
+| /2p/          | lexical marker     | any word where it is inflected for 2nd person (pronouns and verbs) | POS12::0x200                           | 0x3000 |
+| /3p/          | lexical marker     | any word where it is inflected for 3rd person (pronouns, verbs, and nouns) | POS12::0x300                           | 0x3000 |
+| /singular/    | lexical marker     | any word that is known to be singular (pronouns, verbs, and nouns) | POS12::0x400                           | 0xC000 |
+| /plural/      | lexical marker     | any word that is known to be plural (pronouns, verbs, and nouns) | POS12::0x800                           | 0xC000 |
+| /WH/          | lexical marker     | any word that is a WH word (e.g., Who, What, When, Where, How) | POS12::0xC00                           | 0xC000 |
+| /BoB/         | transition marker  | any word where it is the first word of the book (e.g. first word in Genesis) | TRAN::0xE0                             | 0xF0   |
+| /BoC/         | transition marker  | any word where it is the first word of the chapter           | TRAN::0x60                             | 0xF0   |
+| /BoV/         | transition marker  | any word where it is the first word of the verse             | TRAN::0x20                             | 0xF0   |
+| /EoB/         | transition marker  | any word where it is the last word of the book (e.g. last word in revelation) | TRAN::0xF0                             | 0xF0   |
+| /EoC/         | transition marker  | any word where it is the last word of the chapter            | TRAN::0x70                             | 0xF0   |
+| /EoV/         | transition marker  | any word where it is the last word of the verse              | TRAN::0x30                             | 0xF0   |
+| /Hsm/         | segment marker     | Hard Segment Marker (end) ... one of \. \? \!                | TRAN::0x40                             | 0x07   |
+| /Csm/         | segment marker     | Core Segment Marker (end) ... \:                             | TRAN::0x20                             | 0x07   |
+| /Rsm/         | segment marker     | Real Segment Marker (end) ... one of \. \? \! \:             | TRAN::0x60                             | 0x07   |
+| /Ssm/         | segment marker     | Soft Segment Marker (end) ... one of \, \; \( \) --          | TRAN::0x10                             | 0x07   |
+| /sm/          | segment marker     | Any Segment Marker (end)  ... any of the above               | TRAN::!=0x00                           | 0x07   |
+| /_/           | punctuation        | any word that is immediately marked for clausal punctuation  | PUNC::!=0x00                           | 0xE0   |
+| /!/           | punctuation        | any word that is immediately followed by an exclamation mark | PUNC::0x80                             | 0xE0   |
+| /?/           | punctuation        | any word that is immediately followed by a question mark     | PUNC::0xC0                             | 0xE0   |
+| /./           | punctuation        | any word that is immediately followed by a period (declarative) | PUNC::0xE0                             | 0xE0   |
+| /-/           | punctuation        | any word that is immediately followed by a hyphen/dash       | PUNC::0xA0                             | 0xE0   |
+| /;/           | punctuation        | any word that is immediately followed by a semicolon         | PUNC::0x20                             | 0xE0   |
+| /,/           | punctuation        | any word that is immediately followed by a comma             | PUNC::0x40                             | 0xE0   |
+| /:/           | punctuation        | any word that is immediately followed by a colon (information follows) | PUNC::0x60                             | 0xE0   |
+| /'/           | punctuation        | any word that is possessive, marked with an apostrophe       | PUNC::0x10                             | 0x10   |
+| /)/           | parenthetical text | any word that is immediately followed by a close parenthesis | PUNC::0x0C                             | 0x0C   |
+| /(/           | parenthetical text | any word contained within parenthesis                        | PUNC::0x04                             | 0x04   |
+| /Italics/     | text decoration    | italicized words marked with this bit in punctuation byte    | PUNC::0x02                             | 0x02   |
+| /Jesus/       | text decoration    | words of Jesus marked with this bit in punctuation byte      | PUNC::0x01                             | 0x01   |
+| /delta/       | lexicon            | [archaic] word can be transformed into modern American English |                                        |        |
+| \#FFFF        | PN+POS(12)         | hexadecimal representation of bits for a PN+POS(12) value.   | See Digital-AV SDK                     | uint16 |
+| \#FFFFFFFF    | POS(32)            | hexadecimal representation of bits for a POS(32) value.      | See Digital-AV SDK                     | uint32 |
+| #string       | nupos-string       | NUPOS string representing part-of-speech. This is the preferred syntax over POS(32), even though they are equivalent. NUPOS part-of-speech values have higher fidelity than the 16-bit PN+POS(12) representations. | See Part-of-Speech-for-Digital-AV.docx | uint64 |
+| 99999:H       | Strongs Number     | decimal Strongs number for the Hebrew word in the Old Testament | One of Strongs\[4\]                    | 0x7FFF |
+| 99999:G       | Strongs Number     | decimal Strongs number for the Greek word in the New Testament | One of Strongs\[4\]                    | 0x7FFF |
 
 ### Appendix C. Object Model to support search tokens in Quelle-AVX
 
@@ -813,13 +813,9 @@ results:
         match: 0x58041624
 ```
 
-### Appendix F. FlatBuffer schema for request/reply of searches to search-provider
+### Appendix F. FlatBuffer schema of blueprint-blue object model for AVX-Quelle
 
 ```yaml
-attribute "fs_serializer";
-attribute "fs_rpcInterface";
-attribute "fs_sharedString";
-
 namespace XBlueprintBlue;
 
 enum XThreshold: byte { NONE = 0, FUZZY_MIN = 33, FUZZY_MAX = 99, EXACT = 100 }
@@ -828,23 +824,15 @@ enum XLexEnum:   byte { AV = 1, AVX = 2, BOTH = 3 }
 enum XFmtEnum:   byte { JSON = 0, TEXT = 1, HTML = 2, MD = 3 }
 enum XLangEnum:  byte { H = 1, G = 2, X = 0 }
 enum XUserEnum:  byte { ANONYMOUS = 0, EXISTING = 1, NEW = 2, RESET = 3, UNKNOWN = 4 }
-enum XStatusEnum:byte { COMPLETED = 0, FEEDBACK_EXPECTED = 1, ERROR = 2, UNKNOWN = 3 }
-//   When Status == COMPLETED: there is no further action required by avx-command [same is true for ERROR and UNKNOWN] // although reporting status or error to the user may still be warrented
-//   When Status == ACTION_REQUIRED: the verb will not be complete until avx-command performs additional actions
-//   When Status == FEEDBACK_REQUESTED: this is similar to ACTION_REQUIRED, but a return message from avx-command is also expected subsequently
-//   (feedback message facillitates search summaries to be written into the command history; blueprint-blue manages all user-persisted data)
-
-table XUser (fs_serializer) {
-    username:    string      (required);
-    disposition: XUserEnum   = ANONYMOUS;
-}
+enum XStatusEnum:byte { OKAY = 0, ERROR = -128 }
 
 table XBlueprint (fs_serializer) { // was: XRequest
+    command:     string      (required);
     settings:    XSettings   (required);
     search:    [ XSearch ];
     scope:     [ XScope ];
     singleton:   XCommand;
-    status:      XStatusEnum = UNKNOWN;  // required
+    status:      XStatusEnum = ERROR;  // required
     help:        string      (required); // url of help-file for singleton.command xor search.expression  [likely on github for automatic markdown to html conversion]
     warnings:  [ string ];
     errors:    [ string ];
@@ -910,12 +898,22 @@ table XFeature (fs_serializer) {
     match:       XCompare    (required);
 }
 
+// Most of the Blueprint-Blue flatbuffer object is generated from the Pinshot-Blue parse (Rust FFI).
+// However, XWord is now generated using the NUPhone assembly (C#).
+// This way, AVX-Search can perform fuzzy matches, w/o requiring a C++ implementation for English-to-IPA
+// (NUPhone comparison library will be ported to C++)
+
+table XLex (fs_serializer) {
+    key:         uint16 = 0;             // zero is a valid value for OOV items (items found neither in lexicon, nor in OOV-Lemmata)
+    variants:  [ string ];
+}
+
 table XWord (fs_serializer) {
-    wkeys:     [ uint16 ] (required);
+    lex:       [ XLex ] (required);
 }
 
 table XLemma (fs_serializer) {
-    lemmata:   [ uint16 ] (required);
+    lemmata:   [ XLex ] (required);
 }
 
 table XPOS32 (fs_serializer) {
