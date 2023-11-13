@@ -41,7 +41,7 @@ AVX-Quelle is a Level 2 implementation with augmented search capabilities. AVX-Q
 
    A %similarity setting of *precise* or 100 is a special case that still uses phonetics, but expects a full phonetic match (e.g. "there" and "their" are a 100% phonetic match).
 
-3. Automatic similarity matching on lemmas is implied when similarity is set between 33 and 100. Automatic similarity matching on lemmas can be disabled by appending an exclamation mark ( ! ) to the similarity threshold (e.g. %similarity = 75!). Automatic matching on lemmas never occurs when %similarity is set to *exact*.
+3. Automatic similarity matching on lemmas is implied when similarity is set between 33 and 100. Automatic similarity matching on lemmas can be disabled by appending an exclamation mark ( ! ) to the similarity threshold (e.g. %similarity = 75!). Automatic matching on lemmas never occurs when %similarity is set to *exact* or *none*.
 
 AVX-Quelle uses the AV-1769 edition of the sacred text. It substantially agrees with the "Bearing Precious Seed" bibles, as published by local church ministries. The text itself has undergone review by Christian missionaries, pastors, and lay people since the mid-1990's. The original incarnation of the digitized AV-1769 text was implemented in the free PC/Windows app known as:
 
