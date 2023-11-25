@@ -959,8 +959,8 @@ root_type XBlueprint;
 - Quelle expressions have one or more Quelle commands or segments
 - Search segments utilize the QFind class
 - Search segments have one or more fragments separated by whitespace (all fragments are implicit AND conditions)
-- Fragments have one or more OptionGroups [Option groups are AND conditions separated by & ]
-- OptionGroups have one or more Features [Features are OR conditions separated by | ]
+- Fragments have one or more MatchAny objects [MatchAny objects are explicit AND conditions, separated by & ]
+- MatchAny objects have one or more Features [Features are explicit OR conditions, separated by | ]
 - Features can be (negated) using a unary operator of -:
 
 #### Example
@@ -971,24 +971,24 @@ Two search segments (search segments are encapsulated by the QFind class):
 
 ​	search-segment-1: **Lord\* -:/v/ & -:/adv/**       (this has two fragments)
 
-​		fragment-1 has a single option-group
+​		fragment-1 has a single MatchAny object
 
-​			option-group has one [wildcard] feature: **Lord***
+​			MatchAny object has one [wildcard] feature: **Lord***
 
-​		fragment-2 has two option-groups (these are AND conditions)
+​		fragment-2 has two oMatchAny objects (these are AND conditions)
 
-​			option-group-1 has a single negated feature: **-:/v/** (NOT a VERB)
+​			MatchAny object-1 has a single negated feature: **-:/v/** (NOT a VERB)
 
-​			option-group-2 has a single negated feature: **-:/adv/** (NOT an ADVERB)
+​			MatchAny object-2 has a single negated feature: **-:/adv/** (NOT an ADVERB)
 
 ​	search-segment-2: **/v/|/n/ & -:run** has a single fragment
 
-​		The fragment has  two ANDed option groups
+​		The fragment has  two ANDed MatchAny objects
 
-​			option-group-1 has two ORed features: (IS a VERB) OR (IS a NOUN)
+​			MatchAny object-1 has two ORed features: (IS a VERB) OR (IS a NOUN)
 
-​			option-group-2 has a single negated feature: (NOT the word RUN) 
+​			MatchAny object-2 has a single negated feature: (NOT the word RUN) 
 
-As the plus sign implies, search segment results are ORed together
+NOTE: the plus sign between the two search segments above implies that results of the segments are ORed together.
 
 ​	
