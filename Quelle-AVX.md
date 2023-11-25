@@ -956,8 +956,9 @@ root_type XBlueprint;
 
 ### Appendix G. Developer Notes
 
-- Search expressions have one or more Search statements (Search statements utilize the QFind class)
-- Search statements or segments have one or more fragments separated by whitespace (all fragments are implicit AND conditions)
+- Quelle expressions have one or more Quelle commands or segments
+- Search segments utilize the QFind class
+- Search segments have one or more fragments separated by whitespace (all fragments are implicit AND conditions)
 - Fragments have one or more OptionGroups [Option groups are AND conditions separated by & ]
 - OptionGroups have one or more Features [Features are OR conditions separated by | ]
 - Features can be (negated) using a unary operator of -:
