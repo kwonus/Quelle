@@ -962,7 +962,6 @@ root_type XBlueprint;
 - Fragments have one or more OptionGroups [Option groups are AND conditions separated by & ]
 - OptionGroups have one or more Features [Features are OR conditions separated by | ]
 - Features can be (negated) using a unary operator of -:
-- Features can also be use explicit AND ( & ) xor explicit OR ( | )
 
 #### Example
 
