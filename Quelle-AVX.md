@@ -1,6 +1,6 @@
 # Quelle Specification for AVX Framework
 
-##### AVX-Quelle version 2.0.3.901
+##### AVX-Quelle version 2.0.3.B23
 
 ### I. Background
 
@@ -746,26 +746,22 @@ search:
   - find: time|help&-:/verb/ ... need
     negate: false
     quoted: true
-    - segment: time|help&/!verb/
+    - fragment: time|help&/!verb/
       anchored: true
-      - fragment: time|help
+      - option: time|help
         - feature: time 
           wkeys: [ 1316 ]
         - feature: help
           wkeys: [ 795 ]
-      - fragment: -:/verb/
+      - option: -:/verb/
         - feature: -:/verb/
           negate: true
           pos16: 0x100
-    - segment: need
+    - fragment: need
       anchored: false,
-      - fragment: need
+      - option: need
         - feature: need
           wkeys: [ 1026 ]
-
-render: // if render is not specified, a summary of match results is returned as a FtatBuffer (see Appendix F)
-    start: bcv // if v is not provided, it is implicitly verse 1 (book and chapter are required)
-    count: 0xFF // verse-count: 0xFF implies the whole chapter
 ```
 
 
@@ -823,7 +819,6 @@ enum XOutEnum:   byte { AV = 1, AVX = 2 }
 enum XLexEnum:   byte { AV = 1, AVX = 2, BOTH = 3 }
 enum XFmtEnum:   byte { JSON = 0, TEXT = 1, HTML = 2, MD = 3 }
 enum XLangEnum:  byte { H = 1, G = 2, X = 0 }
-enum XUserEnum:  byte { ANONYMOUS = 0, EXISTING = 1, NEW = 2, RESET = 3, UNKNOWN = 4 }
 enum XStatusEnum:byte { OKAY = 0, ERROR = -128 }
 
 table XBlueprint (fs_serializer) { // was: XRequest
@@ -864,20 +859,20 @@ table XStatement (fs_serializer) {
 }
 
 table XSearch (fs_serializer) {
-    expression:  string      (required);
+    expression:  string       (required); // segment
     quoted:      bool        = false;
-    segments:  [ XSegment ]  (required);
-}
-
-table XSegment (fs_serializer) {
-    segment:     string      (required);
-    anchored:    bool        = false;
     fragments:  [ XFragment ] (required);
 }
 
 table XFragment (fs_serializer) {
     fragment:    string      (required);
-    features:  [ XFeature ]  (required);
+    anchored:    bool        = false;
+    required:  [ XOption ]   (required); // AND conditions (all must match)
+}
+
+table XOption (fs_serializer) {
+    option:      string      (required);
+    features:  [ XFeature ]  (required); // OR conditions (any can match)
 }
 
 union XCompare {
@@ -905,7 +900,7 @@ table XFeature (fs_serializer) {
 
 table XLex (fs_serializer) {
     key:         uint16 = 0;             // zero is a valid value for OOV items (items found neither in lexicon, nor in OOV-Lemmata)
-    variants:  [ string ];
+    phonetics: [ string ] (required);    // required, but may be empty (in the case of QWildcard: we do not find phonetic variants for all lexicon matches)
 }
 
 table XWord (fs_serializer) {
@@ -959,32 +954,40 @@ table XScope (fs_serializer) {
 root_type XBlueprint;
 ```
 
-### Appendix G. Extern C functions for Searching and Rendering
+### Appendix G. Developer Notes
 
-```C++
-extern "C" __declspec(dllexport) const std::uint8_t* avx_create_search(const std::uint8_t* const request);
-extern "C" __declspec(dllexport) void avx_delete_search(const uint8_t* const* results);
+- Search expressions have one or more Search statements (Search statements utilize the QFind class)
+- Search statements have one or more fragments separated by whitespace (all fragments are implicit AND conditions)
+- Fragments have one or more features.
+- Features can be (negated) using a unary operator of -:
+- Features can also be use explicit AND ( & ) xor explicit OR ( | )
 
-extern "C" __declspec(dllexport) const char* avx_create_rendering(const uint8_t* const spec);
-extern "C" __declspec(dllexport) void avx_delete_rendering(const char* const rendering);
-//
-// Notionally (pseudo-code / FlatBuffers not withstanding):
-//
-class xresults;
-class xrequest;
-class xrender;
-//
-// classes forward referenced above are defined in blueprint.fbs [i.e. FratBuffers IDL is depicted in Appendix F]
-//
-extern "C" xresults* avx_create_search(xrequest* request);
-extern "C" void avx_delete_search(xresults* results);
+#### Example
 
-extern "C" char* avx_create_rendering(xrender* spec);
-extern "C" void avx_delete_rendering(char* rendering);
-```
+**%span = 15 Lord\* -:/v/ & -:/adv/ + /v/|/n/&-:run**
 
+Two search segments (search segments are encapsulated by the QFind class):
 
+​	search-segment-1: **Lord\* -:/v/ & -:/adv/**       (this has two fragments)
 
-​	
+​		fragment-1 has a single option-group
+
+​			option-group has one [wildcard] feature: **Lord***
+
+​		fragment-2 has two option-groups (these are AND conditions)
+
+​			option-group-1 has a single negated feature: **-:/v/** (NOT a VERB)
+
+​			option-group-2 has a single negated feature: **-:/adv/** (NOT an ADVERB)
+
+​	search-segment-2: **/v/|/n/ & -:run** has a single fragment
+
+​		The fragment has  two ANDed option groups
+
+​			option-group-1 has two ORed features: (IS a VERB) OR (IS a NOUN)
+
+​			option-group-2 has a single negated feature: (NOT the word RUN) 
+
+As the plus sign implies, search segment results are ORed together
 
 ​	
