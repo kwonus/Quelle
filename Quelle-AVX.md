@@ -1,6 +1,6 @@
 # Quelle Specification for AVX Framework
 
-##### AVX-Quelle version 2.0.3.B23
+##### AVX-Quelle version 2.0.3.B27
 
 ### I. Background
 
@@ -216,7 +216,7 @@ Both of the statements above are valid, but will not match any results. Search s
 
 Consider a query for all passages that contain a word beginning with "Lord", followed by any word that is neither a verb nor an adverb:
 
-%span = 15 "Lord\* -:/v/ & -:/adv/"
+%span = 15 "Lord\* -/v/ & -/adv/"
 
 this|that
 
@@ -655,9 +655,9 @@ Like the earlier example, the subject is "you understood".  The object this time
 
 **or:** In Boolean logic, **or** means that any term constitutes a match. With Quelle, *or* is represented by the semi-colon ( **;** ) or plus (+) between SEARCH clauses. 
 
-**not:** In Boolean logic, means that the feature must not be found. With Quelle, *not* is represented by a hyphen+colon ( **-:** ) and applies to individual features within a search segment within the search clause. It is best used in conjunction with other features, because any non-match will be included in results. 
+**not:** In Boolean logic, means that the feature must not be found. With Quelle, *not* is represented by the hyphen ( **-** ) and applies to individual features within a fragment of a search expression. It is best used in conjunction with other features, because any non-match will be included in results. 
 
-hyphen+colon ( **-:** ) means that any non-match satisfies the search condition. Used by itself, it would likely return every verse. Therefore, it should be used judiciously.
+hyphen ( **-** ) means that any non-match satisfies the search condition. Used by itself, it would likely return every verse. Therefore, it should be used judiciously.
 
 ### Appendix B. Specialized Search tokens in AVX-Quelle
 
@@ -743,18 +743,18 @@ scope:
   - include: Hebrews
 
 search:
-  - find: time|help&-:/verb/ ... need
+  - find: time|help&-/verb/ ... need
     negate: false
     quoted: true
-    - fragment: time|help&/!verb/
+    - fragment: time|help&-/verb/
       anchored: true
       - option: time|help
         - feature: time 
           wkeys: [ 1316 ]
         - feature: help
           wkeys: [ 795 ]
-      - option: -:/verb/
-        - feature: -:/verb/
+      - option: -/verb/
+        - feature: -/verb/
           negate: true
           pos16: 0x100
     - fragment: need
@@ -783,15 +783,15 @@ scope:
   - include: Hebrews
 
 results:
-  - find: time|help&-:/verb/ ... need
+  - find: time|help&-/verb/ ... need
     negate: false
     - found: 0x58041620
       length: 5
       - fragment: time|help
         feature: time 
         match: 0x58041620
-      - fragment: -:/verb/
-        feature: -:/verb/
+      - fragment: -/verb/
+        feature: -/verb/
         match: 0x58041621
       - fragment: need
         feature: need 
@@ -801,8 +801,8 @@ results:
       - fragment: time|help
         feature: help 
         match: 0x58041622
-      - fragment: /!verb/
-        feature: /!verb/
+      - fragment: -/verb/
+        feature: -/verb/
         match: 0x58041623
       - fragment: need
         feature: need 
@@ -961,15 +961,15 @@ root_type XBlueprint;
 - Search segments have one or more fragments separated by whitespace (all fragments are implicit AND conditions)
 - Fragments have one or more MatchAny objects [MatchAny objects are explicit AND conditions, separated by & ]
 - MatchAny objects have one or more Features [Features are explicit OR conditions, separated by | ]
-- Features can be (negated) using a unary operator of -:
+- Features can be (negated) using the unary negation operator [ - ]
 
 #### Example
 
-**%span = 15 Lord\* -:/v/ & -:/adv/ + /v/|/n/&-:run**
+**%span = 15 Lord\* -/v/ & -/adv/ + /v/|/n/&-run**
 
 Two search segments (search segments are encapsulated by the QFind class):
 
-​	search-segment-1: **Lord\* -:/v/ & -:/adv/**       (this has two fragments)
+​	search-segment-1: **Lord\* -/v/ & -/adv/**       (this has two fragments)
 
 ​		fragment-1 has a single MatchAny object
 
@@ -977,11 +977,11 @@ Two search segments (search segments are encapsulated by the QFind class):
 
 ​		fragment-2 has two oMatchAny objects (these are AND conditions)
 
-​			MatchAny object-1 has a single negated feature: **-:/v/** (NOT a VERB)
+​			MatchAny object-1 has a single negated feature: **-/v/** (NOT a VERB)
 
-​			MatchAny object-2 has a single negated feature: **-:/adv/** (NOT an ADVERB)
+​			MatchAny object-2 has a single negated feature: **-/adv/** (NOT an ADVERB)
 
-​	search-segment-2: **/v/|/n/ & -:run** has a single fragment
+​	search-segment-2: **/v/|/n/ & -run** has a single fragment
 
 ​		The fragment has  two ANDed MatchAny objects
 
