@@ -1,6 +1,6 @@
 # Quelle Specification for AVX Framework
 
-##### AVX-Quelle version 2.0.3.B27
+##### AVX-Quelle version 2.0.3.C02
 
 ### I. Background
 
@@ -119,7 +119,7 @@ Learning just six verbs is all that is necessary to effectively use Quelle. In t
 | --------- | :---------: | :-------------- | ------------------------- | :---------------------------: |
 | *find*    |  implicit   | SEARCH          | *search spec*             |                               |
 | *filter*  |  implicit   | SEARCH          | **<** *domain*            |                               |
-| *set*     |  implicit   | CONTROL         | **%name** **::** *value*  |    **%name** **=** *value*    |
+| *set*     |  implicit   | CONTROL         | **%name** **=** *value*   |   **%name** **:=** *value*    |
 | *limit*   |  implicit   | OUTPUT          | **[** *row_indices* **]** |                               |
 | **@help** |  explicit   | SYSTEM          |                           |            *topic*            |
 | **@exit** |  explicit   | SYSTEM          |                           |                               |
@@ -150,13 +150,13 @@ As search is a fundamental concern of Quelle, it is optimized to make compound i
 
 Consider these two examples of Quelle statements (first CONTROL; then SEARCH):
 
-%lexicon = KJV
+%lexicon := KJV
 
 "Moses"
 
 Notice that both statements above are single actions.  We should have a way to express both of these in a single command. And this is the rationale behind a compound statement. To combine the previous two actions into one compound statement, issue this command:
 
-"Moses" %lexicon=KJV
+"Moses" %lexicon:=KJV
 
 ### V. Deep Dive into Quelle SEARCH actions
 
@@ -310,7 +310,7 @@ In this section, we will examine how user-defined macros are used in Quelle.  A 
 
 Let’s say we want to name the search example from the previous section; We’ll call it *eternal-power*. To accomplish this, we would issue this command:
 
-%span::7 %similarity::85 + eternal power || eternal-power
+%span=7 %similarity=85 + eternal power || eternal-power
 
 It’s that simple, now instead of typing the entire statement, we can utilize the macro by referencing our previously applied label. Here is how the macro can be invoked. We might call this running the macro:
 
@@ -326,7 +326,7 @@ $my-label-cannot-contain-spaces
 
 Which is equivalent to these statements:
 
-%span::7  %similarity::85 + eternal power + godhead
+%span=7  %similarity=85 + eternal power + godhead
 
 There are several restrictions on macro definitions:
 
@@ -341,11 +341,11 @@ There are several restrictions on macro definitions:
 
 Finally, any macros referenced within a macro definition are expanded prior to applying the new label. Therefore redefining a macro after it has been referenced in a subsequent macro definition has no effect of the initial macro reference. We call this macro-determinism.  A component of determinism for macros is that the macro definition saves all control settings at the time that the label was applied. This assure that the same search results are returned each time the macro is referenced. Here is an example.
 
-%span = 2
+%span := 2
 
 in beginning || in_beginning
 
-%span = 3
+%span := 3
 
 $in_beginning [1] < genesis:1:1
 
@@ -361,7 +361,7 @@ It should be noted that when a macro is paired with any other search clauses, it
 
 ##### Executing a macro remembers all settings, but always without side-effects:
 
-A macro definition captures all settings. We have already discussed macro-determinism (saving settings utilized for execution is needed to provide macro determinism). However, when a macro is saved, any setting with an equals sign (e.g. span=7) is treated as if it were (span::7). In other words, executing a macro never persists changes into your environment, unless you explicitly request such behavior with the @absorb command.
+A macro definition captures all settings. We have already discussed macro-determinism (saving settings utilized for execution is needed to provide macro determinism). However, when a macro is saved, any setting with an persistent assignment (e.g. span:=7) is treated as if it were a volatile assignment (span=7). In other words, executing a macro never persists changes into your environment, unless you explicitly request such behavior with the @absorb command.
 
 ##### Additional explicit macro commands:
 
@@ -439,9 +439,9 @@ The *invoke* command works for command-history works exactly the same way as it 
 
 *@review*
 
-1>  %span = 7
+1>  %span := 7
 
-2>  %similarity::85
+2>  %similarity=85
 
 3> eternal power
 
@@ -463,7 +463,7 @@ $1  $2  $3
 
 which would be interpreted as:
 
-%span = 7  %similarity::85   eternal power
+%span := 7  %similarity=85   eternal power
 
 **RESETTING COMMAND HISTORY**
 
@@ -475,7 +475,7 @@ To clear all command history:
 
 ##### Invoking a command remembers all settings, but always without side-effects:
 
-Command history captures all settings. We have already discussed macro-determinism. Invoking commands by their review numbers behave exactly like macros. They are also deterministic. Just like macros, an setting with an equals sign (e.g. span=7) is treated as if it were (span::7). In other words, invoking command history never persists changes into your environment, unless you explicitly request such behavior with the @absorb command.
+Command history captures all settings. We have already discussed macro-determinism. Invoking commands by their review numbers behave exactly like macros. They are also deterministic. Just like macros, a setting with a persistent assignment (e.g. span:=7) is treated as if it were volatile (span=7). In other words, invoking command history never persists changes into your environment, unless you explicitly request such behavior with the @absorb command.
 
 ### X. Program Help
 
@@ -501,10 +501,10 @@ Type this to terminate the Quelle interpreter:
 
 ### XII. Control Settings & additional related cpmmands
 
-| Verb     | Action Type | Syntax Category | Parameters             | Alternate #1          | Alternate #2 |
-| -------- | :---------: | --------------- | ---------------------- | :-------------------- | :----------- |
-| *clear*  |  implicit   | CONTROL         | *%name* **:: default** | *%name* **= default** |              |
-| **@get** |  explicit   | CONTROL         | **optional:** *name*   |                       |              |
+| Verb     | Action Type | Syntax Category | Parameters            | Alternate #1           | Alternate #2 |
+| -------- | :---------: | --------------- | --------------------- | :--------------------- | :----------- |
+| *clear*  |  implicit   | CONTROL         | *%name* **= default** | *%name* **:= default** |              |
+| **@get** |  explicit   | CONTROL         | **optional:** *name*  |                        |              |
 
 **TABLE 12-1** -- **Listing of additional CONTROL actions**
 
@@ -520,11 +520,11 @@ Type this to terminate the Quelle interpreter:
 
 
 
-| **example**     | **explanation**                                              |
-| --------------- | ------------------------------------------------------------ |
-| %span = 8       | Assign a control setting                                     |
-| **@get** span   | get a control setting                                        |
-| %span = default | Clear the control setting; restoring the Quelle driver default setting |
+| **example**      | **explanation**                                              |
+| ---------------- | ------------------------------------------------------------ |
+| %span := 8       | Assign a control setting                                     |
+| **@get** span    | get a control setting                                        |
+| %span := default | Clear the control setting; restoring the Quelle driver default setting |
 
 **TABLE 12-3** -- **set/clear/get** action operate on configuration settings
 
@@ -540,9 +540,9 @@ format=md   format=default  format=text
 
 The final command would return text.  We call this: "last assignment wins". However, there is one caveat to this precedence order: regardless of where in the statement a macro or history invocation is provided within a statement, it never has precedence over a setting that is actually visible within the statement.  Consider this sequence as an example:
 
-%similarity::none || precedence_example
+%similarity=none || precedence_example
 
-%similarity::85  $precedence_example
+%similarity=85  $precedence_example
 
 @get %similarity
 
@@ -570,7 +570,7 @@ There are additional actions that affect all control settings collectively
 
 | Expressions | Meaning / Usage                                              |
 | ----------- | ------------------------------------------------------------ |
-| **@reset**  | Reset is an explicit command alias to *clear* all control settings, resetting them all to default values<br />equivalent to: %span=default %lexicon=default %display=default %similarity=default %format=default |
+| **@reset**  | Reset is an explicit command alias to *clear* all control settings, resetting them all to default values<br />equivalent to: %span:=default %lexicon:=default %display:=default %similarity:=default %format:=default |
 | $X::current | Special suffix for use with History or Macro invocation as a singleton statement:<br />See "Labeling Statements for subsequent invocation" section of this document.<br />Uses current settings for invocation on history/macro identified/labeled as "X".<br>(On non-singleton invocations, environment settings on the macro/history is **always** ignored, making the ::current suffix superfluous on compound macro satements) |
 
 **TABLE 12-5** -- **Collective CONTROL operations**
@@ -581,19 +581,19 @@ All settings can be cleared using an explicit command:
 
 It is exactly equivalent to this compound statement:
 
-%span=default  %lexicon=default  %display=default  %similarity = default %format=default
+%span:=default  %lexicon:=default  %display:=default  %similarity:=default %format:=default
 
 **Scope of Settings [Statement Scope vs Persistent Scope]**
 
-It should be noted that there is a distinction between name=value and name::value syntax variations. The first form is persistent with respect to subsequent statements. Contrariwise, the latter form affects only the single statement wherewith it is executed. We refer to this as variable scope, Consider these two very similar command sequences:
+It should be noted that there is a distinction between name:=value and name=value syntax variations. The first form is persistent with respect to subsequent statements. Contrariwise, the latter form affects only the single statement wherewith it is executed. We refer to this as variable scope, Consider these two very similar command sequences:
 
 | Example of Statement Scope | Example of Persistent Scope |
 | -------------------------- | --------------------------- |
 | @reset controls            | @reset controls             |
-| "Moses said" %span::7      | "Moses said" %span = 7      |
+| "Moses said" %span=7       | "Moses said" %span := 7     |
 | "Aaron said"               | "Aaron said"                |
 
-In the **statement scope** example, setting span to "7" only affects the search for "Moses said". The next search for "Aaron said" utilizes the default value for span, which is "verse".
+In the [volatile] **statement scope** example, setting span to "7" only affects the search for "Moses said". The next search for "Aaron said" utilizes the default value for span, which is "verse".
 
 In the **persistent scope** example, setting span to "7" affects the search for "Moses said" <u>and all subsequent searches</u>. The next search for "Aaron said" continues to use a span value of "7'".   In other words, the setting **persists** <u>beyond the scope of statement execution</u>.
 
@@ -728,19 +728,17 @@ An object model to support specialized Search Tokens for Quelle-AVX is depicted 
 
 
 
-### Appendix D. Notional YAML for search interop (a search-oriented subset of Blueprint-Blue)
-
-[EXAMPLE depicted as YAML; see Appendix F for FlatBuffer IDL definition]
+### Appendix D. YAML representative example (subset of Blueprint-Blue for search)
 
 ```yaml
 settings:
-  similarity: none
-  span: 7,
-  lexicon: av
+  similarity: 0 // none
+  span: 0,      // verse
+  lexicon: 1    // av
   format: html
   
-scope:
-  - include: Hebrews
+scope: 
+  - include: 58 // Hebrews
 
 search:
   - find: time|help&-/verb/ ... need
@@ -766,22 +764,11 @@ search:
 
 
 
-​		
 
-### Appendix E. Notional YAML representation of search result (actual result is a flatbuffer)
 
-[EXAMPLE depicted as YAML; see Appendix F for FlatBuffer IDL definition]
+### Appendix E. YAML representation of results (TO DO: update to latest AVX spec)
 
 ```yaml
-settings:
-  similarity: none
-  span: 7,
-  lexicon: av
-  format: html
-  
-scope: 
-  - include: Hebrews
-
 results:
   - find: time|help&-/verb/ ... need
     negate: false
@@ -809,11 +796,9 @@ results:
         match: 0x58041624
 ```
 
-### Appendix F. FlatBuffer schema of blueprint-blue object model for AVX-Quelle
+### Appendix F. Notional schema of full blueprint-blue object model for AVX-Quelle
 
 ```yaml
-namespace XBlueprintBlue;
-
 enum XThreshold: byte { NONE = 0, FUZZY_MIN = 33, FUZZY_MAX = 99, EXACT = 100 }
 enum XOutEnum:   byte { AV = 1, AVX = 2 }
 enum XLexEnum:   byte { AV = 1, AVX = 2, BOTH = 3 }
@@ -821,7 +806,7 @@ enum XFmtEnum:   byte { JSON = 0, TEXT = 1, HTML = 2, MD = 3 }
 enum XLangEnum:  byte { H = 1, G = 2, X = 0 }
 enum XStatusEnum:byte { OKAY = 0, ERROR = -128 }
 
-table XBlueprint (fs_serializer) { // was: XRequest
+table XBlueprint { // was: XRequest
     command:     string      (required);
     settings:    XSettings   (required);
     search:    [ XSearch ];
@@ -833,14 +818,14 @@ table XBlueprint (fs_serializer) { // was: XRequest
     errors:    [ string ];
 }
 
-table XCommand (fs_serializer) { // for singleton expressions
+table XCommand { // for singleton expressions
     command:     string      (required);
     verb:        string      (required);
     arguments: [ string ];
     reply:       XReply;
 }
 
-table XReply (fs_serializer) {
+table XReply {
     version:     string;      // for @version
     help:        string;      // for @help
     value:       string;      // for @get
@@ -848,7 +833,7 @@ table XReply (fs_serializer) {
     history:   [ XStatement ];// for @review (history)
 }
 
-table XStatement (fs_serializer) {
+table XStatement {
     id:          uint32 = 0;  // required for @review (history)
     label:       string;      // required for @expand reply
     time:        uint64 = 0;  // required
@@ -858,19 +843,19 @@ table XStatement (fs_serializer) {
     settings:    XSettings   (required);
 }
 
-table XSearch (fs_serializer) {
+table XSearch {
     expression:  string       (required); // segment
     quoted:      bool        = false;
     fragments:  [ XFragment ] (required);
 }
 
-table XFragment (fs_serializer) {
+table XFragment {
     fragment:    string      (required);
     anchored:    bool        = false;
     required:  [ XOption ]   (required); // AND conditions (all must match)
 }
 
-table XOption (fs_serializer) {
+table XOption {
     option:      string      (required);
     features:  [ XFeature ]  (required); // OR conditions (any can match)
 }
@@ -893,50 +878,49 @@ table XFeature (fs_serializer) {
     match:       XCompare    (required);
 }
 
-// Most of the Blueprint-Blue flatbuffer object is generated from the Pinshot-Blue parse (Rust FFI).
+// Most of the Blueprint-Blue object model is directlty inferred from the Pinshot-Blue parse (Rust FFI).
 // However, XWord is now generated using the NUPhone assembly (C#).
 // This way, AVX-Search can perform fuzzy matches, w/o requiring a C++ implementation for English-to-IPA
-// (NUPhone comparison library will be ported to C++)
 
-table XLex (fs_serializer) {
+table XLex {
     key:         uint16 = 0;             // zero is a valid value for OOV items (items found neither in lexicon, nor in OOV-Lemmata)
     phonetics: [ string ] (required);    // required, but may be empty (in the case of QWildcard: we do not find phonetic variants for all lexicon matches)
 }
 
-table XWord (fs_serializer) {
+table XWord {
     lex:       [ XLex ] (required);
 }
 
-table XLemma (fs_serializer) {
+table XLemma {
     lemmata:   [ XLex ] (required);
 }
 
-table XPOS32 (fs_serializer) {
+table XPOS32 {
     pos:         uint32;
 }
 
-table XPOS16 (fs_serializer) {
+table XPOS16 {
     pnpos:       uint16;
 }
 
-table XPunctuation (fs_serializer) {
+table XPunctuation {
     bits:        uint8;
 }
 
-table XTransition (fs_serializer) {
+table XTransition {
     bits:        uint8;
 }
 
-table XStrongs (fs_serializer) {
+table XStrongs {
     lang:        XLangEnum = X;    
     number:      uint16;
 }
 
-table XDelta (fs_serializer) {
+table XDelta {
     differs:     bool      = true; // must be explicitly set to T or F
 }
 
-table XSettings (fs_serializer) {
+table XSettings {
     similarity:  string   (required);
     span:        uint16   = 0;
     lexicon:     XLexEnum = BOTH;
@@ -944,14 +928,12 @@ table XSettings (fs_serializer) {
     format:      XFmtEnum = JSON;
 }
 
-table XScope (fs_serializer) {
+table XScope {
     book:        uint8 = 0;      // required
     chapter:     uint8 = 0;      // required
     verse:       uint8 = 1;      // optional
     vcount:      uint8 = 255;    // optional: verse-count: defaults to all remaining verses in chapter
 }
-
-root_type XBlueprint;
 ```
 
 ### Appendix G. Developer Notes
