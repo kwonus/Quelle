@@ -1,6 +1,6 @@
 # Quelle Specification for AVX Framework
 
-##### AVX-Quelle version 2.0.4.101
+##### AVX-Quelle version 2.0.3.C15
 
 ### I. Background
 
@@ -65,6 +65,7 @@ Quelle Syntax comprises seventeen (17) verbs. Each verb corresponds to a basic a
 
 - find
 - filter
+- assign
 - set
 - get
 - clear
@@ -78,7 +79,6 @@ Quelle Syntax comprises seventeen (17) verbs. Each verb corresponds to a basic a
 - help
 - review
 - invoke
-- version
 - exit
 
 Quelle is an open and extensible standard, additional verbs, and verbs for other languages can be defined without altering the overall syntax structure of the Quelle HMI. The remainder of this document describes Version 2.0 of the Quelle-HMI Level-II specification with specialized AVX search augmentations.  Moreover, there is no need to consult the Vanilla-Quelle documentation, as all similarities with Vanilla-Quelle are redundantly documented here.
@@ -89,17 +89,16 @@ In Quelle terminology, a statement is made up of one or more clauses. Each claus
    - *find*
    - *filter*
 2. CONTROL
-   - *set*
-   - *clear*
+   - *assign*
+   - @set
+   - @clear
    - @get
-   - @reset *(explicit alias for **clear all control settings**)*
    - @absorb *(use history **or** label/macro to **absorb all control settings**)*
 4. OUTPUT
    - *limit*
    - *export*
 4. SYSTEM
    - @help
-   - @version
    - @exit
 5. HISTORY & MACROS
    - *invoke*			  (invoke macro by its label **or** invoke a previous command by its id)
@@ -107,7 +106,7 @@ In Quelle terminology, a statement is made up of one or more clauses. Each claus
    - @delete		  (delete macro by its label)
    - @expand		(label **or** id)
    - @review		 (review history)
-   - @initialize	  (clear all history)
+   - @initialize	  (delete all command history)
 
 Each clause has either a single explicit action or any number of implicit actions.  Explicit actions begin with the @ symbol, immediately followed by the explicit verb.  Implicit actions are inferred by the syntax of the command.
 
@@ -115,14 +114,14 @@ Each clause has either a single explicit action or any number of implicit action
 
 Learning just six verbs is all that is necessary to effectively use Quelle. In the table below, each verb is identified with required and optional parameters/operators.
 
-| Verb      | Action Type | Syntax Category | Required Parameters       | Alternate/Optional Parameters |
-| --------- | :---------: | :-------------- | ------------------------- | :---------------------------: |
-| *find*    |  implicit   | SEARCH          | *search spec*             |                               |
-| *filter*  |  implicit   | SEARCH          | **<** *domain*            |                               |
-| *set*     |  implicit   | CONTROL         | **%name** **=** *value*   |   **%name** **:=** *value*    |
-| *limit*   |  implicit   | OUTPUT          | **[** *row_indices* **]** |                               |
-| **@help** |  explicit   | SYSTEM          |                           |            *topic*            |
-| **@exit** |  explicit   | SYSTEM          |                           |                               |
+| Verb      | Action Type | Syntax Category | Required Parameters       | Optional Parameter |
+| --------- | :---------: | :-------------- | ------------------------- | :----------------: |
+| *find*    |  implicit   | SEARCH          | *search spec*             |                    |
+| *filter*  |  implicit   | SEARCH          | **<** *domain*            |                    |
+| *assign*  |  implicit   | CONTROL         | **%name** **=** *value*   |                    |
+| *limit*   |  implicit   | OUTPUT          | **[** *row_indices* **]** |                    |
+| **@help** |  explicit   | SYSTEM          |                           |      *topic*       |
+| **@exit** |  explicit   | SYSTEM          |                           |                    |
 
 **TABLE 4-1** -- **Fundamental Quelle commands with corresponding syntax summaries**
 
@@ -150,19 +149,19 @@ As search is a fundamental concern of Quelle, it is optimized to make compound i
 
 Consider these two examples of Quelle statements (first CONTROL; then SEARCH):
 
-%lexicon := KJV
+@set lexicon = KJV
 
 "Moses"
 
 Notice that both statements above are single actions.  We should have a way to express both of these in a single command. And this is the rationale behind a compound statement. To combine the previous two actions into one compound statement, issue this command:
 
-"Moses" %lexicon:=KJV
+"Moses" %lexicon=KJV
 
 ### V. Deep Dive into Quelle SEARCH actions
 
 Consider this proximity search where the search using Quelle syntax:
 
-*span=7  Moses Aaron*
+*%span=7  Moses Aaron*
 
 Quelle syntax can define the lexicon by also supplying an additional CONTROL action:
 
@@ -339,13 +338,13 @@ There are several restrictions on macro definitions:
 4. The statement cannot represent an explicit action:
    - Only implicit actions are permitted in a labeled statement.
 
-Finally, any macros referenced within a macro definition are expanded prior to applying the new label. Therefore redefining a macro after it has been referenced in a subsequent macro definition has no effect of the initial macro reference. We call this macro-determinism.  A component of determinism for macros is that the macro definition saves all control settings at the time that the label was applied. This assure that the same search results are returned each time the macro is referenced. Here is an example.
+Finally, any macros referenced within a macro definition are expanded prior to applying the new label. Therefore redefining a macro after it has been referenced in a subsequent macro definition has no effect of the initial macro reference. We call this macro-determinism.  A component of determinism for macros is that the macro definition saves all control settings at the time that the label was applied. This assures that the same search results are returned each time the macro is referenced. Here is an example.
 
-%span := 2
+@set span = 2
 
 in beginning || in_beginning
 
-%span := 3
+@set span = 3
 
 $in_beginning [1] < genesis:1:1
 
@@ -361,7 +360,7 @@ It should be noted that when a macro is paired with any other search clauses, it
 
 ##### Executing a macro remembers all settings, but always without side-effects:
 
-A macro definition captures all settings. We have already discussed macro-determinism (saving settings utilized for execution is needed to provide macro determinism). However, when a macro is saved, any setting with an persistent assignment (e.g. span:=7) is treated as if it were a volatile assignment (span=7). In other words, executing a macro never persists changes into your environment, unless you explicitly request such behavior with the @absorb command.
+A macro definition captures all settings. We have already discussed macro-determinism (saving settings utilized for execution is needed to provide macro determinism). Executing a macro never persists changes into your environment, unless you explicitly request such behavior with the @absorb command.
 
 ##### Additional explicit macro commands:
 
@@ -439,9 +438,9 @@ The *invoke* command works for command-history works exactly the same way as it 
 
 *@review*
 
-1>  %span := 7
+1>  @set span = 7
 
-2>  %similarity=85
+2>  @set similarity=85
 
 3> eternal power
 
@@ -457,25 +456,17 @@ Again, *invoking* command from your command history is *invoked* just like a mac
 
 $3::current
 
-or we could re-invoke all three commands in a single statement as:
-
-$1  $2  $3
-
-which would be interpreted as:
-
-%span := 7  %similarity=85   eternal power
-
 **RESETTING COMMAND HISTORY**
 
-The @reset command can be used to clear command history and/or reset all control variables to defaults.
+The @initialize command can be used to clear all command history.
 
 To clear all command history:
 
-@initialize history
+@initialize
 
-##### Invoking a command remembers all settings, but always without side-effects:
+##### Invoking a command remembers all settings, except when multiple macros are compounded:
 
-Command history captures all settings. We have already discussed macro-determinism. Invoking commands by their review numbers behave exactly like macros. They are also deterministic. Just like macros, a setting with a persistent assignment (e.g. span:=7) is treated as if it were volatile (span=7). In other words, invoking command history never persists changes into your environment, unless you explicitly request such behavior with the @absorb command.
+Command history captures all settings. We have already discussed macro-determinism. Invoking commands by their review numbers behave exactly like macros. In other words, invoking command history never persists changes into your environment, unless you explicitly request such behavior with the @absorb command.
 
 ### X. Program Help
 
@@ -499,12 +490,12 @@ Type this to terminate the Quelle interpreter:
 
 *@exit*
 
-### XII. Control Settings & additional related cpmmands
+### XII. Control Settings & additional related commands
 
-| Verb     | Action Type | Syntax Category | Parameters            | Alternate #1           | Alternate #2 |
-| -------- | :---------: | --------------- | --------------------- | :--------------------- | :----------- |
-| *clear*  |  implicit   | CONTROL         | *%name* **= default** | *%name* **:= default** |              |
-| **@get** |  explicit   | CONTROL         | **optional:** *name*  |                        |              |
+| Verb       | Action Type | Syntax Category | Parameters                         |
+| ---------- | :---------: | --------------- | ---------------------------------- |
+| **@clear** |  explicit   | CONTROL         | *setting* or ALL                   |
+| **@get**   |  explicit   | CONTROL         | **optional:** *setting* or VERSION |
 
 **TABLE 12-1** -- **Listing of additional CONTROL actions**
 
@@ -520,11 +511,11 @@ Type this to terminate the Quelle interpreter:
 
 
 
-| **example**      | **explanation**                                              |
-| ---------------- | ------------------------------------------------------------ |
-| %span := 8       | Assign a control setting                                     |
-| **@get** span    | get a control setting                                        |
-| %span := default | Clear the control setting; restoring the Quelle driver default setting |
+| **example**       | **explanation**                                              | shorthand equivalent |
+| ----------------- | ------------------------------------------------------------ | -------------------- |
+| **@set** span = 8 | Assign a control setting                                     | @span = 8            |
+| **@get** span     | get a control setting                                        |                      |
+| **@clear** span   | Clear the control setting; restoring the Quelle driver default setting |                      |
 
 **TABLE 12-3** -- **set/clear/get** action operate on configuration settings
 
@@ -534,7 +525,7 @@ Type this to terminate the Quelle interpreter:
 
 Otherwise, when multiple clauses contain the same setting, only the last setting in the list is preserved.  Example:
 
-format=md   format=default  format=text
+%format=md %format=default %format=text
 
 @get format
 
@@ -544,7 +535,7 @@ The final command would return text.  We call this: "last assignment wins". Howe
 
 %similarity=85  $precedence_example
 
-@get %similarity
+@get similarity
 
 The final command would return 85, because it was visible in the compound statement.
 
@@ -557,6 +548,8 @@ AVX-Quelle manifests five control names. Each allows all three actions: ***set**
 | display    | the lexicon to be used for display/rendering                 | av/avx (kjv/modern)                                          | av (kjv)      |
 | format     | format of results on output                                  | see Table 12-2                                               | json          |
 | similarity | fuzzy phonetics matching threshold is between 1 and 99<br/>0 or *none* means: do not match on phonetics (use text only)<br/>100 or *exact* means that an *exact* phonetics match is expected | 33 to 99 [fuzzy] **or** ...<br>0 **or** *none*<br>100 **or** *exact*<br>Exclamation ( ! ) after the value enables lemma matching (see Section II / item #3) | 0 (none)      |
+| VERSION    | Not really a true setting: it works with the @get command to retrieve the revision number of the Quelle grammar supported by AV-Engine. This value is read-only. | 2.0.w.xyz                                                    | n/a           |
+| ALL        | Not really a true setting: it works with the @clear command to reset all variables above to their default values. It is only a valid option for the @clear command. | n/a                                                          | n/a           |
 
 **TABLE 12-4** -- **Summary of AVX-Quelle Control Names**
 
@@ -570,7 +563,7 @@ There are additional actions that affect all control settings collectively
 
 | Expressions | Meaning / Usage                                              |
 | ----------- | ------------------------------------------------------------ |
-| **@reset**  | Reset is an explicit command alias to *clear* all control settings, resetting them all to default values<br />equivalent to: %span:=default %lexicon:=default %display:=default %similarity:=default %format:=default |
+| **@reset**  | Reset is an explicit command alias to *clear* all control settings, resetting them all to default values |
 | $X::current | Special suffix for use with History or Macro invocation as a singleton statement:<br />See "Labeling Statements for subsequent invocation" section of this document.<br />Uses current settings for invocation on history/macro identified/labeled as "X".<br>(On non-singleton invocations, environment settings on the macro/history is **always** ignored, making the ::current suffix superfluous on compound macro satements) |
 
 **TABLE 12-5** -- **Collective CONTROL operations**
@@ -579,23 +572,9 @@ All settings can be cleared using an explicit command:
 
 @reset
 
-It is exactly equivalent to this compound statement:
+**Scope of Settings**
 
-%span:=default  %lexicon:=default  %display:=default  %similarity:=default %format:=default
-
-**Scope of Settings [Statement Scope vs Persistent Scope]**
-
-It should be noted that there is a distinction between name:=value and name=value syntax variations. The first form is persistent with respect to subsequent statements. Contrariwise, the latter form affects only the single statement wherewith it is executed. We refer to this as variable scope, Consider these two very similar command sequences:
-
-| Example of Statement Scope | Example of Persistent Scope |
-| -------------------------- | --------------------------- |
-| @reset controls            | @reset controls             |
-| "Moses said" %span=7       | "Moses said" %span := 7     |
-| "Aaron said"               | "Aaron said"                |
-
-In the [volatile] **statement scope** example, setting span to "7" only affects the search for "Moses said". The next search for "Aaron said" utilizes the default value for span, which is "verse".
-
-In the **persistent scope** example, setting span to "7" affects the search for "Moses said" <u>and all subsequent searches</u>. The next search for "Aaron said" continues to use a span value of "7'".   In other words, the setting **persists** <u>beyond the scope of statement execution</u>.
+It should be noted that there is a distinction between **@set** and and implicit **assign** syntax. The first form is persistent and affects the specified settings for all subsequent statements. Contrariwise, an implicit **assign** affects only the single statement wherewith it is executed. We refer to this as variable scope.
 
 ### XIII. Miscellaneous Information
 
@@ -611,7 +590,7 @@ In the **persistent scope** example, setting span to "7" affects the search for 
 
 In general, AVX-Quelle can be thought of as a stateless server. The only exceptions of its stateless nature are:
 
-1) non-default settings with persistent scope
+1) non-default settings assigned using the **@set** command
 2) defined macro labels. 
 3) command history
 
