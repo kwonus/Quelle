@@ -1,6 +1,6 @@
 # Quelle Specification for AVX Framework
 
-##### AVX-Quelle version 2.0.3.C15
+##### AVX-Quelle version 2.0.3.C17
 
 ### I. Background
 
@@ -10,7 +10,7 @@ The vast world of search is rife for a standardized search-syntax that moves us 
 
 Quelle, IPA: [kɛl], in French means "What? or Which?". As Quelle HMI is designed to obtain search-results from search-engines, this interrogative nature befits its name. An earlier interpreter, Clarity, served as inspiration for defining Quelle.  You could think of the Quelle HMI as the next generation of Clarity HMI.  Yet, in order to produce linguistic consistency, Quelle syntax varied dramatically from the Clarity spec. Therefore, a new name was the best way forward.  Truly, Quelle HMI incorporates lessons learned after creating, implementing, and revising Clarity HMI for over a decade.
 
-In 2023, Quelle 2.0 was released. This new release is not a radical divergence from version 1. Most of the updates to the specification are related to macros, control variables, filters, and export directives. Search syntax has remained largely unchanged. We discovered some ambiguity in the PEG grammar that implements the Quelle parser. Certain implicit actions could not be defined deterministically. To resolve those ambiguities, Quelle syntax was refined and updated. Consequently, new operators were introduced  [We added $ % and || to name a few] . These new operators eliminate the need for clause delimiters, in most circumstances. As a result, the version 2 syntax is more streamlined and more intuitive. It comes with a reference implementation in Rust and a fully specified PEG grammar.  Implicit actions for Macros are now referred to as *apply* and *invoke* [those verbs replace *save* and *execute* respectively].
+In 2023, Quelle 2.0 was released. This new release is not a radical divergence from version 1. Most of the updates to the specification are related to macros, control variables, filters, and export directives. Search syntax has remained largely unchanged. We discovered some ambiguity in the PEG grammar that implements the Quelle parser. Certain implicit actions could not be defined deterministically. To resolve those ambiguities, Quelle syntax was refined and updated. Consequently, new operators were introduced  [We added # $ % and || to name a few] . These new operators eliminate the need for clause delimiters, in most circumstances. As a result, the version 2 syntax is more streamlined and more intuitive. It comes with a reference implementation in Rust and a fully specified PEG grammar.  Implicit actions for Macros are now referred to as *apply* and *invoke* [those verbs replace *save* and *execute* respectively].
 
 Quelle is consistent with itself, to make it feel intuitive. Some constructs make parsing unambiguous; other constructs increase ease of typing (Specifically, we attempt to minimize the need to press the shift-key). Naturally, existing scripting languages also influence our syntax. Quelle represents an easy to type and easy to learn HMI.  Moreover, simple search statements look no different than they might appear today in a Google or Bing search box. Still, let's not get ahead of ourselves or even hint about where our simple specification might take us ;-)
 
@@ -93,7 +93,7 @@ In Quelle terminology, a statement is made up of one or more clauses. Each claus
    - @set
    - @clear
    - @get
-   - @absorb *(use history **or** label/macro to **absorb all control settings**)*
+   - @absorb *(use history **or** label to **absorb all control settings**)*
 4. OUTPUT
    - *limit*
    - *export*
@@ -136,14 +136,14 @@ Implicit actions can be combined into compound statements.  However, compound st
 
 As search is a fundamental concern of Quelle, it is optimized to make compound implicit actions easy to construct with a concise and intuitive syntax. Even before we describe Quelle syntax generally, let's examine a few concepts using examples:
 
-| Description                             | Example                                  |
-| --------------------------------------- | :--------------------------------------- |
-| SYSTEM command                          | @help                                    |
-| SEARCH filters                          | < Genesis < Exodus < Revelation          |
-| SEARCH specification                    | this is some text expected to be found   |
-| Compound statement: two SEARCH actions  | "this quoted text" + other unquoted text |
-| Compound statement: two CONTROL actions | %span = 7 %similarity = 85               |
-| Compound statement: CONTROL & SEARCH    | %span = 7 Moses said                     |
+| Description                                 | Example                                  |
+| ------------------------------------------- | :--------------------------------------- |
+| SYSTEM command                              | @help                                    |
+| SEARCH filters                              | < Genesis < Exodus < Revelation          |
+| SEARCH specification                        | this is some text expected to be found   |
+| Compound statement: two SEARCH exxpressions | "this quoted text" + other unquoted text |
+| Compound statement: two CONTROL assignments | %span = 7 %similarity = 85               |
+| Compound statement: CONTROL & SEARCH        | %span = 7 Moses said                     |
 
 **TABLE 4-2** -- **Examples of Quelle statement types**
 
@@ -199,7 +199,7 @@ The SDK, provided by Digital-AV, has marked each word of the bible text for part
 
 Of course, part-of-speech expressions can also be used independently of an AND condition, as follows:
 
-%span = 6 + "/noun/ ... home"
+%span = 6  "/noun/ ... home"
 
 That search would find phrases where a noun appeared within a span of six words, preceding the word "home"
 
@@ -252,7 +252,7 @@ To revisit the example in the previous sample, we can export records to a file w
 
 "Jesus answered" [1 2 3]  >> my-file.output  //  *this would would export the first three matching phrases* // >> indicates that the results should be appended
 
-format=html ; "Jesus answered" [1 2 3]  => my-file.html // *export the first three matching phrases as html*
+format=html "Jesus answered" [1 2 3]  => my-file.html // *export the first three matching phrases as html*
 
 The => allows existing file to be overwritten. Quelle will not overwrite an existing file with > syntax. The => is required to force an overwrite.
 
@@ -288,17 +288,20 @@ vanity < sos < 1co
 
 ### IX. Labeling & Reviewing Statements for subsequent invocation
 
-| Verb            | Action Type | Syntax Category           | Expected Arguments                   | Required Operators |
-| --------------- | ----------- | ------------------------- | ------------------------------------ | :----------------: |
-| *invoke*        | implicit    | HISTORY & LABELING        | *label* or *id*                      |   **$** *label*    |
-| *apply*         | implicit    | HISTORY & <u>LABELING</u> | *label*                              |  **\|\|** *label*  |
-| **@delete**     | explicit    | HISTORY & <u>LABELING</u> | *label*                              |      *label*       |
-| **@expand**     | explicit    | HISTORY & LABELING        | *label* or *id*                      |  *label* or *id*   |
-| **@absorb**     | explicit    | CONTROL                   | *label* or *id*                      |  *label* or *id*   |
-| **@review**     | explicit    | <u>HISTORY</u> & LABELING | **optional:** *max_count date_range* |                    |
-| **@initialize** | explicit    | <u>HISTORY</u> & LABELING |                                      |                    |
+| Verb            | Action Type | Syntax Category           | Searches and Assignments                   | Assignments only                          |
+| --------------- | ----------- | ------------------------- | ------------------------------------------ | :---------------------------------------- |
+| *invoke*        | implicit    | <u>HISTORY</u> & LABELING | **required:** ***$**id*                    | **required:**  ***#**id*                  |
+| *invoke*        | implicit    | HISTORY & <u>LABELING</u> | **required:** ***$**label*                 | **required:** ***#**label*                |
+| *apply*         | implicit    | HISTORY & <u>LABELING</u> | **required:** **\|\|** ***$**label*        | **required:** **\|\|** ****#**label**     |
+| **@delete**     | explicit    | HISTORY & <u>LABELING</u> | **required:** ***$**label*  or  ***$**id*  | **required:** ***#**label*  or  ***#**id* |
+| **@expand**     | explicit    | HISTORY & LABELING        | **required:** ***$**label*  or  ***$**id*  | **required:** ***#**label*  or  ***#**id* |
+| **@absorb**     | explicit    | CONTROL                   | **permitted:** ***$**label*  or  ***$**id* | **required:** ***#**label*  or  ***#**id* |
+| **@review**     | explicit    | <u>HISTORY</u> & LABELING | **optional:** *max_count date_range*       |                                           |
+| **@initialize** | explicit    | <u>HISTORY</u> & LABELING |                                            |                                           |
 
 **TABLE 9-1** -- **Labeling statements and reviewing statement history**
+
+There are two types of macros, macros that save the search expression and the settings/assignments, and those that save only settings/assignments. We call the former: full-macros, and the latter assignment-macros. Full-macros are defined with the dollar sign ($); assignment macros are defined with the (#). A full macro can be demoted to an assignment-macro by using a # instead of $ for its invocation. Examples below are for full macros. But he assignment macros are useful, ironically, to simplify Quelle syntax. This is because a search segment allow only a single search expression.
 
 In this section, we will examine how user-defined macros are used in Quelle.  A macro in Quelle is a way for the user to label a statement for subsequent use.  By applying a label to a statement, a shorthand mechanism is created for subsequent invocation. This gives rise to two new definitions:
 
@@ -309,15 +312,15 @@ In this section, we will examine how user-defined macros are used in Quelle.  A 
 
 Let’s say we want to name the search example from the previous section; We’ll call it *eternal-power*. To accomplish this, we would issue this command:
 
-%span=7 %similarity=85 + eternal power || eternal-power
+%span=7 %similarity=85  eternal power || eternal-power
 
 It’s that simple, now instead of typing the entire statement, we can utilize the macro by referencing our previously applied label. Here is how the macro can be invoked. We might call this running the macro:
 
 $eternal-power
 
-Labeled statements also support compounding using the semi-colon ( ; ), as follows; we will label it also:
+Labeled statements also support compounding, as follows; we will label it also:
 
-$eternal-power + godhead|| my-label-cannot-contain-spaces
+$eternal-power  godhead || my-label-cannot-contain-spaces
 
 Later I can issue this command:
 
@@ -331,11 +334,13 @@ There are several restrictions on macro definitions:
 
 1. Macro definition must represent a valid Quelle statement:
    - The syntax is verified prior to applying the statement label.
-2. Macro definitions exclude export directives
+2. Macro definitions is constrained to a single expression
+   - \+ and is not permitted in macro definitions
+3. Macro definitions exclude export directives
    - Any portion of the statement that contains > is incompatible with a macro definition
-3. Macro definitions exclude output directives
+4. Macro definitions exclude output directives
    - Any portion of the statement that contains [ ] is incompatible with a macro definition
-4. The statement cannot represent an explicit action:
+5. The statement cannot represent an explicit action:
    - Only implicit actions are permitted in a labeled statement.
 
 Finally, any macros referenced within a macro definition are expanded prior to applying the new label. Therefore redefining a macro after it has been referenced in a subsequent macro definition has no effect of the initial macro reference. We call this macro-determinism.  A component of determinism for macros is that the macro definition saves all control settings at the time that the label was applied. This assures that the same search results are returned each time the macro is referenced. Here is an example.
@@ -350,17 +355,13 @@ $in_beginning [1] < genesis:1:1
 
 ***result:*** none
 
-However, if the user desires the current settings to be used instead, just include ***::current*** suffix after the macro. 
+However, if the user desires the current settings to be used instead, a specialized macro invocation ( $\* ) represents all currently persisted settings; just include it as the last fragment of the expression (as show below). 
 
-$in_beginning::current [1] < genesis:1:1
+$in_beginning $* < genesis:1:1
 
 ***result:*** Gen 1:1 In the beginning, God created ...
 
-It should be noted that when a macro is paired with any other search clauses, it implicitly adds the settings::current suffix to all macros. Incidentally, the @expand command for history and macros reveals which settings are bundled in the history or macro.
-
-##### Executing a macro remembers all settings, but always without side-effects:
-
-A macro definition captures all settings. We have already discussed macro-determinism (saving settings utilized for execution is needed to provide macro determinism). Executing a macro never persists changes into your environment, unless you explicitly request such behavior with the @absorb command.
+Similarly, another specialized invocation ( $0 ) represents default values for all settings. As with all settings, even in the case of these specialized invocations, the last setting per expression wins.
 
 ##### Additional explicit macro commands:
 
@@ -378,7 +379,7 @@ If you want the same settings to be persisted to your current session that were 
 
 Both @absorb and @expand also work with command history.
 
-**NOTE:** Labels must begin with a letter [A-Z] or [a-z], but they may contain numbers, hyphens, periods, commas, underscores, and single-quotes (no other punctuation or special characters are supported).
+**NOTE:** User-defined labels must begin with a letter [A-Z] or [a-z], but they may contain numbers, hyphens, periods, commas, underscores, and single-quotes (no other punctuation or special characters are supported).
 
 While macro definitions are deterministic, they can be overwritten/redefined: consider this sequence:
 
@@ -404,7 +405,7 @@ $Jesus_macro   $other_macro || either_said
 
 ***result:***	"Jesus said"   "Peter said"
 
-The sequence above illustrates both macro-determinism and the ability to explicitly redefine a macro.
+The sequence above illustrates both macro-determinism and the ability to explicitly redefine a macro. It should be noted that the two built-in specialized macro invocations ( $\* and $0 ) cannot be deleted or overwritten.
 
 **REVIEW SEARCH HISTORY**
 
@@ -452,13 +453,11 @@ would be shorthand to re-invoke the search specified as:
 
 eternal power
 
-Again, *invoking* command from your command history is *invoked* just like a macro. Moreover, as with macros, control settings are persisted within your command history to provide invocation determinism. That means that the current control settings are ignored when invoking command history. Just like with macros, the current control settings can be utilized by adding the ***::current*** suffix to the invocation. See **Table 12-5**. Example usage:
+Again, *invoking* command from your command history is *invoked* just like a macro. Moreover, as with macros, control settings are persisted within your command history to provide invocation determinism. That means that control settings that were in place during the original command are restored by the invocation.
 
-$3::current
+**INITIALIZING COMMAND HISTORY**
 
-**RESETTING COMMAND HISTORY**
-
-The @initialize command can be used to clear all command history.
+The @initialize command can be used to delete <u>all</u> command history.
 
 To clear all command history:
 
@@ -559,22 +558,15 @@ The *@get* command fetches these values. The *@get* command requires a single ar
 
 @get format
 
-There are additional actions that affect all control settings collectively
-
-| Expressions | Meaning / Usage                                              |
-| ----------- | ------------------------------------------------------------ |
-| **@reset**  | Reset is an explicit command alias to *clear* all control settings, resetting them all to default values |
-| $X::current | Special suffix for use with History or Macro invocation as a singleton statement:<br />See "Labeling Statements for subsequent invocation" section of this document.<br />Uses current settings for invocation on history/macro identified/labeled as "X".<br>(On non-singleton invocations, environment settings on the macro/history is **always** ignored, making the ::current suffix superfluous on compound macro satements) |
-
 **TABLE 12-5** -- **Collective CONTROL operations**
 
 All settings can be cleared using an explicit command:
 
-@reset
+@clear
 
 **Scope of Settings**
 
-It should be noted that there is a distinction between **@set** and and implicit **assign** syntax. The first form is persistent and affects the specified settings for all subsequent statements. Contrariwise, an implicit **assign** affects only the single statement wherewith it is executed. We refer to this as variable scope.
+It should be noted that there is a distinction between **@set** and and implicit **assign** syntax. The first form is persistent and affects the specified settings for all subsequent statements. Contrariwise, an implicit **assign** affects only the single statement wherewith it is executed. We refer to this as persistence vs assignment.
 
 ### XIII. Miscellaneous Information
 
@@ -594,7 +586,7 @@ In general, AVX-Quelle can be thought of as a stateless server. The only excepti
 2) defined macro labels. 
 3) command history
 
-Finally delimiters ( e.g.  ; or + ), between two distinct unquoted search clauses are ***required*** to identify the boundary between the two search clauses. A single delimiter <u>before</u> any search clause is always ***optional*** (e.g., Delimiters are permitted between quoted and unquoted clauses, and any other clause that precedes any search clause). They are ***unexpected*** anywhere else in the statement. This makes a Quelle statement a bit less cluttered than the version 1.0 specification
+Finally the plus ( + ) delimiter is required between any multi-expression search command. This defines the boundary between the two expressions.  The + delimiter also has it's own distinct settings; any assignments to the left of the + sign are disregarded in subsequent expressions. While results are collated into a single set of search results, each search expression, including its dedicated assignments represents a discrete Quelle search.
 
 ---
 
@@ -618,10 +610,7 @@ Like the earlier example, the subject is "you understood".  The object this time
 
 **Statement**: A statement is composed of one or more *actions*. If there is more than one SEARCH actions issued by the statement, then search action is logically OR’ed together.
 
-**Unquoted SEARCH clauses:** an unquoted search clause contains one or more search words. If there is more than one word in the clause, then each word is logically AND’ed together. If two unquoted search clauses are adjacent with a statement, then a delimiter/separator is required between the two clauses. It can be either a semicolon or a plus-sign.
-
-- ; [semi-colon]
-- \+ [plus-sign]
+**Unquoted SEARCH clauses:** an unquoted search clause contains one or more search words. If there is more than one word in the clause, then each word is logically AND’ed together.
 
 **Quoted SEARCH clauses:** a quoted clause contains a single string of terms to search. An explicit match on the string is required. However, an ellipsis ( … ) can be used to indicate that wildcards may appear within the quoted string.
 
@@ -632,7 +621,7 @@ Like the earlier example, the subject is "you understood".  The object this time
 
 **and:** In Boolean logic, **and** means that all terms must be found. With Quelle, *and* is represented by terms that appear within an unquoted clause. 
 
-**or:** In Boolean logic, **or** means that any term constitutes a match. With Quelle, *or* is represented by the semi-colon ( **;** ) or plus (+) between SEARCH clauses. 
+**or:** In Boolean logic, **or** means that any term constitutes a match. With Quelle, *or* is represented by the plus (+) between SEARCH expressions. All search results are collated together as a union. 
 
 **not:** In Boolean logic, means that the feature must not be found. With Quelle, *not* is represented by the hyphen ( **-** ) and applies to individual features within a fragment of a search expression. It is best used in conjunction with other features, because any non-match will be included in results. 
 
