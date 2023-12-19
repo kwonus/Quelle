@@ -301,7 +301,7 @@ vanity < sos < 1co
 
 **TABLE 9-1** -- **Labeling statements and reviewing statement history**
 
-There are two types of macros, macros that save the search expression and the settings/assignments, and those that save only settings/assignments. We call the former: full-macros, and the latter assignment-macros. Full-macros are defined with the dollar sign ($); assignment macros are defined with the (#). A full macro can be demoted to an assignment-macro by using a # instead of $ for its invocation. Examples below are for full macros. But he assignment macros are useful, ironically, to simplify Quelle syntax. This is because a search segment allow only a single search expression.
+There are two types of macros, macros that save the search expression and the settings & filters, and those that save only settings & filters. We call the former: full-macros, and the latter partial-macros. Full-macros are defined with the dollar sign ($); partial macros are defined with the (#). A full macro can be demoted to a partial macro by using a # instead of $ upon its invocation. Examples below are for full macros. But partial macros are useful, to provide more extensive utilization of statement labeling in Quelle command syntax (This is because a search segment allows only a single search expression; partial-macro invocations obviate that restriction in a substantial manner.
 
 In this section, we will examine how user-defined macros are used in Quelle.  A macro in Quelle is a way for the user to label a statement for subsequent use.  By applying a label to a statement, a shorthand mechanism is created for subsequent invocation. This gives rise to two new definitions:
 
