@@ -1,6 +1,6 @@
 # Quelle Specification for AVX Framework
 
-##### AVX-Quelle version 2.0.3.C17
+##### AVX-Quelle version 2.0.3.C19
 
 ### I. Background
 
@@ -149,7 +149,7 @@ As search is a fundamental concern of Quelle, it is optimized to make compound i
 
 Consider these two examples of Quelle statements (first CONTROL; then SEARCH):
 
-@set lexicon = KJV
+@set %lexicon = KJV
 
 "Moses"
 
@@ -301,61 +301,68 @@ vanity < sos < 1co
 
 **TABLE 9-1** -- **Labeling statements and reviewing statement history**
 
-There are two types of macros, macros that save the search expression and the settings & filters, and those that save only settings & filters. We call the former: full-macros, and the latter partial-macros. Full-macros are defined with the dollar sign ($); partial macros are defined with the (#). A full macro can be demoted to a partial macro by using a # instead of $ upon its invocation. Examples below are for full macros. But partial macros are useful, to provide more extensive utilization of statement labeling in Quelle command syntax (This is because a search segment allows only a single search expression; partial-macro invocations obviate that restriction in a substantial manner.
+There are two types of macros:
 
-In this section, we will examine how user-defined macros are used in Quelle.  A macro in Quelle is a way for the user to label a statement for subsequent use.  By applying a label to a statement, a shorthand mechanism is created for subsequent invocation. This gives rise to two new definitions:
+- **FULL** macros that save the search expression and the settings & filters
+- **PARTIAL** macros that save only settings & filters
 
-1. Labeling a statement (or defining a macro; labels must begin with a letter; never a number, underscore, or hyphen)
+Full-macros are defined with the dollar sign ($); partial macros are defined with the (#). A full macro can be demoted to a partial macro by using a # instead of $ upon its invocation. Partial macros cannot be promoted to full macros. Partial macros are useful, as they provide more liberal utilization of previously labelled statements. Quelle search syntax allows only a single search expression: this limits the application of full macros. partial-macro invocations are not restricted in that manner.
+
+In this section, we will examine Quelle syntax, and how macros can be used to label statements for subsequent invocation.  By applying a label to a statement, a shorthand mechanism is created for subsequent invocation. This gives rise to two new definitions:
+
+1. Labeling a statement (or defining a macro)
 
 2. Invoking a labeled statement (running a macro)
 
+Macro labels cannot contain punctuation: only letters, numbers, hyphens, and underscores are permitted. However, macros are identified with a prefix: it is either a pound (#) or dollar ($).
 
-Let’s say we want to name the search example from the previous section; We’ll call it *eternal-power*. To accomplish this, we would issue this command:
 
-%span=7 %similarity=85  eternal power || eternal-power
+Let’s say we want to name the search example from the previous section; We’ll call it *eternal-power*. To accomplish this, we can apply a label to the statement below. This produces a full macro:
 
-It’s that simple, now instead of typing the entire statement, we can utilize the macro by referencing our previously applied label. Here is how the macro can be invoked. We might call this running the macro:
+%span=7 %similarity=85 eternal power < Romans || $eternal-power-romans
 
-$eternal-power
+It’s that simple, now instead of typing the entire statement, we can utilize the macro by referencing our previously applied label. Here is how the macro can be invoked:
 
-Labeled statements also support compounding, as follows; we will label it also:
+$eternal-power-romans
 
-$eternal-power  godhead || my-label-cannot-contain-spaces
+Labeled statements also support compounding. However, statements can only ever have a single search expression. Therefore, this macro invocation is disallowed (as there would be two search expressions in the same segment):
 
-Later I can issue this command:
+$eternal-power godhead
 
-$my-label-cannot-contain-spaces
+However, the control variables and filters that were in the macro can still be leveraged by demoting the label to a partial macro. We can execute this to accomplish the search that was disallowed above:
 
-Which is equivalent to these statements:
+#eternal-power-romans eternal power godhead
 
-%span=7  %similarity=85 + eternal power + godhead
+And compounding allows me to apply another label for future use:
+
+#eternal-power-romans eternal power godhead || $godhead-romans
 
 There are several restrictions on macro definitions:
 
 1. Macro definition must represent a valid Quelle statement:
    - The syntax is verified prior to applying the statement label.
-2. Macro definitions is constrained to a single expression
-   - \+ and is not permitted in macro definitions
+2. Macro definitions apply per segment
+   - when + is used to concatenate searches, the macro applies only to the single expression immediately to its left
 3. Macro definitions exclude export directives
-   - Any portion of the statement that contains > is incompatible with a macro definition
-4. Macro definitions exclude output directives
-   - Any portion of the statement that contains [ ] is incompatible with a macro definition
+   - Any portion of the statement that contains > is excluded from the macro definition
+4. Macro definitions exclude print directives
+   - Any portion of the statement that contains [ ] iis excluded from the macro definition
 5. The statement cannot represent an explicit action:
    - Only implicit actions are permitted in a labeled statement.
 
-Finally, any macros referenced within a macro definition are expanded prior to applying the new label. Therefore redefining a macro after it has been referenced in a subsequent macro definition has no effect of the initial macro reference. We call this macro-determinism.  A component of determinism for macros is that the macro definition saves all control settings at the time that the label was applied. This assures that the same search results are returned each time the macro is referenced. Here is an example.
+Finally, any macros referenced within a macro definition are expanded prior to applying the new label. Therefore, subsequent redefinition of a previously referenced macro invocation has no effect upon the initial macro reference. We call this macro-determinism.  Quelle determinism assures that all control settings are captured at the time that the label is applied to the macro. This further assures that the same search results are returned each time the macro is referenced. Here is an example.
 
-@set span = 2
+@set %span = 2
 
 in beginning || in_beginning
 
-@set span = 3
+@set %span = 3
 
 $in_beginning [1] < genesis:1:1
 
 ***result:*** none
 
-However, if the user desires the current settings to be used instead, a specialized macro invocation ( $\* ) represents all currently persisted settings; just include it as the last fragment of the expression (as show below). 
+However, if the user desires the current settings to be used instead, a specialized macro invocation ( $\* ) represents all currently persisted settings; just include it as the last element of the expression (as show below). 
 
 $in_beginning $* < genesis:1:1
 
@@ -367,45 +374,20 @@ Similarly, another specialized invocation ( $0 ) represents default values for a
 
 Two additional explicit commands exist whereby a macro can be manipulated. We saw above how they can be defined and referenced. There are two additional ways commands that operate on macros: expansion and deletion.  In the last macro definition above where we created  $another-macro, the user could preview an expansion by issuing this command:
 
-@expand another-macro
+@expand $another-macro
 
 If the user wanted to remove this definition, the @delete action is used.  Here is an example:
 
-@delete another-macro
+@delete $another-macro
 
 If you want the same settings to be persisted to your current session that were in place during macro definition, the @absorb command will persist all settings for the macro into your current session
 
-@absorb my-favorite-settings-macro 
+@absorb $my-favorite-settings-macro 
 
-Both @absorb and @expand also work with command history.
+**NOTES:**
 
-**NOTE:** User-defined labels must begin with a letter [A-Z] or [a-z], but they may contain numbers, hyphens, periods, commas, underscores, and single-quotes (no other punctuation or special characters are supported).
-
-While macro definitions are deterministic, they can be overwritten/redefined: consider this sequence:
-
-"Jesus said" || jesus_macro
-
-"Mary said" || other_macro
-
-$Jesus_macro  $other_macro || either_said
-
-@expand either_said
-
-***result:***	"Jesus said"   "Mary said"
-
-"Peter said" || other_macro
-
-@expand either_said
-
-***result:***	"Jesus said"   "Mary said"
-
-$Jesus_macro   $other_macro || either_said
-
-@expand either_said
-
-***result:***	"Jesus said"   "Peter said"
-
-The sequence above illustrates both macro-determinism and the ability to explicitly redefine a macro. It should be noted that the two built-in specialized macro invocations ( $\* and $0 ) cannot be deleted or overwritten.
+- Both @absorb and @expand also work with command history.
+- he two built-in specialized macro invocations ( $\* and $0 ) cannot be deleted or overwritten.
 
 **REVIEW SEARCH HISTORY**
 
@@ -439,9 +421,9 @@ The *invoke* command works for command-history works exactly the same way as it 
 
 *@review*
 
-1>  @set span = 7
+1>  @set %span = 7
 
-2>  @set similarity=85
+2>  @set %similarity=85
 
 3> eternal power
 
@@ -510,11 +492,11 @@ Type this to terminate the Quelle interpreter:
 
 
 
-| **example**       | **explanation**                                              | shorthand equivalent |
-| ----------------- | ------------------------------------------------------------ | -------------------- |
-| **@set** span = 8 | Assign a control setting                                     | @span = 8            |
-| **@get** span     | get a control setting                                        |                      |
-| **@clear** span   | Clear the control setting; restoring the Quelle driver default setting |                      |
+| **example**        | **explanation**                                              | shorthand equivalent |
+| ------------------ | ------------------------------------------------------------ | -------------------- |
+| **@set** %span = 8 | Assign a control setting                                     | @span = 8            |
+| **@get** %span     | get a control setting                                        |                      |
+| **@clear** %span   | Clear the control setting; restoring the Quelle driver default setting |                      |
 
 **TABLE 12-3** -- **set/clear/get** action operate on configuration settings
 
@@ -554,9 +536,9 @@ AVX-Quelle manifests five control names. Each allows all three actions: ***set**
 
 The *@get* command fetches these values. The *@get* command requires a single argument. Examples are below:
 
-*@get* search
+*@get* %span
 
-@get format
+@get %format
 
 **TABLE 12-5** -- **Collective CONTROL operations**
 
@@ -566,17 +548,15 @@ All settings can be cleared using an explicit command:
 
 **Scope of Settings**
 
-It should be noted that there is a distinction between **@set** and and implicit **assign** syntax. The first form is persistent and affects the specified settings for all subsequent statements. Contrariwise, an implicit **assign** affects only the single statement wherewith it is executed. We refer to this as persistence vs assignment.
+It should be noted that there is a distinction between **@set** and and implicit **assign** syntax. The first form is and explicit command and is persistent (it affects all subsequent statements). Contrariwise, an implicit **assign** affects only the single statement wherewith it is executed. We refer to this as persistence vs assignment.
 
 ### XIII. Miscellaneous Information
 
-| Verb         | Action Type | Syntax Category |
-| ------------ | :---------: | --------------- |
-| **@version** |  explicit   | SYSTEM          |
-
 **QUERYING DRIVER FOR VERSION INFORMATION**
 
-@version will query the Quelle Search Provider for version information:
+THis command reveals the current Quelle version of the command interpreter:
+
+@get %version
 
 ---
 
@@ -608,9 +588,11 @@ Go Home!
 
 Like the earlier example, the subject is "you understood".  The object this time is defined, and insists that "you" should go home.  Some verbs always have objects, others sometimes do, and still others never do. Quelle follows this same pattern and some Quelle verbs require direct-objects; and some do not.  In the various tables throughout this document, required and optional parameters are identified, These parameters represent the object of the verb within each respective table.
 
-**Statement**: A statement is composed of one or more *actions*. If there is more than one SEARCH actions issued by the statement, then search action is logically OR’ed together.
+**Statement**: A statement is composed of one or more segments. When there is more than one segment, each segment contains a search expression. All search results are logically OR’ed together. It is recommended that statements with multiple segments be used sparingly as they represent a complex search pattern. In most situations, a single segment is sufficient to perform very powerful searches. This is because Quelle search expressions already offer powerfull searches with Boolean search logic on all search fragments.
 
-**Unquoted SEARCH clauses:** an unquoted search clause contains one or more search words. If there is more than one word in the clause, then each word is logically AND’ed together.
+**Expression**: Each segment has zero or one search expressions. A segment without a search expression is typically used to define a partial macro. If you are searching, your segment will contain a search expression. Expressions have fragments, and fragments have features. For an expression to match, all fragments must match (Logical AND). For a fragment to match, any feature must match (Logical OR). AND is represented by &. OR is represented by |.
+
+**Unquoted SEARCH clauses:** an unquoted search clause contains one or more search fragments. If there is more than one fragment in the clause, then each fragment is logically AND’ed together.
 
 **Quoted SEARCH clauses:** a quoted clause contains a single string of terms to search. An explicit match on the string is required. However, an ellipsis ( … ) can be used to indicate that wildcards may appear within the quoted string.
 
