@@ -1,6 +1,6 @@
 # Quelle Specification for AVX Framework
 
-##### AVX-Quelle version 2.0.3.C19
+##### AVX-Quelle version 2.0.3.C21
 
 ### I. Background
 
@@ -61,7 +61,7 @@ Please see https://Digital-AV.org for additional information about the SDK.
 
 Quelle defines a declarative syntax for specifying search criteria using the *find* verb. Quelle also defines additional verbs to round out its syntax as a simple straightforward means to interact with custom applications where searching text is the fundamental problem at hand.
 
-Quelle Syntax comprises seventeen (17) verbs. Each verb corresponds to a basic action:
+Quelle Syntax comprises fifteen (15) verbs. Each verb corresponds to a basic action:
 
 - find
 - filter
@@ -69,12 +69,10 @@ Quelle Syntax comprises seventeen (17) verbs. Each verb corresponds to a basic a
 - set
 - get
 - clear
-- initialize
-- export
-- limit
+- history
+- print
 - apply
 - delete
-- expand
 - absorb
 - help
 - review
@@ -83,7 +81,7 @@ Quelle Syntax comprises seventeen (17) verbs. Each verb corresponds to a basic a
 
 Quelle is an open and extensible standard, additional verbs, and verbs for other languages can be defined without altering the overall syntax structure of the Quelle HMI. The remainder of this document describes Version 2.0 of the Quelle-HMI Level-II specification with specialized AVX search augmentations.  Moreover, there is no need to consult the Vanilla-Quelle documentation, as all similarities with Vanilla-Quelle are redundantly documented here.
 
-In Quelle terminology, a statement is made up of one or more clauses. Each clause represents an action. While there are seventeen action-verbs, there are only five syntax categories:
+In Quelle terminology, a statement is made up of one or more clauses. Each clause represents an action. While there are fifteen action-verbs, there are only five syntax categories:
 
 1. SEARCH
    - *find*
@@ -95,18 +93,16 @@ In Quelle terminology, a statement is made up of one or more clauses. Each claus
    - @get
    - @absorb *(use history **or** label to **absorb all control settings**)*
 4. OUTPUT
-   - *limit*
-   - *export*
+   - @print
 4. SYSTEM
    - @help
    - @exit
 5. HISTORY & MACROS
    - *invoke*			  (invoke macro by its label **or** invoke a previous command by its id)
-   - *apply*			   (apply label to macro)
+   - *apply*			   (apply label to define a macro)
    - @delete		  (delete macro by its label)
-   - @expand		(label **or** id)
-   - @review		 (review history)
-   - @initialize	  (delete all command history)
+   - @review		 (review macros)
+   - @history	  (review history or reset history)
 
 Each clause has either a single explicit action or any number of implicit actions.  Explicit actions begin with the @ symbol, immediately followed by the explicit verb.  Implicit actions are inferred by the syntax of the command.
 
@@ -114,14 +110,14 @@ Each clause has either a single explicit action or any number of implicit action
 
 Learning just six verbs is all that is necessary to effectively use Quelle. In the table below, each verb is identified with required and optional parameters/operators.
 
-| Verb      | Action Type | Syntax Category | Required Parameters       | Optional Parameter |
-| --------- | :---------: | :-------------- | ------------------------- | :----------------: |
-| *find*    |  implicit   | SEARCH          | *search spec*             |                    |
-| *filter*  |  implicit   | SEARCH          | **<** *domain*            |                    |
-| *assign*  |  implicit   | CONTROL         | **%name** **=** *value*   |                    |
-| *limit*   |  implicit   | OUTPUT          | **[** *row_indices* **]** |                    |
-| **@help** |  explicit   | SYSTEM          |                           |      *topic*       |
-| **@exit** |  explicit   | SYSTEM          |                           |                    |
+| Verb       | Action Type | Syntax Category | Required Parameters     |              Optional Parameters               |
+| ---------- | :---------: | :-------------- | ----------------------- | :--------------------------------------------: |
+| *find*     |  implicit   | SEARCH          | *search spec*           |                                                |
+| *filter*   |  implicit   | SEARCH          | **<** *domain*          |                                                |
+| *assign*   |  implicit   | CONTROL         | **%name** **=** *value* |                                                |
+| **@print** |  explicit   | OUTPUT          | $* or other $label      | *book, chapter, verse and/or export directive* |
+| **@help**  |  explicit   | SYSTEM          |                         |                    *topic*                     |
+| **@exit**  |  explicit   | SYSTEM          |                         |                                                |
 
 **TABLE 4-1** -- **Fundamental Quelle commands with corresponding syntax summaries**
 
@@ -221,48 +217,48 @@ this|that
 
 /noun/ | /verb/
 
-### VI. Displaying Results
+### VI. Printing Results
 
 Consider that there are two fundamental types of searches:
 
 - Searches that return a limited set of results
 - Searches that either return loads of results; or searches where the result count is unknown (and potentially very large)
 
-Due to the latter condition above, SEARCH summarizes results (it does NOT display every result found). However, if more than a summary is desired, the user can control how many results to display.
+Due to the latter condition above, SEARCH summarizes results (it does NOT automatically display every result found). However, when more than a summary is needed, the explicit @print command controls verse rendering. printing results can be directly to the console window or further controlled with the export directive.
 
-"Jesus answered"			*summarize documents that contain this phrase, with paragraph references*
+### VII. The Export directive
 
-"Jesus answered" [ ]        *display every matching phrase*
+This would export a summary for the most recent search
 
-"Jesus answered" [1]  *this would would display only the first matching phrase*
+@print $* > my-search-summary.output  
 
-"Jesus answered" [1 2 3]  *this would would display only the first three matching phrases*
+This would export all found verses in Genesis from the most previous search as html
 
-"Jesus answered" [4 5 6]  *this would would display the next three matching phrases*
+@set format=html
 
-### VII. Exporting Results
+@print $* Genesis  > my-search-genesis.output.html
 
-Export using a display-coordinate:
+This would export all verses in Genesis, independent of any search criteria) as md
 
-To revisit the example in the previous sample, we can export records to a file with these commands:
+@set format=md
 
-"Jesus answered" [ ] > my-file.output  // *this would export every matching phrase*
+@print Genesis:1  > gen.md
 
-"Jesus answered" [1]  > my-file.output  // *this would would export only the first matching phrase*
+To append Genesis chapter two to the previous chapter one output, use >>
 
-"Jesus answered" [1 2 3]  >> my-file.output  //  *this would would export the first three matching phrases* // >> indicates that the results should be appended
+@print Genesis:2  >> gen.md
 
-format=html "Jesus answered" [1 2 3]  => my-file.html // *export the first three matching phrases as html*
+To overwrite the previous file to only contain chapter 50 use =>
 
-The => allows existing file to be overwritten. Quelle will not overwrite an existing file with > syntax. The => is required to force an overwrite.
+@print Genesis:50  => gen.md
 
 
 
-| Verb     | Action Type | Syntax Category | Parameters       | Alternate #1      | Alternate #2      |
-| -------- | :---------: | --------------- | ---------------- | :---------------- | :---------------- |
-| *export* |  implicit   | OUTPUT          | **>** *filename* | **=>** *filename* | **>>** *filename* |
+| Directive | Action Type | Syntax Category | Parameters       | Alternate #1      | Alternate #2      |
+| --------- | :---------: | --------------- | ---------------- | :---------------- | :---------------- |
+| *export*  |    print    | OUTPUT          | **>** *filename* | **=>** *filename* | **>>** *filename* |
 
-**TABLE 7-1** -- **The implicit export action**
+**TABLE 7-1** -- **The export directive**
 
 ### VIII. Filtering Results
 
@@ -288,16 +284,15 @@ vanity < sos < 1co
 
 ### IX. Labeling & Reviewing Statements for subsequent invocation
 
-| Verb            | Action Type | Syntax Category           | Searches and Assignments                   | Assignments only                          |
-| --------------- | ----------- | ------------------------- | ------------------------------------------ | :---------------------------------------- |
-| *invoke*        | implicit    | <u>HISTORY</u> & LABELING | **required:** ***$**id*                    | **required:**  ***#**id*                  |
-| *invoke*        | implicit    | HISTORY & <u>LABELING</u> | **required:** ***$**label*                 | **required:** ***#**label*                |
-| *apply*         | implicit    | HISTORY & <u>LABELING</u> | **required:** **\|\|** ***$**label*        | **required:** **\|\|** ****#**label**     |
-| **@delete**     | explicit    | HISTORY & <u>LABELING</u> | **required:** ***$**label*  or  ***$**id*  | **required:** ***#**label*  or  ***#**id* |
-| **@expand**     | explicit    | HISTORY & LABELING        | **required:** ***$**label*  or  ***$**id*  | **required:** ***#**label*  or  ***#**id* |
-| **@absorb**     | explicit    | CONTROL                   | **permitted:** ***$**label*  or  ***$**id* | **required:** ***#**label*  or  ***#**id* |
-| **@review**     | explicit    | <u>HISTORY</u> & LABELING | **optional:** *max_count date_range*       |                                           |
-| **@initialize** | explicit    | <u>HISTORY</u> & LABELING |                                            |                                           |
+| Verb         | Action Type | Syntax Category           | Parameters                                                   |
+| ------------ | ----------- | ------------------------- | ------------------------------------------------------------ |
+| *invoke*     | implicit    | <u>HISTORY</u> & LABELING | ***$**id* or ***#**id*                                       |
+| *invoke*     | implicit    | HISTORY & <u>LABELING</u> | ***$**label* or ***#**label*                                 |
+| *apply*      | implicit    | HISTORY & <u>LABELING</u> | **\|\|** ***$**label*<br/>\<or\><br/> **\|\|** ****#**label** |
+| **@delete**  | explicit    | HISTORY & <u>LABELING     | ***$**label* or ***#**label*                                 |
+| **@review**  | explicit    | HISTORY & LABELING        | **optional:** ***$**label* or ***#**label*<br/>\<or\><br/>**optional:** *date_range* |
+| **@absorb**  | explicit    | CONTROL                   | **permitted:** ***$**label* or ***#**label* or  ***$**id* or  ***#**id* |
+| **@history** | explicit    | <u>HISTORY</u> & LABELING | **optional:** ***$**id* or ***$**id*<br/>\<or\><br/>**optional:** *max_count<br/>**optional:** *date_range*<br/>**optional:** -reset |
 
 **TABLE 9-1** -- **Labeling statements and reviewing statement history**
 
@@ -306,7 +301,7 @@ There are two types of macros:
 - **FULL** macros that save the search expression and the settings & filters
 - **PARTIAL** macros that save only settings & filters
 
-Full-macros are defined with the dollar sign ($); partial macros are defined with the (#). A full macro can be demoted to a partial macro by using a # instead of $ upon its invocation. Partial macros cannot be promoted to full macros. Partial macros are useful, as they provide more liberal utilization of previously labelled statements. Quelle search syntax allows only a single search expression: this limits the application of full macros. partial-macro invocations are not restricted in that manner.
+Full-macros are defined with the dollar sign ($); partial macros are defined with the (#). Partial macros are useful, as they provide more liberal utilization of previously labelled statements. Quelle search syntax allows only a single search expression: this limits the application of full macros. partial-macro invocations are not restricted in that manner.  Full macro can be demoted to a partial macro by using a # instead of $ upon invocation. Partial macros can be promoted to full macros, by redefining adding a search expression and redefining the macro. 
 
 In this section, we will examine Quelle syntax, and how macros can be used to label statements for subsequent invocation.  By applying a label to a statement, a shorthand mechanism is created for subsequent invocation. This gives rise to two new definitions:
 
@@ -333,22 +328,18 @@ However, the control variables and filters that were in the macro can still be l
 
 #eternal-power-romans eternal power godhead
 
-And compounding allows me to apply another label for future use:
+Alternatively, the macro can be redefined (his example also release the syntax for promoting a partial macro to a full macro:
 
 #eternal-power-romans eternal power godhead || $godhead-romans
 
-There are several restrictions on macro definitions:
+There are a few restrictions on macro definitions:
 
-1. Macro definition must represent a valid Quelle statement:
-   - The syntax is verified prior to applying the statement label.
-2. Macro definitions apply per segment
-   - when + is used to concatenate searches, the macro applies only to the single expression immediately to its left
-3. Macro definitions exclude export directives
-   - Any portion of the statement that contains > is excluded from the macro definition
-4. Macro definitions exclude print directives
-   - Any portion of the statement that contains [ ] iis excluded from the macro definition
-5. The statement cannot represent an explicit action:
+1. The statement cannot represent an explicit action:
    - Only implicit actions are permitted in a labeled statement.
+2.  definition must represent a valid Quelle statement:
+   - The syntax is verified prior to applying the statement label.
+3. Macro definitions apply per segment
+   - when + is used to concatenate searches, the macro applies only to the single expression immediately to its left
 
 Finally, any macros referenced within a macro definition are expanded prior to applying the new label. Therefore, subsequent redefinition of a previously referenced macro invocation has no effect upon the initial macro reference. We call this macro-determinism.  Quelle determinism assures that all control settings are captured at the time that the label is applied to the macro. This further assures that the same search results are returned each time the macro is referenced. Here is an example.
 
@@ -362,7 +353,7 @@ $in_beginning [1] < genesis:1:1
 
 ***result:*** none
 
-However, if the user desires the current settings to be used instead, a specialized macro invocation ( $\* ) represents all currently persisted settings; just include it as the last element of the expression (as show below). 
+However, if the user desires the current settings to be used instead, a specialized macro invocation ( #\* ) represents all currently persisted settings; just include it as the last element of the expression (as show below). 
 
 $in_beginning $* < genesis:1:1
 
@@ -372,9 +363,9 @@ Similarly, another specialized invocation ( $0 ) represents default values for a
 
 ##### Additional explicit macro commands:
 
-Two additional explicit commands exist whereby a macro can be manipulated. We saw above how they can be defined and referenced. There are two additional ways commands that operate on macros: expansion and deletion.  In the last macro definition above where we created  $another-macro, the user could preview an expansion by issuing this command:
+Two additional explicit commands exist whereby a macro can be manipulated. We saw above how they can be defined and referenced. There are two additional ways commands that operate on macros: expansion and deletion.  In the last macro definition above where we created  $another-macro, the user could review an expansion by issuing this command:
 
-@expand $another-macro
+@review $another-macro
 
 If the user wanted to remove this definition, the @delete action is used.  Here is an example:
 
@@ -386,40 +377,40 @@ If you want the same settings to be persisted to your current session that were 
 
 **NOTES:**
 
-- Both @absorb and @expand also work with command history.
-- he two built-in specialized macro invocations ( $\* and $0 ) cannot be deleted or overwritten.
+- @absorb also works with command history.
+- The two built-in specialized macro invocations ( $\* and $0 ) cannot be deleted or overwritten.
 
-**REVIEW SEARCH HISTORY**
+**REVIEW HISTORY and/or MACRO DEFINITIONS** 
 
-*@review* gets the user's search activity for the current session.  To show the last ten searches, type:
+*@history* reveals your previous activity.  To show the last ten searches, type:
 
-*@review*
+*@history*
 
-To show the last three searches, type:
+To reveal the last three searches, type:
 
-*@review* 3
+*@history* 3
 
-To show the last twenty searches, type:
+To reveal the last twenty searches, type:
 
-*@review* 20 
+*@history* 20 
 
-To show the last twenty searches using date ranges, type any of:
+To reveal activity using date ranges, type any of:
 
-*@review* after since 2023/07/04
+*@history* since 2023/07/04
 
-*@review* until 2023/07/04
+*@history* until 2023/07/04
 
-*@review* after 2023/07/04 until 2024/07/04 
+*@history* since 2023/07/04 until 2024/07/04 
 
-*@review* 20 after 2023/07/04 until 2024/07/04 
+*@history* 20 since 2023/07/04 until 2024/07/04 
 
 All ranges are inclusive. Therefore, commands on July 4th would also be included.
 
 **INVOKE**
 
-The *invoke* command works for command-history works exactly the same way as it does for macros.  After issuing a *@review* command, the user might receive a response as follows.
+The *invoke* command works for command-history works exactly the same way as it does for macros.  After issuing a *@history* command, the user might receive a response as follows.
 
-*@review*
+*@history*
 
 1>  @set %span = 7
 
@@ -435,19 +426,19 @@ would be shorthand to re-invoke the search specified as:
 
 eternal power
 
-Again, *invoking* command from your command history is *invoked* just like a macro. Moreover, as with macros, control settings are persisted within your command history to provide invocation determinism. That means that control settings that were in place during the original command are restored by the invocation.
-
-**INITIALIZING COMMAND HISTORY**
-
-The @initialize command can be used to delete <u>all</u> command history.
-
-To clear all command history:
-
-@initialize
+Again, *invoking* command from your command history is *invoked* just like a macro. Moreover, as with macros, control settings are persisted within your command history to provide invocation determinism. That means that control settings that were in place during the original command are utilized for the invocation.
 
 ##### Invoking a command remembers all settings, except when multiple macros are compounded:
 
 Command history captures all settings. We have already discussed macro-determinism. Invoking commands by their review numbers behave exactly like macros. In other words, invoking command history never persists changes into your environment, unless you explicitly request such behavior with the @absorb command.
+
+**RESETTING COMMAND HISTORY**
+
+The @history command can be used to delete <u>all</u> command history.
+
+To clear all command history:
+
+@history -reset
 
 ### X. Program Help
 
