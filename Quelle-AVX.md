@@ -1,6 +1,6 @@
 # Quelle Specification for AVX Framework
 
-##### AVX-Quelle version 2.3.C23
+##### AVX-Quelle version 2.3.C27
 
 ### I. Background
 
