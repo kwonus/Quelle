@@ -1,6 +1,6 @@
 # Quelle Specification for AVX Framework
 
-##### AVX-Quelle version 2.3.C27
+##### AVX-Quelle version 2.4.111
 
 ### I. Background
 
@@ -41,7 +41,7 @@ AVX-Quelle is a Level 2 implementation with augmented search capabilities. AVX-Q
 
    A %similarity setting of *precise* or 100 is a special case that still uses phonetics, but expects a full phonetic match (e.g. "there" and "their" are a 100% phonetic match).
 
-3. In a future release, similarity matching on lemmas can also be specified. Similarity matching on lemmas will be enabled by appending an exclamation mark ( ! ) to the similarity threshold (e.g. %similarity = 75!). Automatic matching on lemmas is not supported when %similarity is set to *exact* or 0. The PEG grammar already supports the exclamation mark in the syntax. However, it is currently ignored in AVX-Search. A future version of AVX-Search will make this additional feature available.
+3. In a future release, similarity matching on lemmas can also be specified. Similarity matching on lemmas will be enabled by appending an exclamation mark ( ! ) to the similarity threshold (e.g. %similarity = 75!). Automatic matching on lemmas is not supported when %similarity is set to *exact* or 0. The PEG grammar already supports the exclamation mark in the syntax. However, it is currently ignored in AVX-Search. A future version of AVX-Search will utilize this syntax to enable this feature.
 
 AVX-Quelle uses the AV-1769 edition of the sacred text. It substantially agrees with the "Bearing Precious Seed" bibles, as published by local church ministries. The text itself has undergone review by Christian missionaries, pastors, and lay people since the mid-1990's. The original incarnation of the digitized AV-1769 text was implemented in the free PC/Windows app known as:
 
@@ -234,13 +234,13 @@ This would export a summary for the most recent search
 
 This would export all found verses in Genesis from the most previous search as html
 
-@set format=html
+@set %format=html
 
 @print $* Genesis  > my-search-genesis.output.html
 
-This would export all verses in Genesis, independent of any search criteria) as md
+This would export all verses in Genesis, independent of any search criteria) as markdown
 
-@set format=md
+@set %format=md
 
 @print Genesis:1  > gen.md
 
@@ -475,9 +475,9 @@ Type this to terminate the Quelle interpreter:
 
 **Export Format Options:**
 
-| **Markdown**   | **HTML**         | **Text**         | Json             |
-| -------------- | ---------------- | ---------------- | ---------------- |
-| *%format = md* | *%format = html* | *%format = text* | *%format = json* |
+| **Markdown**                             | **Text** (UTF8)                       | HTML             | JSON             | YAML           |
+| ---------------------------------------- | ------------------------------------- | ---------------- | ---------------- | -------------- |
+| *%format = md* <br/>*%format = markdown* | *%format = text*<br/>*%format = utf8* | *%format = html* | *%format = json* | %formal = yaml |
 
 **TABLE 12-2** -- **set** format command can be used to set the default content-formatting for for use with the export verb
 
