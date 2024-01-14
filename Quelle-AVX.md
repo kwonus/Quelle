@@ -661,7 +661,7 @@ The lexical search domain of AVX-Quelle includes all words in the original KJV t
 | /delta/            | lexicon            | [archaic] word can be transformed into modern American English |                                                              |        |
 | \#FFFF             | PN+POS(12)         | hexadecimal representation of bits for a PN+POS(12) value.   | See Digital-AV SDK                                           | uint16 |
 | \#FFFFFFFF         | POS(32)            | hexadecimal representation of bits for a POS(32) value.      | See Digital-AV SDK                                           | uint32 |
-| #string            | nupos-string       | NUPOS string representing part-of-speech. This is the preferred syntax over POS(32), even though they are equivalent. NUPOS part-of-speech values have higher fidelity than the 16-bit PN+POS(12) representations. | See Part-of-Speech-for-Digital-AV.docx                       | uint64 |
+| #string            | nupos-string       | NUPOS string representing part-of-speech. This is the preferred syntax over POS(32), even though they are equivalent. NUPOS part-of-speech values have higher fidelity than the 16-bit PN+POS(12) representations. | See Part-of-Speech-for-Digital-AV.docx                       | uint32 |
 | 99999:H            | Strongs Number     | decimal Strongs number for the Hebrew word in the Old Testament | One of Strongs\[4\]                                          | 0x7FFF |
 | 99999:G            | Strongs Number     | decimal Strongs number for the Greek word in the New Testament | One of Strongs\[4\]                                          | 0x7FFF |
 
