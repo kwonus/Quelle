@@ -669,44 +669,5 @@ An object model to support specialized Search Tokens for Quelle-AVX is depicted 
 
 ![QFind](./QFind.png)
 
-
-
-### Appendix D. Developer Notes
-
-- Quelle expressions have one or more Quelle commands or segments
-- Search segments utilize the QFind class
-- Search segments have one or more fragments separated by whitespace (all fragments are implicit AND conditions)
-- Fragments have one or more MatchAny objects [MatchAny objects are explicit AND conditions, separated by & ]
-- MatchAny objects have one or more Features [Features are explicit OR conditions, separated by | ]
-- Features can be (negated) using the unary negation operator [ - ]
-
-#### Example
-
-**%span = 15 Lord\* -/v/ & -/adv/ + /v/|/n/&-run**
-
-Two search segments (search segments are encapsulated by the QFind class):
-
-​	search-segment-1: **Lord\* -/v/ & -/adv/**       (this has two fragments)
-
-​		fragment-1 has a single MatchAny object
-
-​			MatchAny object has one [wildcard] feature: **Lord***
-
-​		fragment-2 has two oMatchAny objects (these are AND conditions)
-
-​			MatchAny object-1 has a single negated feature: **-/v/** (NOT a VERB)
-
-​			MatchAny object-2 has a single negated feature: **-/adv/** (NOT an ADVERB)
-
-​	search-segment-2: **/v/|/n/ & -run** has a single fragment
-
-​		The fragment has  two ANDed MatchAny objects
-
-​			MatchAny object-1 has two ORed features: (IS a VERB) OR (IS a NOUN)
-
-​			MatchAny object-2 has a single negated feature: (NOT the word RUN) 
-
-NOTE: the plus sign between the two search segments above implies that results of the segments are ORed together.
-
 ​	
 
