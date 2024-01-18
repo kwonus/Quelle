@@ -351,7 +351,7 @@ $in_beginning [1] < genesis:1:1
 
 However, if the user desires the current settings to be used instead, a specialized macro invocation ( #\* ) represents all currently persisted settings; just include it as the last element of the expression (as show below). 
 
-$in_beginning $* < genesis:1:1
+$in_beginning #\* < genesis:1:1
 
 ***result:*** Gen 1:1 In the beginning, God created ...
 
