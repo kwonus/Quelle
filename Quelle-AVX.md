@@ -228,10 +228,6 @@ Due to the latter condition above, SEARCH summarizes results (it does NOT automa
 
 ### VII. The Export directive
 
-This would export a summary for the most recent search
-
-@print $* > my-search-summary.output  
-
 This would export all found verses in Genesis from the most previous search as html
 
 @set %format=html
