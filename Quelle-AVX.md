@@ -516,7 +516,7 @@ AVX-Quelle manifests five control names. Each allows all three actions: ***set**
 | display    | the lexicon to be used for display/rendering                 | av/avx (kjv/modern)                                          | av (kjv)      |
 | format     | format of results on output                                  | see Table 12-2                                               | json          |
 | similarity | fuzzy phonetics matching threshold is between 1 and 99<br/>0 or *none* means: do not match on phonetics (use text only)<br/>100 or *exact* means that an *exact* phonetics match is expected | 33 to 99 [fuzzy] **or** ...<br>0 **or** *none*<br>100 **or** *exact*<br>Exclamation ( ! ) after the value enables lemma matching (see Section II / item #3) | 0 (none)      |
-| VERSION    | Not really a true setting: it works with the @get command to retrieve the revision number of the Quelle grammar supported by AV-Engine. This value is read-only. | 2.0.w.xyz                                                    | n/a           |
+| VERSION    | Not really a true setting: it works with the @get command to retrieve the revision number of the Quelle grammar supported by AV-Engine. This value is read-only. | 2.w.xyz                                                      | n/a           |
 | ALL        | Not really a true setting: it works with the @clear command to reset all variables above to their default values. It is only a valid option for the @clear command. | n/a                                                          | n/a           |
 
 **TABLE 12-4** -- **Summary of AVX-Quelle Control Names**
