@@ -1,6 +1,6 @@
 # Quelle Specification for AVX Framework
 
-##### AVX-Quelle version 2.4.120
+##### AVX-Quelle version 2.4.123
 
 ### I. Background
 
@@ -40,8 +40,6 @@ AVX-Quelle is a Level 2 implementation with augmented search capabilities. AVX-Q
    The minimum permitted similarity threshold is 33%. Any similarity threshold between 1 and 32 produces a syntax error.
 
    A %similarity setting of *precise* or 100 is a special case that still uses phonetics, but expects a full phonetic match (e.g. "there" and "their" are a 100% phonetic match).
-
-3. In a future release, similarity matching on lemmas can also be specified. Similarity matching on lemmas will be enabled by appending an exclamation mark ( ! ) to the similarity threshold (e.g. %similarity = 75!). Automatic matching on lemmas is not supported when %similarity is set to *exact* or 0. The PEG grammar already supports the exclamation mark in the syntax. However, it is currently ignored in AVX-Search. A future version of AVX-Search will utilize this syntax to enable this feature.
 
 AVX-Quelle uses the AV-1769 edition of the sacred text. It substantially agrees with the "Bearing Precious Seed" bibles, as published by local church ministries. The text itself has undergone review by Christian missionaries, pastors, and lay people since the mid-1990's. The original incarnation of the digitized AV-1769 text was implemented in the free PC/Windows app known as:
 
@@ -495,19 +493,29 @@ Otherwise, when multiple clauses contain the same setting, only the last setting
 
 %format=md %format=default %format=text
 
-@get format
+@get %format
 
-The final command would return text.  We call this: "last assignment wins". However, there is one caveat to this precedence order: regardless of where in the statement a macro or history invocation is provided within a statement, it never has precedence over a setting that is actually visible within the statement.  Consider this sequence as an example:
+The @get format command would return text.  We call this: "last assignment wins". However, there is one caveat to this precedence order: regardless of where in the statement a macro or history invocation is provided within a statement, it never has precedence over a setting that is actually visible within the statement.
 
-%similarity=none || precedence_example
+Finally, there is a bit more to say about the %similarity setting, because it actually has three components. If we issue this command, it actually affects similarity in two distinct ways:
 
-%similarity=85  $precedence_example
+@similarity=85 
 
-@get similarity
+That command is actually a concise way of setting three values. It is equivalent to this command
 
-The final command would return 85, because it was visible in the compound statement.
+@similarity=word:85 lemma:85
 
-AVX-Quelle manifests five control names. Each allows all three actions: ***set***, ***clear***, and ***@get*** verbs. Table 12-4 lists all settings available in AVX-Quelle. AVX-Quelle can support two distinct orthographies [i.e. Contemporary Modern English (avx/modern), and/or Early Modern English (avx/kjv).
+That is to say, it similarity is operative for the lexical word and also the lemma of the word. While not discussed previously, these two similarities thresholds need not be identical. These commands are also valid:
+
+@similarity = word: 85 lemma: 95
+
+@similarity = word : 85
+
+@similarity = word: none lemma: exact
+
+@similarity = lemma:none
+
+In all, AVX-Quelle manifests five control names. Each allows all three actions: ***set***, ***clear***, and ***@get*** verbs. Table 12-4 lists all settings available in AVX-Quelle. AVX-Quelle can support two distinct orthographies [i.e. Contemporary Modern English (avx/modern), and/or Early Modern English (avx/kjv).
 
 | Setting    | Meaning                                                      | Values                                                       | Default Value |
 | ---------- | ------------------------------------------------------------ | ------------------------------------------------------------ | ------------- |
@@ -515,7 +523,7 @@ AVX-Quelle manifests five control names. Each allows all three actions: ***set**
 | lexicon    | the lexicon to be used for the searching                     | av/avx/dual (kjv/modern/both)                                | dual (both)   |
 | display    | the lexicon to be used for display/rendering                 | av/avx (kjv/modern)                                          | av (kjv)      |
 | format     | format of results on output                                  | see Table 12-2                                               | json          |
-| similarity | fuzzy phonetics matching threshold is between 1 and 99<br/>0 or *none* means: do not match on phonetics (use text only)<br/>100 or *exact* means that an *exact* phonetics match is expected | 33 to 99 [fuzzy] **or** ...<br>0 **or** *none*<br>100 **or** *exact*<br>Exclamation ( ! ) after the value enables lemma matching (see Section II / item #3) | 0 (none)      |
+| similarity | fuzzy phonetics matching threshold is between 1 and 99<br/>0 or *none* means: do not match on phonetics (use text only)<br/>100 or *exact* means that an *exact* phonetics match is expected | 33 to 99 [fuzzy] **or** ...<br>0 **or** *none*<br>100 **or** *exact* | 0 (none)      |
 | VERSION    | Not really a true setting: it works with the @get command to retrieve the revision number of the Quelle grammar supported by AV-Engine. This value is read-only. | 2.w.xyz                                                      | n/a           |
 | ALL        | Not really a true setting: it works with the @clear command to reset all variables above to their default values. It is only a valid option for the @clear command. | n/a                                                          | n/a           |
 
@@ -611,7 +619,7 @@ The lexical search domain of AVX-Quelle includes all words in the original KJV t
 | un\*pro\*fit\*ness | wildcard (example)                      | starts with: un<br/>contains: pro and fit<br/>ends with: ness | all lexicon entries that start with "un", contain "pro" and "fit", and end with "ness" | 0x3FFF |
 | ~ʃɛpɝd*            | phonetic wildcard (example)             | Tilde marks the wildcard as phonetic (wildcards never perform sounds-alike searching) | All lexical entries that start with the sound ʃɛpɝd (this would include shepherd, shepherds, shepherding...) |        |
 | ~ʃɛpɝdz            | sounds-alike search using IPA (example) | Tilde marks the search term as phonetic (and if similarity is set between 33 and 99, search handles approximate matching) | This would match the lexical entry "shepherds" (and possibly similar terms, depending on similarity threshold) |        |
-| \\is\\             | lemma                                   | search on all words that share the same lemma as is: be, is, are, art, ... | be\|is\|are\|art\|...                                        | 0x3FFF |
+| \\is\\             | lemma                                   | search on all words that share the same lemma as is: be, is, are, art, ... | be is are art ...                                            | 0x3FFF |
 | /noun/             | lexical marker                          | any word where part of speech is a noun                      | POS12::0x010                                                 | 0x0FF0 |
 | /n/                | lexical marker                          | synonym for /noun/                                           | POS12::0x010                                                 | 0x0FF0 |
 | /verb/             | lexical marker                          | any word where part of speech is a verb                      | POS12::0x100                                                 | 0x0FF0 |
@@ -657,6 +665,7 @@ The lexical search domain of AVX-Quelle includes all words in the original KJV t
 | /Italics/          | text decoration                         | italicized words marked with this bit in punctuation byte    | PUNC::0x02                                                   | 0x02   |
 | /Jesus/            | text decoration                         | words of Jesus marked with this bit in punctuation byte      | PUNC::0x01                                                   | 0x01   |
 | /delta/            | lexicon                                 | [archaic] word can be transformed into modern American English |                                                              |        |
+| [type]             | named entity                            | Entities are recognized by MorphAdorner. They are also matched against Hitchcock's database. This functionality is experimental and considered BETA. | type=person man<br/>woman tribe city<br/>river mountain<br/>animal gemstone<br/>measurement any<br/>any_Hitchcock |        |
 | \#FFFF             | PN+POS(12)                              | hexadecimal representation of bits for a PN+POS(12) value.   | See Digital-AV SDK                                           | uint16 |
 | \#FFFFFFFF         | POS(32)                                 | hexadecimal representation of bits for a POS(32) value.      | See Digital-AV SDK                                           | uint32 |
 | #string            | nupos-string                            | NUPOS string representing part-of-speech. This is the preferred syntax over POS(32), even though they are equivalent. NUPOS part-of-speech values have higher fidelity than the 16-bit PN+POS(12) representations. | See Part-of-Speech-for-Digital-AV.docx                       | uint32 |
