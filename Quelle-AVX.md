@@ -1,6 +1,6 @@
 # Quelle Specification for AVX Framework
 
-##### AVX-Quelle version 2.4.123
+##### AVX-Quelle version 2.4.211
 
 ### I. Background
 
@@ -497,15 +497,15 @@ Otherwise, when multiple clauses contain the same setting, only the last setting
 
 The @get format command would return text.  We call this: "last assignment wins". However, there is one caveat to this precedence order: regardless of where in the statement a macro or history invocation is provided within a statement, it never has precedence over a setting that is actually visible within the statement.
 
-Finally, there is a bit more to say about the %similarity setting, because it actually has three components. If we issue this command, it actually affects similarity in two distinct ways:
+Finally, there is a bit more to say about the %similarity setting, because it actually has three components. If we issue this command, it affects similarity in two distinct ways:
 
 @similarity=85 
 
-That command is actually a concise way of setting three values. It is equivalent to this command
+That command is a concise way of setting two values. It is equivalent to this command
 
 @similarity=word:85 lemma:85
 
-That is to say, it similarity is operative for the lexical word and also the lemma of the word. While not discussed previously, these two similarities thresholds need not be identical. These commands are also valid:
+That is to say, similarity is operative for the lexical word and also the lemma of the word. While not discussed previously, these two similarities thresholds need not be identical. These commands are also valid:
 
 @similarity = word: 85 lemma: 95
 
@@ -539,7 +539,7 @@ The *@get* command fetches these values. The *@get* command requires a single ar
 
 All settings can be cleared using an explicit command:
 
-@clear
+@clear ALL
 
 **Scope of Settings**
 
@@ -549,7 +549,7 @@ It should be noted that there is a distinction between **@set** and and implicit
 
 **QUERYING DRIVER FOR VERSION INFORMATION**
 
-THis command reveals the current Quelle version of the command interpreter:
+This command reveals the current Quelle version of the command interpreter:
 
 @get %version
 
