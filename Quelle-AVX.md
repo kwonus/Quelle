@@ -92,10 +92,10 @@ In Quelle terminology, a statement is made up of one or more clauses. Each claus
    - @absorb *(use history **or** label to **absorb all control settings**)*
 4. OUTPUT
    - @print
-4. SYSTEM
+5. SYSTEM
    - @help
    - @exit
-5. HISTORY & MACROS
+6. HISTORY & MACROS
    - *invoke*			  (invoke macro by its label **or** invoke a previous command by its id)
    - *apply*			   (apply label to define a macro)
    - @delete		  (delete macro by its label)
