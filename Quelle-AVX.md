@@ -1,6 +1,6 @@
 # Quelle Specification for AVX Framework
 
-##### AVX-Quelle version 2.4.211
+##### AVX-Quelle version 2.4.220
 
 ### I. Background
 
@@ -31,7 +31,9 @@ AVX-Quelle is a Level 2 implementation with augmented search capabilities. AVX-Q
 
    - AVX/Modern *(a lexicon that that has been modernized to appear more like contemporary English)*
 
-   - Dual/Both *(use both lexicons for searching; this setting is not compatible with the %display setting)*
+   - Dual/Both *(use both lexicons; this setting is compatible with the %lexicon setting and the %display setting)*
+
+   The Dual/Both setting for %lexicon indicates that searching should consider both lexicons. The The Dual/Both setting for %display indicates that results should be displayed for both renderings [whether this is side-by-side or in-parallel depends on the format and the application where the display-rendering occurs].
 
 2. AVX-Quelle provides support for fuzzy-match-logic. The %similarity setting can be specified by the user to control the similarity threshold for approximate matching. An exact lexical match is expected when %similarity is set to *exact* or 0.  Zero is not really a similarity threshold, but rather 0 is a synonym for *exact*.
 
@@ -95,7 +97,7 @@ In Quelle terminology, a statement is made up of one or more clauses. Each claus
 5. SYSTEM
    - @help
    - @exit
-6. HISTORY & MACROS
+6. HISTORY & LABELS
    - *invoke*			  (invoke macro by its label **or** invoke a previous command by its id)
    - *apply*			   (apply label to define a macro)
    - @delete		  (delete macro by its label)
@@ -522,7 +524,7 @@ In all, AVX-Quelle manifests five control names. Each allows all three actions: 
 | span       | proximity distance limit                                     | 0 to 999 or verse                                            | 0 [verse]     |
 | lexicon    | the lexicon to be used for the searching                     | av/avx/dual (kjv/modern/both)                                | dual (both)   |
 | display    | the lexicon to be used for display/rendering                 | av/avx (kjv/modern)                                          | av (kjv)      |
-| format     | format of results on output                                  | see Table 12-2                                               | json          |
+| format     | format of results on output                                  | see Table 12-2                                               | text          |
 | similarity | fuzzy phonetics matching threshold is between 1 and 99<br/>0 or *none* means: do not match on phonetics (use text only)<br/>100 or *exact* means that an *exact* phonetics match is expected | 33 to 99 [fuzzy] **or** ...<br>0 **or** *none*<br>100 **or** *exact* | 0 (none)      |
 | VERSION    | Not really a true setting: it works with the @get command to retrieve the revision number of the Quelle grammar supported by AV-Engine. This value is read-only. | 2.w.xyz                                                      | n/a           |
 | ALL        | Not really a true setting: it works with the @clear command to reset all variables above to their default values. It is only a valid option for the @clear command. | n/a                                                          | n/a           |
