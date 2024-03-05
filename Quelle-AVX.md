@@ -1,6 +1,6 @@
 # Quelle Specification for AVX Framework
 
-##### AVX-Quelle version 4.3.3
+##### AVX-Quelle version 4.3.4
 
 ### Background
 
@@ -26,26 +26,28 @@ There are three types of commands in Quelle
 
 Search actions can have numerous components. In that sense, they support compound statements. However, the order of the statements is mostly prescribed. The initial portion of the statement contains one expression block and/or one settings block (one or the other or both, in swappable order). This initial position is followed by an optional scoping block. The final optional component is is either a Macro block or an Export Block (these final directives are mutually exclusive and connot be combined.)
 
-|                       | Expression Block | Settings Block   | Scoping Block   | Macro Block               | Export Block              |
-| --------------------- | ---------------- | ---------------- | --------------- | ------------------------- | ------------------------- |
-| Block Position        | initial position | initial position | post directives | final directive           | final directive           |
-| Requires other Blocks | no               | no               | no              | Expression<br>or Settings | Expression<br/>or Scoping |
-| Excludes other blocks | no               | no               | no              | Export                    | Macro                     |
+|                         | Expression Block | Settings Block   | Scoping Block   | Macro Block               | Export Block              |
+| ----------------------- | ---------------- | ---------------- | --------------- | ------------------------- | ------------------------- |
+| Block Position          | initial position | initial position | post directives | final directive           | final directive           |
+| Macro utilization level | full             | partial          | partial         | not in macro block        | not in export block       |
+| Requires other Blocks   | no               | no               | no              | Expression<br>or Settings | Expression<br/>or Scoping |
+| Excludes other blocks   | no               | no               | no              | Export                    | Macro                     |
 
 - Expression Block Components
 
   - *find expression*
-  - *use expression*
+  - *use expression (full macro utilization)*
 
 - Settings Block Components
 
   - *assign setting*
 
-  - *use settings*
+  - *use settings (partial macro utilization)*
 
 - Scoping Block
 
   - *filter directives*
+  - *use filters (partial macro utilization)*
 
 - Macro Block
 
@@ -55,15 +57,16 @@ Search actions can have numerous components. In that sense, they support compoun
 
   - *export directive*
 
-| Action   | Type             | Position | Action Syntax                                                | Repeatable Action                                            |
-| -------- | ---------------- | -------- | ------------------------------------------------------------ | ------------------------------------------------------------ |
-| *find*   | Expression Block | initial  | search expression or ***#id***                               | **no**                                                       |
-| *use*    | Expression Block | initial  | ***#label*** or ***#id ***                                   | **no**                                                       |
-| *assign* | Settings Block   | initial  | ***[ setting: value ]***                                     | yes (e.g. ***[ format:md  lexicon:kjv  span:verse ]*** )     |
-| *use*    | Settings Block   | initial  | ***[ #label ]*** or ***[ #id ]***                            | no, but can be used with other explicit assignments<br/>(e.g. ***[ #25  span:verse ]*** ) |
-| *filter* | Scoping Block    | post     | ***< scope***                                                | yes (e.g. ***< Genesis 3 < Revelation 3:16-17***)            |
-| *apply*  | Macro Block      | final    | ***\|\| label***                                             | **no**                                                       |
-| *export* | Export Block     | final    | ***> filepath*** or<br/>***>> filepath*** or<br/>***=> filepath*** | **no**                                                       |
+| Action   | Type             | Position | Action Syntax                                                | Repeatable Action                                        |
+| -------- | ---------------- | -------- | ------------------------------------------------------------ | -------------------------------------------------------- |
+| *find*   | Expression Block | initial  | search expression or ***#id***                               | **no**                                                   |
+| *use*    | Expression Block | initial  | ***#label*** or ***#id ***                                   | **no**: only one macro is permitted per block            |
+| *assign* | Settings Block   | initial  | ***[ setting: value ]***                                     | yes (e.g. ***[ format:md  lexicon:kjv  span:verse ]*** ) |
+| *use*    | Settings Block   | initial  | ***[ #label ]*** or<br/>***[ #id ]***                        | **no**: only one macro is permitted per block            |
+| *filter* | Scoping Block    | post     | ***< scope***                                                | yes (e.g. ***< Genesis 3 < Revelation 3:16-17***)        |
+| *use*    | Scoping Block    | post     | **<** ***#label***  or<br/>**<** ***#id***                   | **no**: only one macro is permitted per block            |
+| *apply*  | Macro Block      | final    | ***\|\| label***                                             | **no**                                                   |
+| *export* | Export Block     | final    | ***> filepath*** or<br/>***>> filepath*** or<br/>***=> filepath*** | **no**                                                   |
 
 #### Non-Search Commands
 
@@ -256,47 +259,6 @@ It’s that simple, now instead of typing the entire statement, we can utilize t
 
 #eternal-power-romans
 
-Labeled statements also support compounding. However, statements can only ever have a single search expression. Therefore, this macro invocation is disallowed (as there would be two search expressions in the same segment):
-
-#eternal-power godhead
-
-However, the control variables and filters that were in the macro can still be leveraged by demoting the label to a partial macro. We can execute this to accomplish the search that was disallowed above:
-
-#eternal-power-romans eternal power godhead
-
-Alternatively, the macro can be redefined (his example also release the syntax for promoting a partial macro to a full macro:
-
-#eternal-power-romans eternal power godhead || #godhead-romans
-
-There are a few restrictions on macro definitions:
-
-1. The statement cannot represent an explicit action:
-   - Only implicit actions are permitted in a labeled statement.
-2. definition must represent a valid Quelle statement:
-   - The syntax is verified prior to applying the statement label.
-3. Macro definitions apply per segment
-   - when + is used to concatenate searches, the macro applies only to the single expression immediately to its left
-
-Finally, any macros referenced within a macro definition are expanded prior to applying the new label. Therefore, subsequent redefinition of a previously referenced macro invocation has no effect upon the initial macro reference. We call this macro-determinism.  Quelle determinism assures that all control settings are captured at the time that the label is applied to the macro. This further assures that the same search results are returned each time the macro is referenced. Here is an example.
-
-@set span = 2
-
-in beginning || in_beginning
-
-@set span = 3
-
-#in_beginning [span:1] < genesis:1:1
-
-***result:*** none
-
-However, if the user desires the current settings to be used instead, a specialized control setting [ all:current ] represents all currently persisted settings; just include it in the statement (as show below). 
-
-[ all:current ] #in_beginning < genesis:1:1
-
-***result:*** Gen 1:1 In the beginning, God created ...
-
-Similarly, another specialized setting is [ all:defaults ] represents default values for all settings. 
-
 ### 1.5 - The Export Block
 
 The export directive works in conjunction with the @print command.
@@ -322,6 +284,81 @@ Combining with a scoping black , we could replace the contents of an existing fi
 | *export*         | **>** *filename* | **=>** *filename* | **>>** *filename* |
 
 **TABLE 3** -- **The export directive**
+
+### 1.6 - Macro Utilization
+
+The *use* action is supported in some, but not all search blocks. Macro utilization is supported only in these search block types:
+
+- Expression *(full macro utilization)*
+- Settings *(partial macro utilization)*
+- Scoping *(partial macro utilization)*
+
+Each of the block types, identified above, supports the *use* action. However, each block limited to, at most, one *use* action. While we cite this limitation here, the *use* action works both with labeled macros and statement history. If a macro label is utilized in a block, a history id cannot simultaneously be utilized in the same block (and vice versa). The limitation is on the *use* action within the block. This means that upon an entire statement containing all three supported block types, that statement could contain up to three *use* actions (one per block).
+
+The expression block supports for macro utilization.  In the earlier example:
+
+#eternal-power-romans
+
+All settings, filters, and search criteria are fully utilized (this is called full macro utilization, and it only occurs in expression blocks)
+
+Expression block macro demotion. A macro within the expression block can be demoted into a partial macro. This occurs when a provided black in the statement conflicts with the macro definition. Consider these examples:
+
+Recall that the macro definition: [ span: 7 similarity: 85% ] eternal power < Romans || eternal-power-romans
+
+| Statement                             | Utilization level         | Explanation                                             |
+| ------------------------------------- | ------------------------- | ------------------------------------------------------- |
+| #eternal-power-romans                 | full macro utilization    | no conflicts                                            |
+| #eternal-power-romans [ all:current ] | partial macro utilization | explicit settings replace any settings defined in macro |
+| #eternal-power-romans < Acts          | partial macro utilization | explicit filter replaces any filters defined in macro   |
+| #eternal-power-romans [span:7] < Acts | partial macro utilization | only the search expression is utilized from the macro   |
+
+Explicitly partial macros use only the part of the macro that applies to the block type. For example:
+
+[ #eternal-power-romans ]
+
+That partial macro captures only the settings defined within the macro.
+
+Likewise, in this example:
+
+< #eternal-power-romans
+
+That partial macro captures only the filters defined within the macro.
+
+Macro utilization within a block disallows all other entries within the block; macro utilization in a block is not compatible with any other entries in that same block.
+
+Specifically, the following statements / clauses are not supported by the Quelle grammar:
+
+#eternal-power-romans without excuse
+
+[ #eternal-power-romans span:7 ]
+
+< #eternal-power-romans < Acts
+
+It should be noted that any macros referenced within a macro definition are expanded prior to applying the new label. Therefore, subsequent redefinition of a previously referenced macro invocation never has effect existing macro definitions. We call this macro-determinism.  Quelle determinism assures that all control settings are captured at the time that the label is applied to the macro. This further assures that the same search results are returned each time the macro is referenced. Here is an example.
+
+@set span = 2
+
+in beginning || in_beginning
+
+@set span = 3
+
+#in_beginning [span:1] < genesis:1:1
+
+***result:*** none
+
+However, if the user desires the current settings to be used instead, a specialized control setting [ all:current ] represents all currently persisted settings; just include it in the statement (as show below). 
+
+[ all:current ] #in_beginning < genesis:1:1
+
+***result:*** Gen 1:1 In the beginning, God created ...
+
+Similarly, another specialized setting is [ all:defaults ] ; that block represents default values for all settings. 
+
+Still, a macro can be redefined/overwritten. This doesn't disable macro determinism, even though it feels like it does. The assumption is that the user is explicitly redefining the meaning of macro and Quelle dows not require explicit @delete of the label prior to re-applying. Here is an example:
+
+[ #eternal-power-romans ] eternal power godhead without excuse < #eternal-power-romans || #eternal-power-romans
+
+Finally, a partial macro utilization within the settings block has less precedence that settings that are explicitly assigned within the block.  Likewise, the scoping block can supply additional filters to increase the scope. Unlike the expression block, partial macros are compatible with other entries in the block.
 
 ## Section 2 - Configuration Statements
 
@@ -388,7 +425,7 @@ To reveal all history since id:5 [inclusive]:
 
 All ranges are inclusive. 
 
-**Invocation & Utilization**
+**History Utilization**
 
 The *use* command works for command-history works exactly the same way as it does for macros.  After issuing a *@history* command, the user might receive a response as follows.
 
