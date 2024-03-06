@@ -1,6 +1,6 @@
 # Quelle Specification for AVX Framework
 
-##### AVX-Quelle version 4.3.4
+##### AVX-Quelle version 4.3.9
 
 ### Background
 
@@ -579,11 +579,13 @@ This command reveals the current Quelle version of the command interpreter:
 
 In general, AVX-Quelle can be thought of as a stateless server. The only exceptions of its stateless nature are:
 
-1) non-default settings assigned using the **@set** command
-2) defined macro labels. 
-3) command history
+1. non-default settings assigned using the **@set** command
 
-Finally the plus ( + ) delimiter is required between any multi-expression search command. This defines the boundary between the two expressions.  The + delimiter also has it's own distinct settings; any assignments to the left of the + sign are disregarded in subsequent expressions. While results are collated into a single set of search results, each search expression, including its dedicated assignments represents a discrete Quelle search.
+2. defined macro labels. 
+
+3. command history
+
+   
 
 ## Section 3 - Control Statements
 
@@ -642,9 +644,9 @@ Like the earlier example, the subject is "you understood".  The object this time
 
 **Booleans and Negations:**
 
-**and:** In Boolean logic, **and** means that all terms must be found. With Quelle, *and* is represented by terms that appear within an unquoted clause. 
+**and:** In Boolean logic, **and** means that all terms must be found. With Quelle, **and** is represented by terms that appear within an unquoted clause. **And** logic is also available on each search-term by using the **&** operator.
 
-**or:** In Boolean logic, **or** means that any term constitutes a match. With Quelle, *or* is represented by the plus (+) between SEARCH expressions. All search results are collated together as a union. 
+**or:** In Boolean logic, **or** means that any term constitutes a match. With Quelle, **and** is represented per each search-term by using the **|** operator.
 
 **not:** In Boolean logic, means that the feature must not be found. With Quelle, *not* is represented by the hyphen ( **-** ) and applies to individual features within a fragment of a search expression. It is best used in conjunction with other features, because any non-match will be included in results. 
 
