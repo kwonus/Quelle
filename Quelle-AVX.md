@@ -16,26 +16,26 @@ Quelle is consistent with itself. Some constructs make parsing unambiguous; othe
 
 There are three types of statements in Quelle
 
-| Statement Type           | Syntax                                                       |
-| ------------------------ | ------------------------------------------------------------ |
-| Search Imperative        | versatile                                                    |
-| Configuration Imperative | single command execution (cannot be combined with other clauses) |
-| Control Imperative       | single command execution (cannot be combined with other clauses) |
+| Statement Type               | Syntax                                                       |
+| ---------------------------- | ------------------------------------------------------------ |
+| Selection/Search Imperative  | versatile                                                    |
+| App-Configuration Imperative | single configuration-related action (cannot be combined with other actions) |
+| App-Control Imperative       | single control-related action (cannot be combined with other actions) |
 
-#### Search Statement Syntax
+#### Selection/Search Imperatives
 
-Search statements contain <u>required</u> Selection Criteria, followed by an <u>optional</u> Directive:
+Selection/Search imperative contains <u>required</u> Selection Criteria, followed by an <u>optional</u> Directive:
 
-The selection is made up of one to three blocks. The ordering of blocks is partly prescribed. The scoping block must be the final block listed. The expression and settings block can be in either order (so long as they are listed before the scoping block when present). 
+The selection is made up of one to three blocks. The ordering of blocks is partly prescribed. The scoping block must be in the final position. The search-expression-block and settings-block can be in either order (so long as they are listed before the scoping block when present). 
 
-- Expression Block
+- Search Expression Block
 - Settings Block
 - Scoping Block
 
-|                         | Expression Block | Settings Block | Scoping Block |
-| ----------------------- | ---------------- | -------------- | ------------- |
-| Block Position          | 0 or 1           | 0 or 1         | final         |
-| Macro utilization level | full             | partial        | partial       |
+|                         | Search Expression Block | Settings Block | Scoping Block |
+| ----------------------- | ----------------------- | -------------- | ------------- |
+| Block Position          | 0 or 1                  | 0 or 1         | final         |
+| Macro utilization level | full                    | partial        | partial       |
 
 An optional directive can be issued following the selection criteria.  Only zero or one directives can be issued within a  statement:  
 
@@ -43,37 +43,37 @@ An optional directive can be issued following the selection criteria.  Only zero
 
 - Export Directive
 
-To be clear, a macro cannot be created for a same statement that exports search results to a file. Directives must be instigated separately.  The syntax for these directives is straightforward
+To be clear, a macro cannot be created for a statement that exports selection/search results to a file. Directives must be instigated separately.  The syntax for these directives is straightforward
 
 | Directive Type                  | Directive Syntax *(follows the Selection Criteria)*          |
 | ------------------------------- | ------------------------------------------------------------ |
 | Macro (*apply* label)           | ***\|\| label***                                             |
 | Export Block (*export* to file) | ***> filepath*** or<br/>***>> filepath*** or<br/>***=> filepath*** |
 
-#### Non-Search Statements
+#### Other [non-selection] Imperatives
 
-Non-search statements instigate configuration changes or programmatic control. These statements always begin with **@**. They are executed individually and cannot be combined with any other statements. Statements that begin with @ cannot be combined with search expressions.
+Non-selection statements instigate configuration changes or application control. These statements always begin with **@**. They are executed individually and cannot be combined with any other actions. Imperatives that begin with @ cannot be combined with search expressions.
 
-#### Configuration Statements
+#### Configuration Imperatives
 
 Quelle supports three categories of configuration. See Section 2 for additional details.
 
-| Configuration Targets | Configuration Statements    |
+| Configuration Targets | Configuration Actions       |
 | --------------------- | --------------------------- |
 | User Settings         | @set, @get, @clear, @absorb |
-| User Macros           | @review, @delete            |
-| User History          | @review, @delete, @invoke   |
+| User Macros           | @view, @delete              |
+| User History          | @view, @delete, @invoke     |
 
-#### Control Statements
+#### Control Imperatives
 
-Quelle has only two control statementss. See Section 3 for additional details.
+Quelle has only two control imperatives. See Section 3 for additional details.
 
-| Control Targets  | Control Statements | Optional Parameter | Description                         |
-| ---------------- | ------------------ | ------------------ | ----------------------------------- |
-| User Information | @help              | topic              | Help with Quelle syntax and usage   |
-| System Control   | @exit              | -                  | Exit the application or interpreter |
+| Control Targets  | Control Actions | Optional Parameter | Description                         |
+| ---------------- | --------------- | ------------------ | ----------------------------------- |
+| User Information | @help           | topic              | Help with Quelle syntax and usage   |
+| System Control   | @exit           | -                  | Exit the application or interpreter |
 
-## Section 1 - Search Statements
+## Section 1 - Selection/Search 
 
 From a linguistic standpoint, all Quelle statements are issued in the imperative. The subject of the verb is always "you understood". As the user, you are commanding Quelle what to do. Some statements have additional guiding parameters. These parameters instruct Quelle <u>what</u> to act upon.
 
@@ -92,7 +92,7 @@ It should be noted that these two statements, while similar, do not have identic
 - @lexicon.search = KJV
 - [ lexicon.search:KJV ]
 
-The former [Configuration Command] changes the lexicon setting for all future searches. Whereas, the latter [Settings Block assignment within a Search Command] affects only that single search. All subsequent searches are unaffected by the block assignment. There are times when a user will want a setting to persist, and other times when the user wants the setting changed only temporarily. Quelle permits the user to choose.
+The former, which is a configuration imperative, changes the lexicon setting for all future searches. Whereas, the latter, merely a Settings-Block assigment, affects only the currently executing Selection/Search imperative. Subsequent searches are unaffected by settings-block assignments. There are times when a user will want a setting to persist, and other times when the user wants the setting changed only temporarily. Quelle permits the user to choose.
 
 #### QuickStart
 
@@ -154,6 +154,8 @@ As we saw in the overview, there three blocks that compose Selection Criteria:
 | *use*    | Settings Block   | initial  | ***[ #label ]*** or<br/>***[ #id ]***      | **no**: only one macro is permitted per block            |
 | *filter* | Scoping Block    | post     | ***< scope***                              | yes (e.g. ***< Genesis 3 < Revelation 1-3***)            |
 | *use*    | Scoping Block    | post     | **<** ***#label***  or<br/>**<** ***#id*** | **no**: only one macro is permitted per block            |
+
+**Table 1-1** - Summary of actions expressible in the Selection Criteria segment of a Selection/Search imperative statement
 
 Two mutually exclusive optional directives can be issued following the selection criteria. 
 
@@ -253,6 +255,8 @@ vanity < sos < 1co
 | -------------------------------------------------- | ------------------------------------------- |
 | *apply*                                            | ***\|\| label***                            |
 
+**Table 1-2** - Syntax summary for the *apply* action in the Macro Directive of a Selection/Search imperative statement.
+
 Labeled statements are also called macros. All macros are defined with a hash-tag (#); 
 
 Macro labels cannot contain punctuation: only letters, numbers, hyphens, and underscores are permitted. However, macros are identified with a hash-tag (#).
@@ -273,6 +277,8 @@ It’s that simple, now instead of typing the entire statement, we can utilize t
 | Export Directive  *(follows the Selection Criteria)* | Create file      | Create or Overwrite file | Create or Append File |
 | ---------------------------------------------------- | ---------------- | :----------------------- | :-------------------- |
 | *export*                                             | **>** *filename* | **=>** *filename*        | **>>** *filename*     |
+
+**Table 1-3** - Syntax summary for the *export* action in the Export Directive of a Selection/Search imperative statement.
 
 This would export all verses in Genesis 1 from the most previous search as html
 
@@ -300,7 +306,7 @@ The *use* action is supported in each of the three Selection Criteria blocks:
 - Settings *(partial macro utilization)*
 - Scoping *(partial macro utilization)*
 
-Each of the block types supports the *use* action. However, each block limited to, at most, one *use* action. The *use* action references either a label for a macro or a statement id revealed by the @review imperative. As there are  a maximum of three blocks in the selection criteria, a statement could contain up to three *use* actions (one per block).
+Each of the block types supports the *use* action. However, each block limited to, at most, one *use* action. The *use* action references either a label for a macro or a statement id revealed by the @view imperative. As there are  a maximum of three blocks in the selection criteria, a statement could contain up to three *use* actions (one per block).
 
 The expression block supports full macro utilization.  In the earlier example:
 
@@ -312,12 +318,14 @@ Expression block macros sometimes undergo demotion. A macro within the expressio
 
 Recall that the macro definition: [ span: 7 similarity: 85% ] eternal power < Romans || eternal-power-romans
 
-| Statement                             | Utilization level         | Explanation                                             |
+| Macro Statement                       | Utilization level         | Explanation                                             |
 | ------------------------------------- | ------------------------- | ------------------------------------------------------- |
 | #eternal-power-romans                 | full macro utilization    | no conflicts                                            |
 | #eternal-power-romans [ all:current ] | partial macro utilization | explicit settings replace any settings defined in macro |
 | #eternal-power-romans < Acts          | partial macro utilization | explicit filter replaces any filters defined in macro   |
 | #eternal-power-romans [span:7] < Acts | partial macro utilization | only the search expression is utilized from the macro   |
+
+**Table 1-4** - Macro utilization in a Search Expression 
 
 Outside of the expression block, partial macros *use* only the part of the macro that applies to the block type. For example, this clause utilizes only the settings defined within the macro.:
 
@@ -361,7 +369,7 @@ Still, a macro can be redefined/overwritten. This doesn't disable macro determin
 
 [ #eternal-power-romans ] eternal power godhead without excuse < #eternal-power-romans || #eternal-power-romans
 
-### 1.4 - History Utilization
+### 1.5 - History Utilization
 
 Just like macro utilization, the *use* action is supported in each of the three Selection Criteria blocks:
 
@@ -369,11 +377,11 @@ Just like macro utilization, the *use* action is supported in each of the three 
 - Settings *(partial macro utilization)*
 - Scoping *(partial macro utilization)*
 
-Each of the block types supports the *use* action. However, each block limited to, at most, one *use* action. The *use* action references either a label for a macro or a statement id revealed by  the @*review* imperative. As there are a maximum of three blocks in the selection criteria, a statement could contain up to three *use* actions (one per block).
+Each of the block types supports the *use* action. However, each block limited to, at most, one *use* action. The *use* action references either a label for a macro or a statement id revealed by  the @*view* imperative. As there are a maximum of three blocks in the selection criteria, a statement could contain up to three *use* actions (one per block).
 
 Only the expression block supports full macro utilization.
 
-Expression block macros sometimes undergo demotion. A historic utilization within the expression block is demoted into a partial macro when a provided block within the selection criteria conflicts with the macro definition. Assume that this command is identified by the @review command by id := 5:
+Expression block macros sometimes undergo demotion. A historic utilization within the expression block is demoted into a partial macro when a provided block within the selection criteria conflicts with the macro definition. Assume that this command is identified by the @view command by id := 5:
 
 [ span: 3 similarity: 85% ] "in ... beginning" < Genesis < John
 
@@ -383,6 +391,8 @@ Expression block macros sometimes undergo demotion. A historic utilization withi
 | #5 [ all:current ] | partial macro utilization | explicit settings replace any settings defined in macro |
 | #5 < Acts          | partial macro utilization | explicit filter replaces any filters defined in macro   |
 | #5 [span:7] < Acts | partial macro utilization | only the search expression is utilized from the macro   |
+
+**Table 1-5** - History utilization in a Search Expression 
 
 Outside of the expression block, partial *usage* applies by block type. For example, this clause utilizes only the settings defined where id = 5.
 
@@ -406,23 +416,23 @@ It should be noted that any historic id references are expanded prior to applyin
 
 
 
-## Section 2 - Configuration Statements
+## Section 2 - Configuration
 
-### 2.1 - Reviewing Macros and Labels
+### 2.1 - Viewing Macros & Labels
 
-| Verb        | Syntax Category | Syntax                                                       |
-| ----------- | --------------- | ------------------------------------------------------------ |
-| **@delete** | Configuration   | *label* <u>or</u> *wildcard* <u>or</u> -labels FROM <u>and/or</u> UNTIL<br/>**FROM parameter :** *from* yyyy/mm/dd<br/>**UNTIL parameter :** *until* yyyy/mm/dd |
-| **@review** | Configuration   | *label* <u>or</u> *wildcard* <u>or</u> -labels <u>optional</u> FROM <u>and/or</u> UNTIL<br/>**FROM parameter :** *from* yyyy/mm/dd<br/>**UNTIL parameter :** *until* yyyy/mm/dd |
-| **@absorb** | Configuration   | **permitted:** *label*                                       |
+| Action      | Syntax                                                       |
+| ----------- | ------------------------------------------------------------ |
+| **@delete** | *label* <u>or</u> *wildcard* <u>or</u> -labels FROM <u>and/or</u> UNTIL<br/>**FROM parameter :** *from* yyyy/mm/dd<br/>**UNTIL parameter :** *until* yyyy/mm/dd |
+| **@view**   | *label* <u>or</u> *wildcard* <u>or</u> -labels <u>optional</u> FROM <u>and/or</u> UNTIL<br/>**FROM parameter :** *from* yyyy/mm/dd<br/>**UNTIL parameter :** *until* yyyy/mm/dd |
+| **@absorb** | **permitted:** *label*                                       |
 
-**TABLE 4** -- **Labeling and reviewing labeled statements**
+**TABLE 2-1** -- **Labeling and viewing labeled statements**
 
 ##### Additional explicit macro commands:
 
-Two additional explicit commands exist whereby a macro can be manipulated. We saw above how they can be defined and referenced. There are two additional ways commands that operate on macros: expansion and deletion.  In the last macro definition above where we created  #another-macro, the user could review an expansion by issuing this command:
+Two additional explicit commands exist whereby a macro can be manipulated. We saw above how they can be defined and referenced. There are two additional ways commands that operate on macros: expansion and deletion.  In the last macro definition above where we created  #another-macro, the user could view an expansion by issuing this command:
 
-@review another-macro
+@view another-macro
 
 If the user wanted to remove this definition, the @delete action is used.  Here is an example:
 
@@ -436,46 +446,46 @@ If you want the same settings to be persisted to your current session that were 
 
 ​       @absorb also works with command history.
 
-### 2.2 - Reviewing History
+### 2.2 - Viewing History
 
 | Verb        | Syntax Category | Parameters                                                   |
 | ----------- | --------------- | ------------------------------------------------------------ |
 | **@invoke** | Configuration   | ***id***                                                     |
 | **@delete** | Configuration   | -history FROM <u>and/or</u> UNTIL<br/>**FROM parameter :** *from* *id* <u>or</u> *from* yyyy/mm/dd<br/>**UNTIL parameter :** *until* *id* <u>or</u> *until* yyyy/mm/dd |
-| **@review** | Configuration   | *id* <u>or</u> -history <u>optional</u> FROM <u>and/or</u> UNTIL<br/>**FROM parameter :** *from* *id* <u>or</u> *from* yyyy/mm/dd<br/>**UNTIL parameter :** *until* *id* <u>or</u> *until* yyyy/mm/dd |
+| **@view**   | Configuration   | *id* <u>or</u> -history <u>optional</u> FROM <u>and/or</u> UNTIL<br/>**FROM parameter :** *from* *id* <u>or</u> *from* yyyy/mm/dd<br/>**UNTIL parameter :** *until* *id* <u>or</u> *until* yyyy/mm/dd |
 | **@absorb** | Configuration   | ***id***                                                     |
 
-**TABLE 5** -- **Reviewing statement history**
+**TABLE 2-2** -- **Viewing & Invoking statement history**
 
 **COMMAND HISTORY** 
 
-*@review* allows you to see your previous activity.  To show the last ten searches, type:
+*@view* allows you to see your previous activity.  To show the last ten searches, type:
 
-*@review* -history
+*@view* -history
 
 To reveal all history up until now, type:
 
-@review until now
+@view until now
 
 To reveal all searches since January 1, 2024, type:
 
-*@review* from 2024/1/1
+*@view* from 2024/1/1
 
 To reveal for the single month of January 2024:
 
-*@review* from 2024/1/1 until 2024/1/31
+*@view* from 2024/1/1 until 2024/1/31
 
 To reveal all history since id:5 [inclusive]:
 
-*@review* from 5
+*@view* from 5
 
 All ranges are inclusive. 
 
 **History Utilization**
 
-The *use* command works for command-history works exactly the same way as it does for macros.  After issuing a *@review* command to show history, the user might receive a response as follows.
+The *use* command works for command-history works exactly the same way as it does for macros.  After issuing a *@view* command to show history, the user might receive a response as follows.
 
-*@review*
+*@view*
 
 1>  @set span = 7
 
@@ -493,7 +503,7 @@ eternal power
 
 Again, *utilizing* a command from your command history is *used* just like a macro. Moreover, as with macros, control settings are persisted within your command history to provide invocation determinism. That means that control settings that were in place during the original command are utilized for the invocation.
 
-Command history captures all settings. We have already discussed macro-determinism. Invoking commands by their review numbers behave exactly like macros. In other words, invoking command history never persists changes into your environment, unless you explicitly request such behavior with the @absorb command.
+Command history captures all settings. We have already discussed macro-determinism. Invoking commands by their ids behave exactly like macros. In other words, invoking command history never persists changes into your environment, unless you explicitly request such behavior with the @absorb command.
 
 **RESETTING COMMAND HISTORY**
 
@@ -505,16 +515,16 @@ To remove all command history:
 
 FROM / UNTIL parameters can limit the scope of the @delete command.
 
-### 2.3 - Configuration Settings & related commands
+### 2.3 - Settings
 
-| Verb        | Syntax Category | Parameters                                |
-| ----------- | --------------- | ----------------------------------------- |
-| **@clear**  | Configuration   | *setting* or ALL                          |
-| **@get**    | Configuration   | **optional:** *setting* or ALL or VERSION |
-| **@set**    | Configuration   | *setting* **=** *value*                   |
-| **@absorb** | Configuration   | ***id*** or ***label***                   |
+| Action      | Parameters                                |
+| ----------- | ----------------------------------------- |
+| **@clear**  | *setting* or ALL                          |
+| **@get**    | **optional:** *setting* or ALL or VERSION |
+| **@set**    | *setting* **=** *value*                   |
+| **@absorb** | ***id*** or ***label***                   |
 
-**TABLE 6** -- **Listing of additional CONTROL actions**
+**TABLE 2-3.a** - **Listing of additional CONTROL actions**
 
 
 
@@ -524,7 +534,7 @@ FROM / UNTIL parameters can limit the scope of the @delete command.
 | --------------------------------------- | ------------------------------------- | ---------------- | ---------------- | ---------------- |
 | @*format = md*<br/>@*format = markdown* | @*format = text*<br/>@*format = utf8* | @*format = html* | @*format = json* | @*format = yaml* |
 
-**TABLE 7** -- **set** format command can be used to set the default content-formatting for for use with the export verb
+**TABLE 2-3.b** - **@set** format command can be used to set the default content-formatting for for use with the export verb
 
 
 
@@ -534,7 +544,7 @@ FROM / UNTIL parameters can limit the scope of the @delete command.
 | **@get** span     | get a control setting                                        | @span                |
 | **@clear** span   | Clear the control setting; restoring the Quelle driver default setting |                      |
 
-**TABLE 8** -- **set/clear/get** action operate on configuration settings
+**TABLE 2-3.c** - **set/clear/get** action operate on configuration settings
 
 In all, AVX-Quelle manifests five control names. Each allows all three actions: ***set***, ***clear***, and ***@get*** verbs. Table 9 lists all settings available in AVX-Quelle. AVX-Quelle can support two distinct orthographies [i.e. Contemporary Modern English (avx/modern), and/or Early Modern English (avx/kjv).
 
@@ -551,7 +561,7 @@ In all, AVX-Quelle manifests five control names. Each allows all three actions: 
 | VERSION                           | Not really a true setting: it works with the @get command to retrieve the revision number of the Quelle grammar supported by AV-Engine. This value is read-only. | 4.x.yz                                                       | n/a           |
 | ALL                               | ALL is an aggregate setting: it works with the @clear command to reset all variables above to their default values. It is used with @get to fetch all settings. It can also be used in the settings block of a statement to override values to default or the currently saved values for situations where a macro is utilized. | current<br/>**or**<br/>defaults                              | current       |
 
-**TABLE 9** -- **Summary of AVX-Quelle Control Names**
+**TABLE 2-3.d** - Summary of AVX-Quelle Settings
 
 The *@get* command fetches these values. The *@get* command requires a single argument. Examples are below:
 
@@ -563,11 +573,11 @@ All settings can be cleared using an explicit command:
 
 @clear ALL
 
-**Scope of Settings**
+**Persistence of Settings**
 
-It should be noted that there is a distinction between **@set** and and implicit **assign** syntax. The first form is and explicit command and is persistent (it affects all subsequent statements). Contrariwise, an implicit **assign** affects only the single statement wherewith it is executed. We refer to this as persistence vs assignment.
+It should be noted that there is a distinction between **@set** and and ***assign*** actions. The first action is an application configuration-imperative, and it is persistent (it affects all subsequent statements). Contrariwise, the ***assign*** action affects only the single statement wherein it is executed. We refer to this distinction as *persistence* vs *assignment*.
 
-### 2-4 Miscellaneous Information
+### 2.4 - Miscellaneous Information
 
 **QUERYING DRIVER FOR VERSION INFORMATION**
 
