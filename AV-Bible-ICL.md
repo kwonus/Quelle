@@ -1,30 +1,31 @@
-# Imperative Control Language (ICL) for AV-Bible<br/>and the AVX Framework
+<script src="./md-page.js"></script><noscript>
+
+# Imperative Control Language (ICL) for AV-Bible
 
 ##### version 4.3.9
 
 ### Background
 
-Most modern search engines, provide a mechanism for searching via a text input box, where the user is expected to type search terms. While this interface is primitive from a UI perspective, it facilitates rich augmentation via search-specific semantics. Google pioneered the modern search interface by employing an elegantly simple "search box". This was an evolution away from the complex interfaces that preceded it. However, when a user searches for multiple terms, it becomes confusing how to obtain any results except "match every term".
+Near the end of the last century, Google pioneered the modern search interface by employing an elegantly simple "search box". This was an evolution away from the complex interfaces that preceded it. Still, it becomes problematic when we want to search for multiple terms, unless we expect to merely "match every term".
 
-The vast world of search is rife for a standardized search-syntax that moves us past only basic search capabilities. Without the introduction of a complicated search UI, Imperative Control Language (ICL) provides a concise and easy to learn command language for search, configuration, and control of AV-Bible.  ICL is a dialect of Quelle and conforms to the Quelle Specification. It can be easily invoked from within a simple text input box on a web page or even from a specialized command shell. The syntax supports Boolean operations such as AND, OR, and NOT, albeit in a non-gear-headed way. While great care has been taken to support the construction of complex queries, greater care has been taken to maintain a clear and concise syntax.
+Imperative Control Language (ICL) provides a concise yet comprehensive command-language for searching, configuring, and controlling the AV-Bible application.  Its grammar supports Boolean operations such as AND, OR, and NOT. While great care has been taken to support the construction of complex queries, greater care has been taken to maintain a clear and concise syntax.
 
-ICL is consistent with itself. Some constructs make parsing unambiguous; other constructs increase ease of typing (Specifically, we attempt to minimize the need to press the shift-key). Naturally, existing scripting languages have some influence on our syntax. However, to avoid complexity, we favor simplicity of expression over versatility. There might be edge cases that where a more versatile grammar could have reduced keystrokes. Yet, we strived to keep ICL simple. Avoiding nuance has produced a grammar that is easy to type, easy to learn, and easy to remember.  Moreover, most search expressions look no different than they might appear today in a Google or Bing search box. 
+ICL is consistent with itself. Naturally, existing scripting languages have some influence on ICL syntax. However, we always favor simplicity over versatility. This avoids complexity of syntax and makes behavior easy to describe. There might be edge cases that where a more versatile grammar might have reduced keystrokes. Yet, by avoiding nuance, ICL is easy to learn, easy to type, and easy to remember.  In fact, search expressions often look no different than they would appear today in a Google or Bing search. Incidentally, ICL is a dialect of Quelle and conforms to the Quelle Specification.
 
-### Overview of ICL Syntax
+### Overview of ICL Grammar
 
-There are three types of statements
+There are two types of statements
 
-| Statement Type               | Syntax                                                       |
-| ---------------------------- | ------------------------------------------------------------ |
-| Selection/Search Imperative  | versatile                                                    |
-| App-Configuration Imperative | single configuration-related action (cannot be combined with other actions) |
-| App-Control Imperative       | single control-related action (cannot be combined with other actions) |
+| Statement Type      | Syntax                                                       |
+| ------------------- | ------------------------------------------------------------ |
+| Selection  Criteria | Combines search criteria and scoping filters for tailored verse selection.<br/>Configuration settings can also be combined and incorporated into the selection criteria. |
+| Discrete Imperative | single action for configuration and/or application control (cannot be combined with other actions) |
 
-#### Selection/Search Imperatives
+#### Selection Criteria (includes search operations)
 
-Selection/Search imperative contains <u>required</u> Selection Criteria, followed by an <u>optional</u> Directive:
+Selection Criteria contains <u>required</u> Selection Criteria, followed by an <u>optional</u> Directive:
 
-The selection is made up of one to three blocks. The ordering of blocks is partly prescribed. The scoping block must be in the final position. The search-expression-block and settings-block can be in either order (so long as they are listed before the scoping block when present). 
+The selection criteria controls how verses are selected. It is made up of one to three blocks. The ordering of blocks is partly prescribed. The scoping block must be in the final position. The search-expression-block and settings-block can be in either order (so long as they are listed before the scoping block when present). 
 
 - Search Expression Block
 - Settings Block
@@ -48,13 +49,13 @@ To be clear, a macro cannot be created for a statement that exports selection/se
 | Macro (*apply* tag)             | ***\|\| tag***                                               |
 | Export Block (*export* to file) | ***> filepath*** or<br/>***>> filepath*** or<br/>***=> filepath*** |
 
-#### Other [non-selection] Imperatives
+#### Discrete Imperatives
 
-Non-selection statements instigate configuration changes or application control. These statements always begin with **@**. They are executed individually and cannot be combined with any other actions. Imperatives that begin with @ cannot be combined with search expressions.
+Non-selection statements instigate configuration changes or application control. These statements always begin with **@**. They are executed individually and cannot be combined with any other actions. Imperatives that begin with @ cannot be combined with search expressions. This is why they are called Discrete Imperatives.
 
-#### Configuration Imperatives
+#### Configuration Statements
 
-ICL supports three categories of configuration. See Section 2 for additional details.
+ICL supports three categories of configuration. These are described more completely in Section 2.
 
 | Configuration Targets | Configuration Actions       |
 | --------------------- | --------------------------- |
@@ -62,14 +63,14 @@ ICL supports three categories of configuration. See Section 2 for additional det
 | User Macros           | @view, @delete              |
 | User History          | @view, @delete, @invoke     |
 
-#### Control Imperatives
+#### Control Statements
 
-ICL has only two control imperatives. See Section 3 for additional details.
+ICL has only two control imperatives. These are described more completely in Section 3.
 
-| Control Targets  | Control Actions | Optional Parameter | Description                         |
-| ---------------- | --------------- | ------------------ | ----------------------------------- |
-| User Information | @help           | topic              | Help with ICL syntax and usage      |
-| System Control   | @exit           | -                  | Exit the application or interpreter |
+| Control Targets   | Control Actions | Optional Parameter | Description                         |
+| ----------------- | --------------- | ------------------ | ----------------------------------- |
+| Usage Information | @help           | topic              | Help with ICL syntax and usage      |
+| System Control    | @exit           | -                  | Exit the application or interpreter |
 
 ## Section 1 - Selection/Search 
 
@@ -414,7 +415,7 @@ It should be noted that any historic id references are expanded prior to applyin
 
 
 
-## Section 2 - Configuration
+## Section 2 - Configuration Statements
 
 ### 2.1 - Viewing Macros & Tags
 
