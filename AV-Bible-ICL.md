@@ -6,15 +6,13 @@
 
 Most modern search engines, provide a mechanism for searching via a text input box, where the user is expected to type search terms. While this interface is primitive from a UI perspective, it facilitates rich augmentation via search-specific semantics. Google pioneered the modern search interface by employing an elegantly simple "search box". This was an evolution away from the complex interfaces that preceded it. However, when a user searches for multiple terms, it becomes confusing how to obtain any results except "match every term".
 
-The vast world of search is rife for a standardized search-syntax that moves us past only basic search capabilities. Without the introduction of a complicated search UI, Quelle represents a freely available specification for an open Human-Machine-Interface (HMI). It can be easily invoked from within a simple text input box on a web page or even from a specialized command shell. The syntax supports Boolean operations such as AND, OR, and NOT, albeit in a non-gear-headed way. While great care has been taken to support the construction of complex queries, greater care has been taken to maintain a clear and concise syntax.
+The vast world of search is rife for a standardized search-syntax that moves us past only basic search capabilities. Without the introduction of a complicated search UI, Imperative Control Language (ICL) provides a concise and easy to learn command language for search, configuration, and control of AV-Bible.  ICL is a dialect of Quelle and conforms to the Quelle Specification. It can be easily invoked from within a simple text input box on a web page or even from a specialized command shell. The syntax supports Boolean operations such as AND, OR, and NOT, albeit in a non-gear-headed way. While great care has been taken to support the construction of complex queries, greater care has been taken to maintain a clear and concise syntax.
 
-Quelle, IPA: [kɛl], in French means "What? or Which?". As Quelle HMI is designed to obtain search-results from search-engines, this interrogative nature befits its name. In 2024, Quelle 4 was released. Search syntax has remained largely unchanged since version 1. Version 4 syntax is more streamlined than ever. Plus, it also comes with a reference implementation in Rust and a fully specified PEG grammar.
+ICL is consistent with itself. Some constructs make parsing unambiguous; other constructs increase ease of typing (Specifically, we attempt to minimize the need to press the shift-key). Naturally, existing scripting languages have some influence on our syntax. However, to avoid complexity, we favor simplicity of expression over versatility. There might be edge cases that where a more versatile grammar could have reduced keystrokes. Yet, we strived to keep ICL simple. Avoiding nuance has produced a grammar that is easy to type, easy to learn, and easy to remember.  Moreover, most search expressions look no different than they might appear today in a Google or Bing search box. 
 
-Quelle is consistent with itself. Some constructs make parsing unambiguous; other constructs increase ease of typing (Specifically, we attempt to minimize the need to press the shift-key). Naturally, existing scripting languages have some influence on our syntax. However, to avoid complexity, we favor simplicity of expression over versatility. There might be edge cases that where a more versatile grammar could have reduced keystrokes. Yet, we strived to keep Quelle simple. Avoiding nuance has produced a grammar that is easy to type, easy to learn, and easy to remember.  Moreover, most search expressions look no different than they might appear today in a Google or Bing search box. Still, let's not get ahead of ourselves or even hint about where our simple specification might take us ;-)
+### Overview of ICL Syntax
 
-### Overview of Quelle Syntax
-
-There are three types of statements in Quelle
+There are three types of statements
 
 | Statement Type               | Syntax                                                       |
 | ---------------------------- | ------------------------------------------------------------ |
@@ -56,7 +54,7 @@ Non-selection statements instigate configuration changes or application control.
 
 #### Configuration Imperatives
 
-Quelle supports three categories of configuration. See Section 2 for additional details.
+ICL supports three categories of configuration. See Section 2 for additional details.
 
 | Configuration Targets | Configuration Actions       |
 | --------------------- | --------------------------- |
@@ -66,18 +64,18 @@ Quelle supports three categories of configuration. See Section 2 for additional 
 
 #### Control Imperatives
 
-Quelle has only two control imperatives. See Section 3 for additional details.
+ICL has only two control imperatives. See Section 3 for additional details.
 
 | Control Targets  | Control Actions | Optional Parameter | Description                         |
 | ---------------- | --------------- | ------------------ | ----------------------------------- |
-| User Information | @help           | topic              | Help with Quelle syntax and usage   |
+| User Information | @help           | topic              | Help with ICL syntax and usage      |
 | System Control   | @exit           | -                  | Exit the application or interpreter |
 
 ## Section 1 - Selection/Search 
 
-From a linguistic standpoint, all Quelle statements are issued in the imperative. The subject of the verb is always "you understood". As the user, you are commanding Quelle what to do. Some statements have additional guiding parameters. These parameters instruct Quelle <u>what</u> to act upon.
+From a linguistic standpoint, all ICL statements are issued in the imperative. The subject of the verb is always "you understood". As the user, you are commanding the application what to do. Some statements have additional guiding parameters. These parameters instruct what the command is to act upon.
 
-Consider these two examples of Quelle statements (first Configuration, followed by Search):
+Consider these two examples of ICL statements (first Configuration, followed by Search):
 
 @lexicon.searh = KJV
 
@@ -92,7 +90,7 @@ It should be noted that these two statements, while similar, do not have identic
 - @search.lexicon = KJV
 - [ search.lexicon:KJV ]
 
-The former, which is a configuration imperative, changes the lexicon setting for all future searches. Whereas, the latter, merely a Settings-Block assigment, affects only the currently executing Selection/Search imperative. Subsequent searches are unaffected by settings-block assignments. There are times when a user will want a setting to persist, and other times when the user wants the setting changed only temporarily. Quelle permits the user to choose.
+The former, which is a configuration imperative, changes the lexicon setting for all future searches. Whereas, the latter, merely a Settings-Block assigment, affects only the currently executing Selection/Search imperative. Subsequent searches are unaffected by settings-block assignments. There are times when a user will want a setting to persist, and other times when the user wants the setting changed only temporarily. ICL permits the user to choose.
 
 #### QuickStart
 
@@ -100,7 +98,7 @@ Consider this proximity search (find Moses and Aaron within a single span of sev
 
 *[ span:7 ]  Moses Aaron*
 
-Quelle syntax can specify the lexicon to search, by also supplying temporary settings:
+ICL syntax can specify the lexicon to search, by also supplying temporary settings:
 
 *[ span:7 search.lexicon:KJV ]  Moses Aaron*
 
@@ -126,7 +124,7 @@ The search criteria above is equivalent to this search:
 
 In all cases, “...” means “followed by”, but the ellipsis allows other words to appear between "said" and "Aaron". Likewise, it allows words to appear between "said" and "Miriam". 
 
-Quelle is designed to be intuitive. It provides the ability to invoke Boolean logic for term-matching and/or linguistic feature-matching. As we saw above, the pipe symbol ( | ) can be used to invoke an *OR* condition.
+ICL is designed to be intuitive. It provides the ability to invoke Boolean logic for term-matching and/or linguistic feature-matching. As we saw above, the pipe symbol ( | ) can be used to invoke an *OR* condition.
 
 ### 1.1 - Selection Criteria
 
@@ -165,7 +163,7 @@ The ampersand symbol can similarly be used to represent *AND* conditions upon te
 
 "part&/verb/"
 
-The SDK, provided by Digital-AV, has marked each word of the bible text for part-of-speech. With Quelle's rich syntax, this type of search is easy and intuitive.
+The SDK, provided by Digital-AV, has marked each word of the bible text for part-of-speech. With the rich syntax of ICL, this type of search is easy and intuitive.
 
 Of course, part-of-speech expressions can also be used independently of an AND condition, as follows:
 
@@ -337,7 +335,7 @@ Likewise, in this example, this clause utilizes only the filters defined within 
 
 Macro utilization within a block disallows all other entries within the block; macro utilization in a block is not compatible with any other entries in that same block.
 
-Specifically, the following statements / clauses are not supported by Quelle grammar:
+Specifically, the following statements / clauses are not supported by ICL:
 
 **NOT SUPPORTED:**  #eternal-power-romans without excuse  
 
@@ -365,7 +363,7 @@ However, if the user desires the current settings to be used instead, a speciali
 
 Similarly, another specialized setting is [ all:defaults ] ; that block represents default values for all settings. 
 
-Still, a macro can be redefined/overwritten. This doesn't disable macro determinism, even though it feels like it does. The assumption is that the user is explicitly redefining the meaning of macro and Quelle does not require an explicit @delete of the tag prior to re-applying. Here is an example:
+Still, a macro can be redefined/overwritten. This doesn't disable macro determinism, even though it feels like it does. The assumption is that the user is explicitly redefining the meaning of macro and ICL does not require an explicit @delete of the tag prior to re-applying. Here is an example:
 
 [ #eternal-power-romans ] eternal power godhead without excuse < #eternal-power-romans || #eternal-power-romans
 
@@ -404,7 +402,7 @@ Likewise, in this example, this clause utilizes only the filters for id = 5.
 
 Just like macros, utilization within a block disallows all other entries within the block; utilization in a block is not compatible with any other entries in that same block.
 
-Specifically, the following statements / clauses are not supported by Quelle grammar:
+Specifically, the following statements / clauses are not supported by ICL:
 
 **NOT SUPPORTED:**  #5 without excuse  
 
@@ -538,15 +536,15 @@ FROM / UNTIL parameters can limit the scope of the @delete command.
 
 
 
-| **example**       | **explanation**                                              | shorthand equivalent |
-| ----------------- | ------------------------------------------------------------ | -------------------- |
-| **@set** span = 8 | Assign a control setting                                     | @span = 8            |
-| **@get** span     | get a control setting                                        | @span                |
-| **@clear** span   | Clear the control setting; restoring the Quelle driver default setting |                      |
+| **example**              | **explanation**                                              | shorthand equivalent |
+| ------------------------ | ------------------------------------------------------------ | -------------------- |
+| **@set** search.span = 8 | Assign a control setting                                     | @span = 8            |
+| **@get** search.span     | get a control setting                                        | @span                |
+| **@clear** search.span   | Clear the setting; restores the setting to its default value | @clear span          |
 
 **TABLE 2-3.c** - **set/clear/get** action operate on configuration settings
 
-In all, AVX-Quelle manifests five control names. Each allows all three actions: ***set***, ***clear***, and ***@get*** verbs. Table 9 lists all settings available in AVX-Quelle. AVX-Quelle can support two distinct orthographies [i.e. Contemporary Modern English (avx/modern), and/or Early Modern English (avx/kjv).
+In all, ICL manifests five control names. Each allows all three actions: ***set***, ***clear***, and ***@get*** verbs. Table 9 lists all settings available in AV-Bible. AV-Bible supports two distinct orthographies [i.e. Contemporary Modern English (avx/modern), and/or Early Modern English (avx/kjv). These are selectable via ICL.
 
 | Setting Name | Functional.Name  | Meaning                                                      | Values                                                       | Default Value |
 | ------------ | ---------------- | ------------------------------------------------------------ | ------------------------------------------------------------ | ------------- |
@@ -558,10 +556,10 @@ In all, AVX-Quelle manifests five control names. Each allows all three actions: 
 | similarity   |                  | Streamlined syntax for setting word & lemma to an identical value<br/>fuzzy phonetics matching threshold is between 1 and 99<br/>0 or *none* means: do not match on phonetics (use text only)<br/>100 or *exact* means that an *exact* phonetics match is expected | 33% to 99% [fuzzy] **or** ...<br>0 **or** *none*<br>100 **or** *exact* | 0 / none      |
 | word         | similarity.word  | fuzzy phonetics matching as described above, but this prefix only affects similarity matching on the word. | 33% to 99% [fuzzy] **or** ...<br>0 **or** *none*<br>100 **or** *exact* | 0 / none      |
 | lemma        | similarity.lemma | fuzzy phonetics matching as described above, but this prefix only affects similarity matching on the lemma. | 33% to 99% [fuzzy] **or** ...<br>0 **or** *none*<br>100 **or** *exact* | 0 / none      |
-| revision     | grammar.revision | Not really a true setting: it works with the @get command to retrieve the revision number of the Quelle grammar supported by AV-Engine. This value is read-only. | 4.x.yz                                                       | n/a           |
+| revision     | grammar.revision | Not really a true setting: it works with the @get command to retrieve the revision number of the ICL grammar supported by AV-Engine. This value is read-only. | 4.x.yz                                                       | n/a           |
 | ALL          |                  | ALL is an aggregate setting: it works with the @clear command to reset all variables above to their default values. It is used with @get to fetch all settings. It can also be used in the settings block of a statement to override values to default or the currently saved values for situations where a macro is utilized. | current<br/>**or**<br/>defaults                              | current       |
 
-**TABLE 2-3.d** - Summary of AVX-Quelle Settings
+**TABLE 2-3.d** - Summary of AV-Bible Settings
 
 The *@get* command fetches these values. The *@get* command requires a single argument. Examples are below:
 
@@ -581,13 +579,13 @@ It should be noted that there is a distinction between **@set** and and ***assig
 
 **QUERYING DRIVER FOR VERSION INFORMATION**
 
-This command reveals the current Quelle version of the command interpreter:
+This command reveals the current Grammar revision of the Imperative Control Language (ICL), implemented  by the command interpreter of AV-Bible:
 
-@get version
+@get revision
 
 ---
 
-In general, AVX-Quelle can be thought of as a stateless server. The only exceptions of its stateless nature are:
+In general, the ICL command processor can be thought of as a stateless server. The only exceptions of its stateless nature are:
 
 1. non-default settings assigned using the **@set** command
 
@@ -601,9 +599,9 @@ In general, AVX-Quelle can be thought of as a stateless server. The only excepti
 
 ### 3.1 - Program Help
 
-*@help*
+To get general help, use this command:
 
-This will provide a help message in a Quelle interpreter.
+*@help*
 
 Or for specific topics:
 
@@ -615,19 +613,19 @@ Or for specific topics:
 
 etc ...
 
-### 3.2 - Exiting Quelle
+### 3.2 - Exiting the Application
 
-Type this to terminate the Quelle interpreter:
+Type this to terminate the app:
 
 *@exit*
 
-## Section 4 - Quelle Grammar and Design Elements
+## Section 4 - Grammar and Design Elements
 
-An object model to manifest the Quelle grammar is depicted below:
+An object model to manifest the ICL grammar is depicted below:
 
 ![QCommand](./QCommand.png)
 
-### 4.1 - Glossary of Quelle Terminology
+### 4.1 - Glossary of ICL Terminology
 
 **Syntax Categories:** Each syntax category defines rules by which verbs can be expressed in the statement. 
 
@@ -635,15 +633,15 @@ An object model to manifest the Quelle grammar is depicted below:
 
 Go!
 
-The subject of this sentence is "you understood".  Similarly, all Quelle verbs are issued without an explicit subject. The object of the verb in the one word sentence above is also unstated.  Quelle operates in an analogous manner.  Consider this English sentence:
+The subject of this sentence is "you understood".  Similarly, all verbs are issued without an explicit subject. The object of the verb in the one word sentence above is also unstated.  ICL operates in an analogous manner.  Consider this English sentence:
 
 Go Home!
 
-Like the earlier example, the subject is "you understood".  The object this time is defined, and insists that "you" should go home.  Some verbs always have objects, others sometimes do, and still others never do. Quelle follows this same pattern and some Quelle verbs require direct-objects; and some do not.  In the various tables throughout this document, required and optional parameters are identified, These parameters represent the object of the verb within each respective table.
+Like the earlier example, the subject is "you understood".  The object this time is defined, and insists that "you" should go home.  Some verbs always have objects, others sometimes do, and still others never do. ICL follows this same pattern and some ICL verbs require direct-objects; and some do not.  In the various tables throughout this document, required and optional parameters are identified, These parameters represent the object of the verb within each respective table.
 
-**Statement**: A statement is composed of one or more segments. When there is more than one segment, each segment contains a search expression. All search results are logically OR’ed together. It is recommended that statements with multiple segments be used sparingly as they represent a complex search pattern. In most situations, a single segment is sufficient to perform very powerful searches. This is because Quelle search expressions already offer powerfull searches with Boolean search logic on all search fragments.
+**Selection Criteria**: Selection what text to render is determined with a search expression, scoping filters, or both.
 
-**Expression**: Each segment has zero or one search expressions. A segment without a search expression is typically used to define a partial macro. If you are searching, your segment will contain a search expression. Expressions have fragments, and fragments have features. For an expression to match, all fragments must match (Logical AND). For a fragment to match, any feature must match (Logical OR). AND is represented by &. OR is represented by |.
+**Search Expression**: The Search Expression has fragments, and fragments have features. For an expression to match, all fragments must match (Logical AND). For a fragment to match, any feature must match (Logical OR). AND is represented by &. OR is represented by |.
 
 **Unquoted SEARCH clauses:** an unquoted search clause contains one or more search fragments. If there is more than one fragment in the clause, then each fragment is logically AND’ed together.
 
@@ -654,17 +652,17 @@ Like the earlier example, the subject is "you understood".  The object this time
 
 **Booleans and Negations:**
 
-**and:** In Boolean logic, **and** means that all terms must be found. With Quelle, **and** is represented by terms that appear within an unquoted clause. **And** logic is also available on each search-term by using the **&** operator.
+**and:** In Boolean logic, **and** means that all terms must be found. With ICL, **and** is represented by terms that appear within an unquoted clause. **And** logic is also available on each search-term by using the **&** operator.
 
-**or:** In Boolean logic, **or** means that any term constitutes a match. With Quelle, **and** is represented per each search-term by using the **|** operator.
+**or:** In Boolean logic, **or** means that any term constitutes a match. With ICL, **and** is represented per each search-term by using the **|** operator.
 
-**not:** In Boolean logic, means that the feature must not be found. With Quelle, *not* is represented by the hyphen ( **-** ) and applies to individual features within a fragment of a search expression. It is best used in conjunction with other features, because any non-match will be included in results. 
+**not:** In Boolean logic, means that the feature must not be found. With ICL, *not* is represented by the hyphen ( **-** ) and applies to individual features within a fragment of a search expression. It is best used in conjunction with other features, because any non-match will be included in results. 
 
 hyphen ( **-** ) means that any non-match satisfies the search condition. Used by itself, it would likely return every verse. Therefore, it should be used judiciously.
 
-### 4.2 - Specialized Search tokens in AVX-Quelle
+### 4.2 - Specialized Search tokens in AV-Bible
 
-The lexical search domain of AVX-Quelle includes all words in the original KJV text. It can also optionally search using a modernized lexicon of the KJV (e.g. hast and has; this is controllable with the search.lexicon setting).  The table below lists additional linguistic extensions available in AVX-Quelle, which happens to be a Level-II Quelle implementation.
+The lexical search domain of ICL includes all words in the original KJV text. It can also optionally search using a modernized lexicon of the KJV (e.g. hast and has; this is controllable with the search.lexicon setting).  The table below lists linguistic extensions available in ICL.
 
 | Search Term        | Operator Type                           | Meaning                                                      | Maps To                                                      | Mask   |
 | ------------------ | --------------------------------------- | ------------------------------------------------------------ | ------------------------------------------------------------ | ------ |
@@ -730,22 +728,22 @@ The lexical search domain of AVX-Quelle includes all words in the original KJV t
 | 99999:H            | Strongs Number                          | decimal Strongs number for the Hebrew word in the Old Testament | One of Strongs\[4\]                                          | 0x7FFF |
 | 99999:G            | Strongs Number                          | decimal Strongs number for the Greek word in the New Testament | One of Strongs\[4\]                                          | 0x7FFF |
 
-### 4-3 - Object Model to support search tokens in Quelle-AVX
+### 4-3 - Object Model to support ICL search tokens
 
-An object model to support specialized Search Tokens for Quelle-AVX is depicted below:
+An object model to support specialized ICL Search Tokens is depicted below:
 
 ![QFind](./QFind.png)
 
-### 4.4 - Quelle-AVX Addendum
+### 4.4 - ICL conformance to the Quelle specification
 
-Vanilla Quelle specifies two possible implementation levels:
+Quelle specifies two possible implementation levels:
 
 - Level 1 [basic search support]
 - Level 2 [search support includes also searching on part-of-speech tags]
 
-AVX-Quelle is a Level 2 implementation with augmented search capabilities. AVX-Quelle extends baseline Vanilla-Quelle to include AVX-specific constructs.  These extensions provide additional specialized search features and the ability to manage two distinct lexicons for the biblical texts.
+ICL is a Level 2 Quelle implementation with augmented search capabilities. ICL extends Quelle to include AVX-Framework-specific constructs.  These extensions provide additional specialized search features and the ability to manage two distinct lexicons for the biblical texts.
 
-1. AVX-Quelle represents the biblical text with two substantially similar, but distinct, lexicons. The search.lexicon setting can be specified by the user to control which lexicon is to be searched. Likewise, the render.lexicon setting is used to control which lexicon is used for displaying the biblical text. As an example, the KJV text of "thou art" would be modernized to "you are".
+1. ICL represents the biblical text with two substantially similar, but distinct, lexicons. The search.lexicon setting can be specified by the user to control which lexicon is to be searched. Likewise, the render.lexicon setting is used to control which lexicon is used for displaying the biblical text. As an example, the KJV text of "thou art" would be modernized to "you are".
 
    - AV/KJV *(a lexicon that faithfully represents the KJV bible; AV purists should select this setting)*
 
@@ -755,7 +753,7 @@ AVX-Quelle is a Level 2 implementation with augmented search capabilities. AVX-Q
 
    The Dual/Both setting for [search:] indicates that searching should consider both lexicons. The The Dual/Both setting for [render:] indicates that results should be displayed for both renderings [whether this is side-by-side or in-parallel depends on the format and the application where the display-rendering occurs]. Left unspecified, the lexicon setting applies to[search:] and [render:] components.
 
-2. AVX-Quelle provides support for fuzzy-match-logic. The similarity setting can be specified by the user to control the similarity threshold for approximate matching. An exact lexical match is expected when similarity is set to *exact* or 0.  Zero is not really a similarity threshold, but rather 0 is a synonym for *exact*.
+2. ICL provides support for fuzzy-match-logic. The similarity setting can be specified by the user to control the similarity threshold for approximate matching. An exact lexical match is expected when similarity is set to *exact* or 0.  Zero is not really a similarity threshold, but rather 0 is a synonym for *exact*.
 
    Approximate matches are considered when similarity is set between 33% and 99%. Similarity is calculated based upon the phonetic representation for the word.
 
@@ -763,7 +761,7 @@ AVX-Quelle is a Level 2 implementation with augmented search capabilities. AVX-Q
 
    A similarity setting of *precise* or 100% is a special case that still uses phonetics, but expects a full phonetic match (e.g. "there" and "their" are a 100% phonetic match).
 
-AVX-Quelle uses the AV-1769 edition of the sacred text. It substantially agrees with the "Bearing Precious Seed" bibles, as published by local church ministries. The text itself has undergone review by Christian missionaries, pastors, and lay people since the mid-1990's. The original incarnation of the digitized AV-1769 text was implemented in the free PC/Windows app known as:
+Av_bible uses the AV-1769 edition of the sacred text. It substantially agrees with the "Bearing Precious Seed" bibles, as published by local church ministries. The text itself has undergone review by Christian missionaries, pastors, and lay people since the mid-1990's. The original incarnation of the digitized AV-1769 text was implemented in the free PC/Windows app known as:
 
 - AV-1995
 - AV-1997
