@@ -1,165 +1,163 @@
 # Quelle Specification
 
-##### version 2.0.3.612
+##### version 4.3.9
 
-### I. Background
+### Background
 
-Most modern search engines, provide a mechanism for searching via a text input box where the user is expected to type search terms. While primitive, this interface was pioneered by major web-search providers and represented an evolution from the far more complex interfaces that came earlier. When you search for multiple terms, however, there seems to be only one basic paradigm: “find every term”. The vast world of search is rife for a search-syntax that moves us past the ability to only search using basic search expressions. To this end, the Quelle specification is put forward an open Human-Machine-Interface (HMI) that can be invoked within a command shell or even within a simple text input box on a web page. The syntax fully supports basic Boolean operations such as AND, OR, and NOT. While great care has been taken to support the construction of complex queries, greater care has been taken to maintain a clear and concise syntax.
+Most modern search engines, provide a mechanism for searching via a text input box, where the user is expected to type search terms. While this interface is primitive from a UI perspective, it facilitates rich augmentation via search-specific semantics. Google pioneered the modern search interface by employing an elegantly simple "search box". This was an evolution away from the complex interfaces that preceded it. However, when a user searches for multiple terms, it becomes confusing how to obtain any results except "match every term".
 
-Quelle, IPA: [kɛl], in French means "What? or Which?". As Quelle HMI is designed to obtain search-results from search-engines, this interrogative nature befits its name. An earlier interpreter, Clarity, served as inspiration for defining Quelle.  You could think of the Quelle HMI as an evolution of Clarity HMI.  However, in order to create linguistic consistency in Quelle's Human-to-Machine command language, the resulting syntax varied so dramatically from the Clarity spec, that a new name was the best way forward.  Truly, Quelle HMI incorporates lessons learned after creating, implementing, and revising Clarity HMI for over a decade.
+The vast world of search is rife for a standardized search-syntax that moves us past only basic search capabilities. Without the introduction of a complicated search UI, Quelle represents a freely available specification for an open Human-Machine-Interface (HMI). It can be easily invoked from within a simple text input box on a web page or even from a specialized command shell. The syntax supports Boolean operations such as AND, OR, and NOT, albeit in a non-gear-headed way. While great care has been taken to support the construction of complex queries, greater care has been taken to maintain a clear and concise syntax.
 
-In 2023, Quelle 2.0 was published. This new specification is not a radical divergence from version 1. Most of the changes are centered around macros, control variables, filters, and export directives. Search syntax has remained largely unchanged. It turned out that the PEG grammar had some  ambiguity differentiating between the various implicit actions. To eliminate that ambiguity, new operators were introduced  [We added $ % and || to name a few] . These additions also reduce the need for clause delimiters. The version 2 spec feels more streamlined, more intuitive, and comes with a working revision of the PEG grammar. Implicit actions for Macros are now referred to as *apply* and *invoke* [those verbs replace *save* and *execute* respectively].
+Quelle, IPA: [kɛl], in French means "What? or Which?". As Quelle HMI is designed to obtain search-results from search-engines, this interrogative nature befits its name. In 2024, Quelle 4 was released. Search syntax has remained largely unchanged since version 1. Version 4 syntax is more streamlined than ever. Plus, it also comes with a reference implementation in Rust and a fully specified PEG grammar.
 
-One fundamental change to the search specification in Quelle 2.0 is the dropping of support for bracketed search terms. While parsing these artifacts was easy within the PEG grammar, implementing the search from the parse was quite complex. That seldom-used feature doubled the complexity of corresponding search-algorithms. Having successfully implemented bracketed terms in the AV-Bible Windows application, I will make two strong assertions about bracketed terms:
+Quelle is consistent with itself. Some constructs make parsing unambiguous; other constructs increase ease of typing (Specifically, we attempt to minimize the need to press the shift-key). Naturally, existing scripting languages have some influence on our syntax. However, to avoid complexity, we favor simplicity of expression over versatility. There might be edge cases that where a more versatile grammar could have reduced keystrokes. Yet, we strived to keep Quelle simple. Avoiding nuance has produced a grammar that is easy to type, easy to learn, and easy to remember.  Moreover, most search expressions look no different than they might appear today in a Google or Bing search box. Still, let's not get ahead of ourselves or even hint about where our simple specification might take us ;-)
 
-1. implementation was intensely complex
-2. almost no one used it.
-
-For those two reasons, we have nixed bracketed terms from the grammar in the updated spec.
-
-Every attempt has been made to make Quelle consistent with itself. Some constructs are in place to make parsing unambiguous, other constructs are biased toward ease of typing (such as limiting keystrokes that require the shift key). Of course, other command languages also influence our syntax, to make things more intuitive for a polyglot. In all, Quelle represents an easy to type and easy to learn HMI.  Moreover, simple search statements look no different than they might appear today in Google or Bing. Still, let's not get ahead of ourselves or even hint about where our simple specification might take us ;-)
-
-### II. Addendum
-
-A reference implementation of Quelle can be found in Quelle-AVX and related open source projects. There are two possible implementation levels:
+Vanilla Quelle specifies two possible implementation levels:
 
 - Level 1 [basic search support]
-- Level 2 [search support includes also searching on part-of-speech tags]
+- Level 2 [search support includes also searching on part-of-speech tags and fuzzy-match support]
 
-### III. Quelle Syntax
+### Overview of Quelle Syntax
 
-Quelle defines a declarative syntax for specifying search criteria using the *find* verb. Quelle also defines additional verbs to round out its syntax as a simple straightforward means to interact with custom applications where searching text is the fundamental problem at hand.
+There are two types of statements
 
-Quelle Syntax comprises seventeen (17) verbs. Each verb corresponds to a basic action:
+| Statement Type          | Syntax                                                       |
+| ----------------------- | ------------------------------------------------------------ |
+| **Selection  Criteria** | Combines search criteria and scoping filters for tailored verse selection.<br/>Settings can also be combined and incorporated into the selection criteria. |
+| **Discrete Imperative** | single action for configuration and/or application control (cannot be combined with other actions) |
 
-- find
-- filter
-- set
-- get
-- clear
-- initialize
-- export
-- limit
-- apply
-- delete
-- expand
-- absorb
-- help
-- review
-- invoke
-- version
-- exit
+#### Selection Criteria (includes search operations)
 
-Quelle is an open and extensible standard, additional verbs, and verbs for other languages can be defined without altering the overall syntax structure of the Quelle HMI. The remainder of this document describes Version 1.0 of the Quelle-HMI specification.  
+Selection Criteria contains <u>required</u> Selection Criteria, followed by an <u>optional</u> Directive:
 
-In Quelle terminology, a statement is made up of one or more clauses. Each clause represents an action. While there are seventeen action-verbs, there are only five syntax categories:
+The selection criteria controls how verses are selected. It is made up of one to three blocks. The ordering of blocks is partly prescribed. The scoping block must be in the final position. The search-expression-block and settings-block can be in either order (so long as they are listed before the scoping block when present). 
 
-1. SEARCH
-   - *find*
-   - *filter*
-2. CONTROL
-   - *set*
-   - *clear*
-   - @get
-   - @reset *(explicit alias for **clear all control settings**)*
-   - @absorb *(use history **or** label/macro to **absorb all control settings**)*
-3. OUTPUT
-   - *limit*
-   - *export*
-4. SYSTEM
-   - @help
-   - @version
-   - @exit
-5. HISTORY & MACROS
-   - *invoke*			  (invoke macro by its label **or** invoke a previous command by its id)
-   - *apply*			   (apply label to macro)
-   - @delete		  (delete macro by its label)
-   - @expand		(label **or** id)
-   - @review		 (review history)
-   - @initialize	  (clear all history)
+- Search Expression Block
+- Settings Block
+- Scoping Block
 
-Each syntax category has either explicit and/or implicit actions.  Explicit actions begin with the @ symbol, immediately followed by the explicit verb.  Implicit actions are inferred by the syntax of the command.
+| Block Position | Block Type                  | Hashtag UtilizationLevel |
+| -------------- | --------------------------- | ------------------------ |
+| **0** or **1** | **Search Expression Block** | full utilization         |
+| **0** or **1** | **Settings Block**          | partial utilization      |
+| ***final***    | **Scoping Block**           | partial utilization      |
 
-### IV. Fundamental Quelle Commands
+An optional directive can be issued following the selection criteria.  Only zero or one directives can be issued within a  statement:  
 
-Learning just six verbs is all that is necessary to effectively use Quelle. In the table below, each verb is identified with required and optional parameters/operators.
+- Macro Directive
 
-| Verb      | Action Type | Syntax Category | Required Parameters       | Alternate/Optional Parameters |
-| --------- | :---------: | :-------------- | ------------------------- | :---------------------------: |
-| *find*    |  implicit   | SEARCH          | *search spec*             |                               |
-| *filter*  |  implicit   | SEARCH          | **<** *domain*            |                               |
-| *set*     |  implicit   | CONTROL         | **%name** **::** *value*  |    **%name** **=** *value*    |
-| *limit*   |  implicit   | OUTPUT          | **[** *row_indices* **]** |                               |
-| **@help** |  explicit   | SYSTEM          |                           |            *topic*            |
-| **@exit** |  explicit   | SYSTEM          |                           |                               |
+- Export Directive
 
-**TABLE 4-1****Fundamental Quelle commands with corresponding syntax summaries**
+To be clear, a macro cannot be created for a statement that exports selection/search results to a file. Directives must be instigated separately.  The syntax for these directives is straightforward
 
-From a linguistic standpoint, all Quelle commands are issued in the imperative. The subject of the verb is always "you understood". As the user, you are commanding Quelle what to do. Some verbs have direct objects [aka required parameters]. These parameters instruct Quelle <u>what</u> to act upon. The verb dictates the required parameters: in linguistic terms, this is referred to as the valence of the verb.
+| Directive Type                                               | Directive Syntax *(follows the Selection Criteria)*          |
+| ------------------------------------------------------------ | ------------------------------------------------------------ |
+| Macro (*apply* tag to macro)                                 | ***\|\| tag***                                               |
+| Export Block (*export* results of selection criteria to a file) | ***> filepath*** or<br/>***>> filepath*** or<br/>***=> filepath*** |
 
-Quelle supports two types of actions:
+#### Discrete Imperatives
 
-1. Implicit actions [implicit actions are inferred from the syntax of their parameters]
-2. Explicit actions [The verb needs to be explicitly stated in the command and it begins with **@**]
+Non-selection statements instigate configuration changes or application control. These statements always begin with **@**. They are executed individually and cannot be combined with any other actions. Imperatives that begin with @ cannot be combined with search expressions. This is why they are called Discrete Imperatives.
 
-Implicit actions can be combined into compound statements.  However, compound statements are limited to contain ONLY implicit actions. This means that explicit actions cannot be used to construct a compound statement.
+#### Configuration Statements
 
-As search is a fundamental concern of Quelle, it is optimized to make compound implicit actions easy to construct with a concise and intuitive syntax. Even before we describe Quelle syntax generally, let's examine a few concepts using examples:
+Quelle grammar supports three categories of configuration. These are described more completely in Section 2.
 
-| Description                             | Example                                  |
-| --------------------------------------- | :--------------------------------------- |
-| SYSTEM command                          | @help                                    |
-| SEARCH filters                          | < Wall-Street-Journal < Washington-Post  |
-| SEARCH specification                    | this is some text expected to be found   |
-| Compound statement: two SEARCH actions  | "this quoted text" + other unquoted text |
-| Compound statement: two CONTROL actions | %span = 7 %similarity = 85               |
-| Compound statement: CONTROL & SEARCH    | %span = 7 Moses said                     |
+| Configuration Targets | Configuration Actions       |
+| --------------------- | --------------------------- |
+| User Settings         | @set, @get, @clear, @absorb |
+| User Macros           | @view, @delete              |
+| User History          | @view, @delete, @invoke     |
 
-**TABLE 4-2****Examples of Quelle statement types**
+#### Control Statements
 
-### V. Deep Dive into Quelle SEARCH actions
+Quelle gram has only two control imperatives. These are described more completely in Section 3.
 
-Quelle syntax can alter the span by also supplying an additional CONTROL action:
+| Control Targets   | Control Actions | Optional Parameter | Description                         |
+| ----------------- | --------------- | ------------------ | ----------------------------------- |
+| Usage Information | @help           | topic              | Help with Quelle syntax and usage   |
+| System Control    | @exit           | -                  | Exit the application or interpreter |
 
-*span=8 Harris Biden*
+## Section 1 - Selection/Search 
 
-The statement above has a CONTROL action and a SEARCH action
+#### QuickStart
 
-Next, consider a search to find Biden and (Kamala or Harris):
+Consider this proximity search (find Moses and Aaron within a single span of seven words, along with a scoping [domain] filter):
 
-*Biden Kamala|Harris*
+*[ span:7 ]  Moses Aaron* < bible
 
-The order in which the search terms are provided is insignificant. Additionally, the type-case is insignificant.
+Next, consider a search to find Moses <u>or</u> Aaron:
+
+*Moses|Aaron* < bible
+
+The order in which the search terms are provided is insignificant. Additionally, the type-case is insignificant. And either name found would constitute a match.
 
 Of course, there are times when word order is significant. Accordingly, searching for explicit strings can be accomplished using double-quotes as follows:
 
-*"Biden said ... Harris"*
+*"Moses said ... Aaron"* < bible
 
 These constructs can even be combined. For example:
 
-*"Biden said ... Kamala|Harris"*
+*"Moses said ... Aaron|Miriam"* < bible
 
-The search criteria above is equivalent to this search:
+In all cases, “...” means “followed by”, but the ellipsis allows other words to appear between "said" and "Aaron". Likewise, it allows words to appear between "said" and "Miriam". 
 
-*"Biden said ... Kamala" + "Biden said ... Harris"*
+Quelle is designed to be intuitive. It provides the ability to invoke Boolean logic for term-matching and/or linguistic feature-matching. As we saw above, the pipe symbol ( | ) can be used to invoke an *OR* condition.
 
-In all cases, “...” means “followed by”, but the ellipsis allows other words to appear between "said" and "Kamala". Likewise, it allows words to appear between "said" and "Harris".
 
-Of course, translating the commands into actual search results might not be trivial for the application developer. Still, the Vanilla Quelle parser and the PEG grammar are freely available, allowing the developer to just leverage the parse and focus on delivering search results.
 
-Quelle is designed to be intuitive. It provides the ability to invoke Boolean logic on how term matching should be performed. As we saw above, the pipe symbol ( | ) can be used to invoke an OR condition [Boolean multiplication upon the terms that compose a search expression].
+The scoping deirective provided above is just for example puposes. A Quelle implementation could readily be defined to implement any of these scoping filters:
 
-The ampersand symbol can similarly be used to represent AND conditions upon terms. If we were searching a dataset in a baseball domain, we might issue this command:
+< YouTube videos
 
-"Babe Ruth ... home run&/noun/"
+< Wall Street Journal 2024
 
-If the corpus is marked for part-of-speech, this search would return only matching phrases where the word run was labelled as a noun.
+< Disney Movies
 
-Of course, part-of-speech expressions can also be used independent of the an AND condition, as follows:
+### 1.1 - Selection Criteria
 
-span = 6 "/noun/ ... home run"
+As we saw in the overview, there three blocks that compose Selection Criteria:
 
-This would find phrases where a noun appeared within a span of six words and preceded "home run"
+- Expression Block Components
+
+  - *find expression*
+  - *use expression (full macro utilization)*
+- Settings Block Components
+
+  - *assign setting*
+
+  - *use settings (partial macro utilization)*
+- Scoping Block
+
+  - *filter directives*
+  - *use filters (partial macro utilization)*
+
+| Action   | Type             | Position | Action Syntax                            | Repeatable Action                             |
+| -------- | ---------------- | -------- | ---------------------------------------- | --------------------------------------------- |
+| *find*   | Expression Block | initial  | search expression or ***#id***           | **no**                                        |
+| *use*    | Expression Block | initial  | ***#tag*** or ***#id ***                 | **no**: only one macro is permitted per block |
+| *assign* | Settings Block   | initial  | ***[ setting: value ]***                 | yes (e.g. ***[ format:md  span:7]*** )        |
+| *use*    | Settings Block   | initial  | ***[ #tag ]*** or<br/>***[ #id ]***      | **no**: only one macro is permitted per block |
+| *filter* | Scoping Block    | post     | ***< scope***                            | yes (e.g. ***< Genesis 3 < Revelation 1-3***) |
+| *use*    | Scoping Block    | post     | **<** ***#tag***  or<br/>**<** ***#id*** | **no**: only one macro is permitted per block |
+
+**Table 1-1** - Summary of actions expressible in the Selection Criteria segment of a Selection/Search imperative statement
+
+Two mutually exclusive optional directives can be issued following the selection criteria. 
+
+#### 1.1.1 - Search Expression Block
+
+The ampersand symbol can similarly be used to represent *AND* conditions upon terms. As an example. the English language contains words that can sometimes as a noun , and other times as some other part-of-speech. To determine if the bible text contains the word "part" where it is used as a verb, we can issue this command:
+
+"part&/verb/"
+
+The SDK, provided by Digital-AV, has marked each word of the bible text for part-of-speech. With the rich syntax of Quelle, this type of search is easy and intuitive.
+
+Of course, part-of-speech expressions can also be used independently of an AND condition, as follows:
+
+[ span: 6 ]  "/noun/ ... home"
+
+That search would find phrases where a noun appeared within a span of six words, preceding the word "home"
 
 **Valid statement syntax, but no results:**
 
@@ -167,216 +165,418 @@ this&that
 
 /noun/ & /verb/
 
-Both of the statements above are valid, but will not match any results. Search statements attempt to match actual words in the actual bible text. A bord cannot be "this" **and** "that". Likewise, an individual word in a sentence does not operate as a /noun/ **and** a /verb/. Contrariwise, these searches are valid, but would also return numerous matches:
+Both of the statements above are valid, but will not match any results. Search statements attempt to match actual words in  the actual bible text. A word cannot be "this" **and** "that". Likewise, an individual word in a sentence does not operate as a /noun/ **and** a /verb/ at the same time.
 
-this|that
+**Negating search-terms Example:**
 
-/noun/ | /verb/
+Consider a query for all articles that contain a Bill Clinton in the Washington Post, followed by any word that is neither a verb nor an adverb:
 
-### VI. Displaying Results
+[ span:15 ] "Bill|William ... Clinton -/v/ & -/adv/"
 
-Consider that there are two fundamental types of searches:
+#### 1.1.2 - Settings Block
 
-- Searches that return a limited set of results
-- Searches that either return loads of results; or searches where the result count is unknown (and potentially very large)
+When the same setting appears more than once, only the last setting in the list is preserved.  Example:
 
-Due to the latter condition above, SEARCH summarizes results (it does NOT display every result found). However, if more than a summary is desired, the user can control how many results to display.
+[ format:md  format:text ]
 
-"Clinton answered" *summarize documents that contain this phrase, with paragraph references*
+@get format
 
-"Clinton answered" [ ] *display every matching phrase* // equivalent to Clinton answered" ||[*]
+The @get format command would return text.  We call this: "last assignment wins".
 
-"Clinton answered" [1] *this would would display only the first matching phrase*
+Finally, there is a bit more to say about the similarity setting, because it actually has three components. If we issue this command, it affects similarity in two distinct ways:
 
-"Clinton answered" [1 2 3] *this would would display only the first three matching phrases*
+[  similarity: 85% ]
 
-"Clinton answered" [4 5 6] *this would would display the next first three matching phrases*
+That command is a concise way of setting two values. It is equivalent to this command
 
-### VII. Exporting Results
+[ similarity.word:85%  similarity.lemma:85% ]
 
-Export using a display-coordinate:
+That is to say, similarity is operative for the lexical word and also the lemma of the word. While not discussed previously, these two similarities thresholds need not be identical. These commands are also valid:
 
-To revisit the example in the previous sample, we can export records to a file with these commands:
+[ similarity.word: 85%  similarity.lemma: 95% ]
 
-"Clinton answered" [ ] > my-file.output // *this would export every matching phrase*
+[ similarity.word: 85% ]
 
-"Clinton answered" [1] > my-file.output // *this would would export only the first matching phrase*
+[ similarity.word: none  similarity.lemma: exact ]
 
-"Clinton answered" [1 2 3] >> my-file.output // *this would would export the first three matching phrases* // >> indicates that the results should be appended
+[ similarity.lemma: none ]
 
-format=html ; "Clinton answered" [1 2 3] => my-file.html // *export the first three matching phrases as html*
+#### 1.1.3 - Scoping Block
 
-The => allows existing file to be overwritten. Quelle will not overwrite an existing file with > syntax. The => is required to force an overwrite.
+Sometimes we want to limit the scope of our search. Say that I want to find mentions of the serpent in Genesis. I can search only Genesis by executing this search:
 
-| Verb     | Action Type | Syntax Category | Parameters       | Alternate #1      | Alternate #2      |
-| -------- | :---------: | --------------- | ---------------- | :---------------- | :---------------- |
-| *export* |  implicit   | OUTPUT          | **>** *filename* | **=>** *filename* | **>>** *filename* |
+serpent < Genesis
 
-**TABLE 7-1** -- **The implicit export action**
+If I also want to search in Genesis and Revelation, this works:
 
-### VIII. Filtering Results
+serpent < Genesis < Revelation
 
-Sometimes we want to constrain the domain of where we are searching. Say that I want to find mentions of the Joe Biden in the Wall Street Journal. I can search only WSJ by executing this search:
+Filters also allow Chapter and Verse specifications. To search for the serpent in Genesis Chapter 3, we can do this:
 
-"Joe Biden" < WSJ
+serpent < Genesis 3
 
-If I also want to search in Wall Street Journal and the New York Post, this works:
+Abbreviations are also supported:
 
-serpent < WSJ < NYP
+vanity < sos < 1co
 
-Search domains and associated abbreviations must be explicitly supported by the Quelle Driver. The domain is captured by the Pinshot-blue parser, but the object-model needs explicit adaptation to constrain searches by domain designations.
 
-### IX. Labeling & Reviewing Statements for subsequent invocation
 
-| Verb            | Action Type | Syntax Category           | Expected Arguments        | Required Operators |
-| --------------- | ----------- | ------------------------- | ------------------------- | :----------------: |
-| *invoke*        | implicit    | HISTORY & LABELING        | *label* or *id*           |   **$** *label*    |
-| *apply*         | implicit    | HISTORY & <u>LABELING</u> | *label*                   |  **\|\|** *label*  |
-| **@delete**     | explicit    | HISTORY & <u>LABELING</u> | *label*                   |      *label*       |
-| **@expand**     | explicit    | HISTORY & LABELING        | *label* or *id*           |  *label* or *id*   |
-| **@absorb**     | explicit    | CONTROL                   | *label* or *id*           |  *label* or *id*   |
-| **@review**     | explicit    | <u>HISTORY</u> & LABELING | **optional:** *max_count* |                    |
-| **@initialize** | explicit    | <u>HISTORY</u> & LABELING |                           |                    |
+### 1.2 - Macro Directive
 
-**TABLE 9-1** -- **Labeling statements and reviewing statement history**
+| Macro Directive *(follows the Selection Criteria)* | Syntax for applying tag to create a macro |
+| -------------------------------------------------- | ----------------------------------------- |
+| *apply*                                            | ***\|\| tag***                            |
 
-In this section, we will examine how user-defined macros are used in Quelle. A macro in Quelle is a way for the user to label a statement for subsequent use. By applying a label to a statement, a shorthand mechanism is created for subsequent utilization. This gives rise to two new definitions:
+**Table 1-2** - Syntax summary for the *apply* action in the Macro Directive of a Selection/Search imperative statement.
 
-1. Labelling a statement (or defining a macro)
-2. Utilization of a labelled statement (running a macro)
+Tagged statements are also called macros. All macros are defined with a hash-tag (#); 
 
-Let’s say we want to name the search example from the previous section; We’ll call it *eternal-power*. To accomplish this, we would issue this command:
+Macro tags cannot contain punctuation: only letters, numbers, hyphens, and underscores are permitted. However, macros are identified with a hash-tag (#).
 
-%span::7 %exact::true + eternal power || eternal-power
 
-It’s that simple, now instead of typing the entire statement, we can utilize the macro by referencing our previously applied label. Here is how the macro can be utilized. We might call this running the macro:
+Let’s say we want to name the search example from the previous section; We’ll call it *eternal-power*. To accomplish this, we can apply a tag to the statement below:
 
-$eternal-power
+[ span: 7 similarity: 85% ] eternal power < Romans || eternal-power-romans
 
-Labelled statements also support compounding using the semi-colon ( ; ), as follows; we will label it also:
+It’s that simple, now instead of typing the entire statement, we can utilize the macro by referencing our previously applied tag. Here is how the macro is utilized:
 
-$eternal-power + diety|| my-label-cannot-contain-spaces
+#eternal-power-romans
 
-Later I can issue this command:
 
-$my-label-cannot-contain-spaces
 
-Which is equivalent to these statements:
+### 1.3 - Export Directive
 
-%span::7 %exact::true + eternal power + diety
+| Export Directive  *(follows the Selection Criteria)* | Create file      | Create or Overwrite file | Create or Append File |
+| ---------------------------------------------------- | ---------------- | :----------------------- | :-------------------- |
+| *export*                                             | **>** *filename* | **=>** *filename*        | **>>** *filename*     |
 
-To illustrate this further, here are four more examples of labeled statement definitions:
+**Table 1-3** - Syntax summary for the *export* action in the Export Directive of a Selection/Search imperative statement.
 
-%exact::1 || C1
+This would export all verses in Genesis 1 from the most previous search as html
 
-%span::8 || C2
+[ format:html ] #in_beginning  > my-macro-output.html
 
-+nation || F1
+This would export all verses for the executed macro as markdown
 
-+eternal || F2
+[ format:markdown ] #in_beginning  > my-macro-output.html
 
-We can utilize these as a compound statement by issuing this command:
+Combining only with a scoping black , we could append Genesis chapter two, to an existing file:
 
-$C1 $C2 $F1 $F2
+< Genesis 2  >> C:\users\my-user-name\documents\existing-file.md
 
-Similarly, we could define another label from these, by issuing this command:
+Combining with a scoping black , we could replace the contents of an existing file with Genesis chapter three:
 
-$C1 $C2 $F1 $F2 || another-macro
+< Genesis 3  => C:\users\my-user-name\documents\existing-file.md
 
-This expands to:
 
-%exact::1 %span::8 nation + eternal
 
-There are several restrictions on macro definitions:
+### 1.4 - Macro Utilization
 
-1. Macro definition must represent a valid Quelle statement:
-   - The syntax is verified prior to applying the statement label.
-2. Macro definitions exclude export directives
-   - Any portion of the statement that contains > is incompatible with a macro definition
-3. Macro definitions exclude output directives
-   - Any portion of the statement that contains [ ] is incompatible with a macro definition
-4. The statement cannot represent an explicit action:
-   - Only implicit actions are permitted in a labelled statement.
+The *use* action is supported in each of the three Selection Criteria blocks:
 
-Finally, any macros referenced within a macro definition are expanded prior to applying the new label. Therefore redefining a macro after it has been referenced in a subsequent macro definition has no effect of the initial macro reference. We call this macro-determinism. A component of determinism for macros is that the macro definition saves all control settings at the time that the label was applied. This assure that the same search results are returned each time the macro is referenced. However, if the user desires the current settings to be used instead, just ***::current*** suffix after the macro.
+- Expression *(full macro utilization)*
+- Settings *(partial macro utilization)*
+- Scoping *(partial macro utilization)*
+
+Each of the block types supports the *use* action. However, each block limited to, at most, one *use* action. The *use* action references either a tag for a macro or a statement id revealed by the @view imperative. As there are  a maximum of three blocks in the selection criteria, a statement could contain up to three *use* actions (one per block).
+
+The expression block supports full macro utilization.  In the earlier example:
+
+#eternal-power-romans
+
+All settings, filters, and search criteria are utilized (this is called full macro utilization, and it can only occur in expression blocks)
+
+Expression block macros sometimes undergo demotion. A macro within the expression block is demoted into a partial macro when a provided block within the selection criteria conflicts with the macro definition. Consider these examples:
+
+Recall that the macro definition: [ span: 7 similarity: 85% ] eternal power < Romans || eternal-power-romans
+
+| Macro Statement                       | Utilization level         | Explanation                                             |
+| ------------------------------------- | ------------------------- | ------------------------------------------------------- |
+| #eternal-power-romans                 | full macro utilization    | no conflicts                                            |
+| #eternal-power-romans [ all:current ] | partial macro utilization | explicit settings replace any settings defined in macro |
+| #eternal-power-romans < Acts          | partial macro utilization | explicit filter replaces any filters defined in macro   |
+| #eternal-power-romans [span:7] < Acts | partial macro utilization | only the search expression is utilized from the macro   |
+
+**Table 1-4** - Macro utilization in a Search Expression 
+
+Outside of the expression block, partial macros *use* only the part of the macro that applies to the block type. For example, this clause utilizes only the settings defined within the macro.:
+
+[ #eternal-power-romans ]
+
+Likewise, in this example, this clause utilizes only the filters defined within the macro.
+
+< #eternal-power-romans
+
+Macro utilization within a block disallows all other entries within the block; macro utilization in a block is not compatible with any other entries in that same block.
+
+Specifically, the following statements / clauses are not supported by Quelle:
+
+**NOT SUPPORTED:**  #eternal-power-romans without excuse  
+
+**NOT SUPPORTED:**  [ #eternal-power-romans span:7 ]
+
+**NOT SUPPORTED:**  < #eternal-power-romans < Acts
+
+It should be noted that any macros referenced within a macro definition are expanded prior to applying the new tag. Therefore, subsequent redefinition of a previously referenced macro invocation never affects existing macro definitions. We call this macro-determinism.  All control settings are captured at the time that the tag is applied to the macro. This further assures that the same search results are returned each time the macro is referenced. Here is an example.
+
+@set span = 2
+
+in beginning || in_beginning
+
+@set span = 3
+
+#in_beginning [span:1] < genesis:1:1
+
+***result:*** none
+
+However, if the user desires the current settings to be used instead, a specialized control setting [ all:current ] represents all currently persisted settings; just include it in the statement (as show below). 
+
+[ all:current ] #in_beginning < genesis:1:1
+
+***result:*** Gen 1:1 In the beginning, God created ...
+
+Similarly, another specialized setting is [ all:defaults ] ; that block represents default values for all settings. 
+
+Still, a macro can be redefined/overwritten. This doesn't disable macro determinism, even though it feels like it does. The assumption is that the user is explicitly redefining the meaning of macro and Quelle does not require an explicit @delete of the tag prior to re-applying. Here is an example:
+
+[ #eternal-power-romans ] eternal power godhead without excuse < #eternal-power-romans || #eternal-power-romans
+
+### 1.5 - History Utilization
+
+Just like macro utilization, the *use* action is supported in each of the three Selection Criteria blocks:
+
+- Expression *(full macro utilization)*
+- Settings *(partial macro utilization)*
+- Scoping *(partial macro utilization)*
+
+Each of the block types supports the *use* action. However, each block limited to, at most, one *use* action. The *use* action references either a tag for a macro or a statement id revealed by  the @*view* imperative. As there are a maximum of three blocks in the selection criteria, a statement could contain up to three *use* actions (one per block).
+
+Only the expression block supports full macro utilization.
+
+Expression block macros sometimes undergo demotion. A historic utilization within the expression block is demoted into a partial macro when a provided block within the selection criteria conflicts with the macro definition. Assume that this command is identified by the @view command by id := 5:
+
+[ span: 3 similarity: 85% ] "in ... beginning" < Genesis < John
+
+| Statement          | Utilization level         | Explanation                                             |
+| ------------------ | ------------------------- | ------------------------------------------------------- |
+| #5                 | full macro utilization    | no conflicts                                            |
+| #5 [ all:current ] | partial macro utilization | explicit settings replace any settings defined in macro |
+| #5 < Acts          | partial macro utilization | explicit filter replaces any filters defined in macro   |
+| #5 [span:7] < Acts | partial macro utilization | only the search expression is utilized from the macro   |
+
+**Table 1-5** - History utilization in a Search Expression 
+
+Outside of the expression block, partial *usage* applies by block type. For example, this clause utilizes only the settings defined where id = 5.
+
+[ #5 ]
+
+Likewise, in this example, this clause utilizes only the filters for id = 5.
+
+< #5
+
+Just like macros, utilization within a block disallows all other entries within the block; utilization in a block is not compatible with any other entries in that same block.
+
+Specifically, the following statements / clauses are not supported by Quelle:
+
+**NOT SUPPORTED:**  #5 without excuse  
+
+**NOT SUPPORTED:**  [ #5 span:7 ]
+
+**NOT SUPPORTED:**  < #5 < Acts
+
+It should be noted that any historic id references are expanded prior to applying the new tags for macros. As mentioned in the previous section, we call this macro-determinism.  Therefore, even if an id is removed from the command history with the @delete command, any macros that it was referenced within, continue to behave identically post-deletion.
+
+
+
+## Section 2 - Configuration Statements
+
+### 2.1 - Viewing Macros & Tags
+
+| Action      | Syntax                                                       |
+| ----------- | ------------------------------------------------------------ |
+| **@delete** | *tag* <u>or</u> *wildcard* <u>or</u> -tags FROM <u>and/or</u> UNTIL<br/>**FROM parameter :** *from* yyyy/mm/dd<br/>**UNTIL parameter :** *until* yyyy/mm/dd |
+| **@view**   | *tag* <u>or</u> *wildcard* <u>or</u> -tags <u>optional</u> FROM <u>and/or</u> UNTIL<br/>**FROM parameter :** *from* yyyy/mm/dd<br/>**UNTIL parameter :** *until* yyyy/mm/dd |
+| **@absorb** | **permitted:** *tag*                                         |
+
+**TABLE 2-1** -- **Tagging and viewing tagged statements**
 
 ##### Additional explicit macro commands:
 
-Two additional explicit commands exist whereby a macro can be manipulated. We saw above how they can be defined and referenced. There are two additional ways commands that operate on macros: expansion and deletion. In the last macro definition above where we created $another-macro, the user could preview an expansion by issuing this command:
+Two additional explicit commands exist whereby a macro can be manipulated. We saw above how they can be defined and referenced. There are two additional ways commands that operate on macros: expansion and deletion.  In the last macro definition above where we created  #another-macro, the user could view an expansion by issuing this command:
 
-@expand another-macro
+@view another-macro
 
-If the user wanted to remove this definition, the @delete action is used. Here is an example:
+If the user wanted to remove this definition, the @delete action is used.  Here is an example:
 
 @delete another-macro
 
-NOTE: Labels must begin with a letter [A-Z] or [a-z], but they may contain numbers, spaces, hyphens, periods, commas, underscores, and single-quotes (no other punctuation or special characters are supported).
+If you want the same settings to be persisted to your current session that were in place during macro definition, the @absorb command will persist all settings for the macro into your current session
 
-While macro definitions are deterministic, they can be overwritten/redefined.
+@absorb my-favorite-settings-macro 
 
-**REVIEW SEARCH HISTORY**
+**NOTE:**
 
-*@review* gets the user's search activity for the current session.  To show the last ten searches, type:
+​       @absorb also works with command history.
 
-*@review*
+### 2.2 - Viewing History
 
-To show the last three searches, type:
+| Verb        | Syntax Category | Parameters                                                   |
+| ----------- | --------------- | ------------------------------------------------------------ |
+| **@invoke** | Configuration   | ***id***                                                     |
+| **@delete** | Configuration   | -history FROM <u>and/or</u> UNTIL<br/>**FROM parameter :** *from* *id* <u>or</u> *from* yyyy/mm/dd<br/>**UNTIL parameter :** *until* *id* <u>or</u> *until* yyyy/mm/dd |
+| **@view**   | Configuration   | *id* <u>or</u> -history <u>optional</u> FROM <u>and/or</u> UNTIL<br/>**FROM parameter :** *from* *id* <u>or</u> *from* yyyy/mm/dd<br/>**UNTIL parameter :** *until* *id* <u>or</u> *until* yyyy/mm/dd |
+| **@absorb** | Configuration   | ***id***                                                     |
 
-*@review* 3
+**TABLE 2-2** -- **Viewing & Invoking statement history**
 
-To show the last twenty searches, type:
+**COMMAND HISTORY** 
 
-*@review* 20 
+*@view* allows you to see your previous activity.  To show the last ten searches, type:
 
-**INVOKE**
+*@view* -history
 
-The *invoke* command works for command-history works exactly the same way as it does for macros.  After issuing a *@review* command, the user might receive a response as follows.
+To reveal all history up until now, type:
 
-*@review*
+@view until now
 
-1>  %span = 7
+To reveal all searches since January 1, 2024, type:
 
-2>  %similarity::85
+*@view* from 2024/1/1
+
+To reveal for the single month of January 2024:
+
+*@view* from 2024/1/1 until 2024/1/31
+
+To reveal all history since id:5 [inclusive]:
+
+*@view* from 5
+
+All ranges are inclusive. 
+
+**History Utilization**
+
+The *use* command works for command-history works exactly the same way as it does for macros.  After issuing a *@view* command to show history, the user might receive a response as follows.
+
+*@view*
+
+1>  @set span = 7
+
+2>  @set similarity=85
 
 3> eternal power
 
-And the invoke command can re-invoke any command listed.
+And the use command can utilize any command listed.
 
-$3
+#3
 
-would be shorthand to re-invoke the search specified as:
+would be shorthand to for the search specified as:
 
 eternal power
 
-Again, *invoking* command from your command history is *invoked* just like a macro. Moreover, as with macros, control settings are persisted within your command history to provide invocation determinism. That means that the current control settings are ignored when invoking command history. Just like with macros, the current control settings can be utilized by adding the ***::current*** suffix to the invocation. See **Table 12-5**. Example usage:
+Again, *utilizing* a command from your command history is *used* just like a macro. Moreover, as with macros, control settings are persisted within your command history to provide invocation determinism. That means that control settings that were in place during the original command are utilized for the invocation.
 
-$3::current
-
-or we could re-invoke all three commands in a single statement as:
-
-$1  $2  $3
-
-which would be interpreted as:
-
-%span = 7  %similarity::85   eternal power
+Command history captures all settings. We have already discussed macro-determinism. Invoking commands by their ids behave exactly like macros. In other words, invoking command history never persists changes into your environment, unless you explicitly request such behavior with the @absorb command.
 
 **RESETTING COMMAND HISTORY**
 
-The @reset command can be used to clear command history and/or reset all control variables to defaults.
+The @delete command can be used to remove <u>all</u> command history.
 
-To clear all command history:
+To remove all command history:
 
-@initialize history
+@delete -history -all
 
-##### Invoking a command remembers all settings, but always without side-effects:
+FROM / UNTIL parameters can limit the scope of the @delete command.
 
-Command history captures all settings. We have already discussed macro-determinism. Invoking commands by their review numbers behave exactly like macros. They are also deterministic. Just like macros, an setting with an equals sign (e.g. span=7) is treated as if it were (span::7). In other words, invoking command history never persists changes into your environment, unless you explicitly request such behavior with the @absorb command.
+### 2.3 - Settings
 
-### X. Program Help
+| Action      | Parameters                                |
+| ----------- | ----------------------------------------- |
+| **@clear**  | *setting* or ALL                          |
+| **@get**    | **optional:** *setting* or ALL or VERSION |
+| **@set**    | *setting* **=** *value*                   |
+| **@absorb** | ***id*** or ***tag***                     |
+
+**TABLE 2-3.a** - **Listing of additional CONTROL actions**
+
+
+
+**Export Format Options:**
+
+| Export Content Type | Command              | Synonym          |
+| ------------------- | -------------------- | ---------------- |
+| **Markdown**        | *@format = markdown* | *@format = md*   |
+| **Text** (UTF8)     | *@format = text*     | *@format = utf8* |
+| **HTML**            | *@format = html*     |                  |
+| **JSON**            | *@format = json*     |                  |
+| **YAML**            | *@format = yaml*     |                  |
+
+**TABLE 2-3.b** - **@set** format command can be used to set the default content-formatting for for use with the export verb
+
+
+
+| **example**              | **explanation**                                              | shorthand equivalent |
+| ------------------------ | ------------------------------------------------------------ | -------------------- |
+| **@set** search.span = 8 | Assign a control setting                                     | @span = 8            |
+| **@get** search.span     | get a control setting                                        | @span                |
+| **@clear** search.span   | Clear the setting; restores the setting to its default value | @clear span          |
+
+**TABLE 2-3.c** - **set/clear/get** action operate on configuration settings
+
+In all, Quelle manifests five control names. Each allows all three actions: ***set***, ***clear***, and ***@get*** verbs. Table 2.3.d lists all Quelle settings. Some settings should only be expected in implementations that conform to the Level 2 specification.
+
+| Setting Name | Functional.Name  | Meaning                                                      | Values                                                       | Default Value | Spec Level |
+| ------------ | ---------------- | ------------------------------------------------------------ | ------------------------------------------------------------ | ------------- | ---------- |
+| span         | search.span      | proximity distance limit                                     | 0 to 999 or verse                                            | 0 / verse     | 1          |
+| format       | render.format    | format of results on output                                  | see Table 7                                                  | text / utf8   | 2          |
+| similarity   |                  | Streamlined syntax for setting word & lemma to an identical value<br/>fuzzy phonetics matching threshold is between 1 and 99<br/>0 or *none* means: do not match on phonetics (use text only)<br/>100 or *exact* means that an *exact* phonetics match is expected | 33% to 99% [fuzzy] **or** ...<br>0 **or** *none*<br>100 **or** *exact* | 0 / none      | 2          |
+| word         | similarity.word  | fuzzy phonetics matching as described above, but this prefix only affects similarity matching on the word. | 33% to 99% [fuzzy] **or** ...<br>0 **or** *none*<br>100 **or** *exact* | 0 / none      | 2          |
+| lemma        | similarity.lemma | fuzzy phonetics matching as described above, but this prefix only affects similarity matching on the lemma. | 33% to 99% [fuzzy] **or** ...<br>0 **or** *none*<br>100 **or** *exact* | 0 / none      | 2          |
+| revision     | grammar.revision | Not really a true setting: it works with the @get command to retrieve the revision number of the Quelle grammar supported by AV-Engine. This value is read-only. | 4.x.yz                                                       | n/a           | 1          |
+| ALL          |                  | ALL is an aggregate setting: it works with the @clear command to reset all variables above to their default values. It is used with @get to fetch all settings. It can also be used in the settings block of a statement to override values to default or the currently saved values for situations where a macro is utilized. | current<br/>**or**<br/>defaults                              | current       | 1          |
+
+**TABLE 2-3.d** - Summary of AV-Bible Settings
+
+The *@get* command fetches these values. The *@get* command requires a single argument. Examples are below:
+
+*@get* span
+
+@get format
+
+All settings can be cleared using an explicit command:
+
+@clear ALL
+
+**Persistence of Settings**
+
+It should be noted that there is a distinction between **@set** and and ***assign*** actions. The first action is an application configuration-imperative, and it is persistent (it affects all subsequent statements). Contrariwise, the ***assign*** action affects only the single statement wherein it is executed. We refer to this distinction as *persistence* vs *assignment*.
+
+### 2.4 - Miscellaneous Information
+
+**QUERYING DRIVER FOR VERSION INFORMATION**
+
+This command reveals the current Quelle grammar revision:
+
+@get revision
+
+---
+
+In general, the Quelle command processor can be thought of as a stateless server. The only exceptions of its stateless nature are:
+
+1. non-default settings assigned using the **@set** command
+
+2. defined macro tags. 
+
+3. command history
+
+   
+
+## Section 3 - Control Statements
+
+### 3.1 - Program Help
+
+To get general help, use this command:
 
 *@help*
-
-This will provide a help message in a Quelle interpreter.
 
 Or for specific topics:
 
@@ -388,205 +588,127 @@ Or for specific topics:
 
 etc ...
 
-### XI. Exiting Quelle
+### 3.2 - Exiting the Application
 
-Type this to terminate the Quelle interpreter:
+Type this to terminate the app:
 
 *@exit*
 
-### XII. Control Settings & additional related cpmmands
-
-| Verb     | Action Type | Syntax Category | Parameters             | Alternate #1          | Alternate #2 |
-| -------- | :---------: | --------------- | ---------------------- | :-------------------- | :----------- |
-| *clear*  |  implicit   | CONTROL         | *%name* **:: default** | *%name* **= default** |              |
-| **@get** |  explicit   | CONTROL         | **optional:** *name*   |                       |              |
-
-**TABLE 12-1** -- **Listing of additional CONTROL actions**
-
-
-
-**Export Format Options:**
-
-| **Markdown**   | **HTML**         | **Text**         | Json             |
-| -------------- | ---------------- | ---------------- | ---------------- |
-| *%format = md* | *%format = html* | *%format = text* | *%format = json* |
-
-**TABLE 12-2** -- **set** format command can be used to set the default content-formatting for for use with the export verb
-
-
-
-| **example**    | **explanation**                                              |
-| -------------- | ------------------------------------------------------------ |
-| span = 8       | Assign a control setting                                     |
-| **@get** span  | get a control setting                                        |
-| span = default | Clear the control setting; restoring the Quelle driver default setting |
-
-**TABLE 12-3** -- **set/clear/get** action operate on configuration settings
-
-
-
-**SETTINGS:**
-
-Otherwise, when multiple clauses contain the same setting, only the last setting in the list is preserved.  Example:
-
-format=md   format=default  format=text
-
-@get format
-
-The final command would return text.  We call this: "last assignment wins". However, there is one caveat to this precedence order: regardless of where in the statement a macro or history invocation is provided within a statement, it never has precedence over a setting that is actually visible within the statement.  Consider this sequence as an example:
-
-Vanilla-Quelle manifests just two control names. Both allow all three actions: ***set***, ***clear***, and ***@get*** verbs. Table 12-4 lists both settings available in Vanilla-Quelle. 
-
-| Setting | Meaning                     | Values            | Default Value |
-| ------- | --------------------------- | ----------------- | ------------- |
-| span    | proximity distance limit    | 0 to 999 or verse | 0 [verse]     |
-| format  | format of results on output | see Table 12-2    | json          |
-
-**TABLE 12-4** -- **Summary of Vanilla-Quelle Control Names**
-
-The *@get* command fetches these values. The *@get* command requires a single argument. Examples are below:
-
-*@get* search
-
-@get format
-
-There are additional actions that affect all control settings collectively
-
-| Expressions | Meaning / Usage                                              |
-| ----------- | ------------------------------------------------------------ |
-| **@reset**  | Reset is an explicit command alias to *clear* all control settings, resetting them all to default values<br />equivalent to: %span=default %lexicon=default %display=default %similarity=default %format=default |
-| $X::current | Special suffix for use with History or Macro invocation as a singleton statement:<br />See "Labeling Statements for subsequent invocation" section of this document.<br />Uses current settings for invocation on history/macro identified/labeled as "X".<br>(On non-singleton invocations, environment settings on the macro/history is **always** ignored, making the ::current suffix superfluous on compound macro satements) |
-
-**TABLE 12-5** -- **Collective CONTROL operations**
-
-All settings can be cleared using an explicit command:
-
-@reset
-
-It is exactly equivalent to this compound statement:
-
-%span=default  %format=default
-
-**Scope of Settings [Statement Scope vs Persistent Scope]**
-
-It should be noted that there is a distinction between name=value and name::value syntax variations. The first form is persistent with respect to subsequent statements. Contrariwise, the latter form affects only the single statement wherewith it is executed. We refer to this as variable scope, Consider these two very similar command sequences:
-
-| Example of Statement Scope | Example of Persistent Scope |
-| -------------------------- | --------------------------- |
-| @reset controls            | @reset controls             |
-| "Moses said" %span::7      | "Moses said" %span = 7      |
-| "Aaron said"               | "Aaron said"                |
-
-In the **statement scope** example, setting span to "7" only affects the search for "Moses said". The next search for "Aaron said" utilizes the default value for span, which is "verse".
-
-In the **persistent scope** example, setting span to "7" affects the search for "Moses said" <u>and all subsequent searches</u>. The next search for "Aaron said" continues to use a span value of "7'".   In other words, the setting **persists** <u>beyond the scope of statement execution</u>.
-
-### XIII. Miscellaneous Information
-
-| Verb         | Action Type | Syntax Category |
-| ------------ | :---------: | --------------- |
-| **@version** |  explicit   | SYSTEM          |
-
-**QUERYING DRIVER FOR VERSION INFORMATION**
-
-@version will query the Quelle Search Provider for version information:
-
----
-
-In general, Quelle can be thought of as a stateless server. The only exceptions of its stateless nature are:
-
-1) non-default settings with persistent scope
-2) defined macro labels. 
-3) command history
-
-Finally delimiters ( e.g.  ; or + ), between two distinct unquoted search clauses are ***required*** to identify the boundary between the two search clauses. A single delimiter <u>before</u> any search clause is always ***optional*** (e.g., Delimiters are permitted between quoted and unquoted clauses, and any other clause that precedes any search clause). They are ***unexpected*** anywhere else in the statement. This makes a Quelle statement a bit less cluttered than the version 1.0 specification
-
----
+## Section 4 - Grammar and Design Elements
 
 An object model to manifest the Quelle grammar is depicted below:
 
-![QCommand](C:\src\Quelle\QCommand.png)
+![QCommand](C:\Users\Me\AppData\Roaming\AV-Bible\Help\diagrams\QCommand.png)
 
-### Appendix A. Glossary of Quelle Terminology
-
-**Syntax Categories:** Each syntax category defines rules by which verbs can be expressed in the statement. 
+### 4.1 - Glossary of Quelle Terminology
 
 **Actions:** Actions are complete verb-clauses issued in the imperative [you-understood].  Many actions have one or more parameters.  But just like English, a verb phrase can be a single word with no explicit subject and no explicit object.  Consider this English sentence:
 
 Go!
 
-The subject of this sentence is "you understood".  Similarly, all Quelle verbs are issued without an explicit subject. The object of the verb in the one word sentence above is also unstated.  Quelle operates in an analogous manner.  Consider this English sentence:
+The subject of this sentence is "you understood".  Similarly, all verbs are issued without an explicit subject. The object of the verb in the one word sentence above is also unstated.  Quelle operates in an analogous manner.  Consider this English sentence:
 
 Go Home!
 
 Like the earlier example, the subject is "you understood".  The object this time is defined, and insists that "you" should go home.  Some verbs always have objects, others sometimes do, and still others never do. Quelle follows this same pattern and some Quelle verbs require direct-objects; and some do not.  In the various tables throughout this document, required and optional parameters are identified, These parameters represent the object of the verb within each respective table.
 
-**Statement**: A statement is composed of one or more *actions*. If there is more than one SEARCH actions issued by the statement, then search action is logically OR’ed together.
+**Selection Criteria**: Selection what text to render is determined with a search expression, scoping filters, or both.
 
-**Unquoted SEARCH clauses:** an unquoted search clause contains one or more search words. If there is more than one word in the clause, then each word is logically AND’ed together. If two unquoted search clauses are adjacent with a statement, then a delimiter/separator is required between the two clauses. It can be either a semicolon or a plus-sign.
+**Search Expression**: The Search Expression has fragments, and fragments have features. For an expression to match, all fragments must match (Logical AND). For a fragment to match, any feature must match (Logical OR). AND is represented by &. OR is represented by |.
 
-- ; [semi-colon]
-- \+ [plus-sign]
+**Unquoted SEARCH clauses:** an unquoted search clause contains one or more search fragments. If there is more than one fragment in the clause, then each fragment is logically AND’ed together.
 
-**Quoted SEARCH clauses:** a quoted clause contains a single string of terms to search. An explicit match on the string is required. However, an ellipsis ( … ) can be used to indicate that wildcards may appear within the quoted string.
+**Quoted SEARCH clauses:** a quoted clause contains a single string of terms to search. An explicit match on the string is required. However, an ellipsis ( … ) can be used to indicate that other terms may silently intervene within the quoted string.
 
 - It is called *quoted,* as the entire clause is sandwiched on both sides by double-quotes ( " )
 - The absence of double-quotes means that the statement is unquoted
 
 **Booleans and Negations:**
 
-**and:** In Boolean logic, **and** means that all terms must be found. With Quelle, *and* is represented by terms that appear within an unquoted clause. 
+**and:** In Boolean logic, **and** means that all terms must be found. With Quelle, **and** is represented by terms that appear within an unquoted clause. **And** logic is also available on each search-term by using the **&** operator.
 
-**or:** In Boolean logic, **or** means that any term constitutes a match. With Quelle, *or* is represented by the semi-colon ( **;** ) or plus (+) between SEARCH clauses. 
+**or:** In Boolean logic, **or** means that any term constitutes a match. With Quelle, **and** is represented per each search-term by using the **|** operator.
 
-**not:** In Boolean logic, means that the feature must not be found. With Quelle, *not* is represented by a hyphen+colon ( **-:** ) and applies to individual features within a search segment within the search clause. It is best used in conjunction with other features, because any non-match will be included in results. 
+**not:** In Boolean logic, means that the feature must not be found. With Quelle, *not* is represented by the hyphen ( **-** ) and applies to individual features within a fragment of a search expression. It is best used in conjunction with other features, because any non-match will be included in results. 
 
-hyphen+colon ( **-:** ) means that any non-match satisfies the search condition. Used by itself, it would likely return every verse. Therefore, it should be used judiciously.
+hyphen ( **-** ) means that any non-match satisfies the search condition. Used by itself, it would likely return every verse. Therefore, it should be used judiciously.
 
-### Appendix B. Specialized Search tokens in a Quelle Level-II driver
+### 4.2 - Specialized Search tokens in Level #2 conformant dialects
 
-The table below lists additional linguistic extensions available in a Level-II Quelle implementation.
+The table below lists linguistic extensions in level #2 dialects of Quelle.
 
-| Search Term  | Operator Type      | Meaning                                                      | Maps To               | Mask     |
-| ------------ | ------------------ | ------------------------------------------------------------ | --------------------- | -------- |
-| Jer\*        | wildcard           | starts with Jer                                              | selects from lexicon  | 0x3FFF   |
-| \*iah        | wildcard           | ends with iah                                                | selects from lexicon  | 0x3FFF   |
-| Jer\*iah     | wildcard           | starts with Jer and ends with iah                            | Jer\* & \*iah         | as above |
-| \\is\\       | lemma              | search on all words that share the same lemma as is: be, is, are, art, etc | be\|is\|are\|art\|... | 0x3FFF   |
-| /noun/       | lexical marker     | any word where part of speech is a noun                      | POS12::0x010          | 0x0FF0   |
-| /n/          | lexical marker     | synonym for /noun/                                           | POS12::0x010          | 0x0FF0   |
-| /verb/       | lexical marker     | any word where part of speech is a verb                      | POS12::0x100          | 0x0FF0   |
-| /v/          | lexical marker     | synonym for /verb/                                           | POS12::0x100          | 0x0FF0   |
-| /pronoun/    | lexical marker     | any word where part of speech is a pronoun                   | POS12::0x020          | 0x0FF0   |
-| /pn/         | lexical marker     | synonym for /pronoun/                                        | POS12::0x020          | 0x0FF0   |
-| /adjective/  | lexical marker     | any word where part of speech is an adjective                | POS12::0xF00          | 0x0FFF   |
-| /adj/        | lexical marker     | synonym for /adjective/                                      | POS12::0xF00          | 0x0FFF   |
-| /adverb/     | lexical marker     | any word where part of speech is an adverb                   | POS12::0xA00          | 0x0FFF   |
-| /adv/        | lexical marker     | synonym for /adverb/                                         | POS12::0xA00          | 0x0FFF   |
-| /determiner/ | lexical marker     | any word where part of speech is a determiner                | POS12::0xD00          | 0x0FF0   |
-| /det/        | lexical marker     | synonym for /determiner/                                     | POS12::0xD00          | 0x0FF0   |
-| /1p/         | lexical marker     | any word where it is inflected for 1st person (pronouns and verbs) | POS12::0x100          | 0x3000   |
-| /2p/         | lexical marker     | any word where it is inflected for 2nd person (pronouns and verbs) | POS12::0x200          | 0x3000   |
-| /3p/         | lexical marker     | any word where it is inflected for 3rd person (pronouns, verbs, and nouns) | POS12::0x300          | 0x3000   |
-| /singular/   | lexical marker     | any word that is known to be singular (pronouns, verbs, and nouns) | POS12::0x400          | 0xC000   |
-| /plural/     | lexical marker     | any word that is known to be plural (pronouns, verbs, and nouns) | POS12::0x800          | 0xC000   |
-| /WH/         | lexical marker     | any word that is a WH word (e.g., Who, What, When, Where, How) | POS12::0xC00          | 0xC000   |
-| /_/          | punctuation        | any word that is immediately marked for clausal punctuation  | PUNC::!=0x00          | 0xE0     |
-| /!/          | punctuation        | any word that is immediately followed by an exclamation mark | PUNC::0x80            | 0xE0     |
-| /?/          | punctuation        | any word that is immediately followed by a question mark     | PUNC::0xC0            | 0xE0     |
-| /./          | punctuation        | any word that is immediately followed by a period (declarative) | PUNC::0xE0            | 0xE0     |
-| /-/          | punctuation        | any word that is immediately followed by a hyphen/dash       | PUNC::0xA0            | 0xE0     |
-| /;/          | punctuation        | any word that is immediately followed by a semicolon         | PUNC::0x20            | 0xE0     |
-| /,/          | punctuation        | any word that is immediately followed by a comma             | PUNC::0x40            | 0xE0     |
-| /:/          | punctuation        | any word that is immediately followed by a colon (information follows) | PUNC::0x60            | 0xE0     |
-| /'/          | punctuation        | any word that is possessive, marked with an apostrophe       | PUNC::0x10            | 0x10     |
-| /)/          | parenthetical text | any word that is immediately followed by a close parenthesis | PUNC::0x0C            | 0x0C     |
-| /(/          | parenthetical text | any word contained within parenthesis                        | PUNC::0x04            | 0x04     |
+| Search Term        | Operator Type                           | Meaning                                                      | Maps To                                                      |
+| ------------------ | --------------------------------------- | ------------------------------------------------------------ | ------------------------------------------------------------ |
+| un\*               | wildcard (example)                      | starts with: un                                              | all lexical entries that start with "un"                     |
+| \*ness             | wildcard (example)                      | ends with: ness                                              | all lexical entries that end with "ness"                     |
+| un\*ness           | wildcard (example)                      | starts with: un<br/>ends with: ness                          | all lexical entries that start with "un", and end with "ness" |
+| \*profit\*         | wildcard (example)                      | contains: profit                                             | all lexical entries that contain both "profit"               |
+| \*pro\*fit\*       | wildcard (example)                      | contains: pro and fit                                        | all lexical entries that contain both "pro" and "fit" (in any order) |
+| un\*profit*ness    | wildcard (example)                      | starts with: un<br/>contains: profit<br/>ends with: ness     | all lexical entries that start with "un", contain "profit", and end with "ness" |
+| un\*pro\*fit\*ness | wildcard (example)                      | starts with: un<br/>contains: pro and fit<br/>ends with: ness | all lexical entries that start with "un", contain "pro" and "fit", and end with "ness" |
+| ~ʃɛpɝd*            | phonetic wildcard (example)             | Tilde marks the wildcard as phonetic (wildcards never perform sounds-alike searching) | All lexical entries that start with the sound ʃɛpɝd (this would include shepherd, shepherds, shepherding...) |
+| ~ʃɛpɝdz            | sounds-alike search using IPA (example) | Tilde marks the search term as phonetic (and if similarity is set between 33 and 99, search handles approximate matching) | This would match the lexical entry "shepherds" (and possibly similar terms, depending on similarity threshold) |
+| \\is\\             | lemma                                   | search on all words that share the same lemma as is: be, is, are, ... | be is are ...                                                |
+| /noun/             | lexical marker                          | any word where part of speech is a noun                      |                                                              |
+| /n/                | lexical marker                          | synonym for /noun/                                           |                                                              |
+| /verb/             | lexical marker                          | any word where part of speech is a verb                      |                                                              |
+| /v/                | lexical marker                          | synonym for /verb/                                           |                                                              |
+| /pronoun/          | lexical marker                          | any word where part of speech is a pronoun                   |                                                              |
+| /pn/               | lexical marker                          | synonym for /pronoun/                                        |                                                              |
+| /adjective/        | lexical marker                          | any word where part of speech is an adjective                |                                                              |
+| /adj/              | lexical marker                          | synonym for /adjective/                                      |                                                              |
+| /adverb/           | lexical marker                          | any word where part of speech is an adverb                   |                                                              |
+| /adv/              | lexical marker                          | synonym for /adverb/                                         |                                                              |
+| /determiner/       | lexical marker                          | any word where part of speech is a determiner                |                                                              |
+| /det/              | lexical marker                          | synonym for /determiner/                                     |                                                              |
+| /preposition/      | lexical marker                          | any word where part of speech is a preposition               |                                                              |
+| /prep/             | lexical marker                          | any word where part of speech is a preposition               |                                                              |
+| /1p/               | lexical marker                          | any word where it is inflected for 1st person (pronouns and verbs) |                                                              |
+| /2p/               | lexical marker                          | any word where it is inflected for 2nd person (pronouns and verbs) |                                                              |
+| /3p/               | lexical marker                          | any word where it is inflected for 3rd person (pronouns, verbs, and nouns) |                                                              |
+| /singular/         | lexical marker                          | any word that is known to be singular (pronouns, verbs, and nouns) |                                                              |
+| /plural/           | lexical marker                          | any word that is known to be plural (pronouns, verbs, and nouns) |                                                              |
+| /WH/               | lexical marker                          | any word that is a WH word (e.g., Who, What, When, Where, How) |                                                              |
+| /_/                | punctuation                             | any word that is immediately marked for clausal punctuation  |                                                              |
+| /!/                | punctuation                             | any word that is immediately followed by an exclamation mark |                                                              |
+| /?/                | punctuation                             | any word that is immediately followed by a question mark     |                                                              |
+| /./                | punctuation                             | any word that is immediately followed by a period (declarative) |                                                              |
+| /-/                | punctuation                             | any word that is immediately followed by a hyphen/dash       |                                                              |
+| /;/                | punctuation                             | any word that is immediately followed by a semicolon         |                                                              |
+| /,/                | punctuation                             | any word that is immediately followed by a comma             |                                                              |
+| /:/                | punctuation                             | any word that is immediately followed by a colon (information follows) |                                                              |
+| /'/                | punctuation                             | any word that is possessive, marked with an apostrophe       |                                                              |
+| /)/                | parenthetical text                      | any word that is immediately followed by a close parenthesis |                                                              |
+| /(/                | parenthetical text                      | any word contained within parenthesis                        |                                                              |
 
-### Appendix C. Object Model that supports search tokens in Quelle-AVX
+### Appendix
 
-An object model to support specialized Search Tokens for Quelle-AVX (a superset of Vanilla Quelle) is depicted below:
+### AVX dialect of the Quelle specification
 
-![QFind](C:\src\Quelle\QFind.png)
+Quelle specifies two possible implementation levels:
 
+- Level 1 [basic search support]
+- Level 2 [search support includes also searching on part-of-speech tags]
+
+Quelle-AVX is a Level 2 Quelle implementation with augmented search capabilities. Quelle-AVX extends Quelle to include AVX-Framework-specific constructs.  These extensions provide additional specialized search features and the ability to manage two distinct lexicons for the biblical texts.
+
+1. Quelle-AVX represents the biblical text with two substantially similar, but distinct, lexicons. The search.lexicon setting can be specified by the user to control which lexicon is to be searched. Likewise, the render.lexicon setting is used to control which lexicon is used for displaying the biblical text. As an example, the KJV text of "thou art" would be modernized to "you are".
+
+   - AV/KJV *(a lexicon that faithfully represents the KJV bible; AV purists should select this setting)*
+
+   - AVX/Modern *(a lexicon that that has been modernized to appear more like contemporary English)*
+
+   - Dual/Both *(use both lexicons)*
+
+   The Dual/Both setting for [search:] indicates that searching should consider both lexicons. The The Dual/Both setting for [render:] indicates that results should be displayed for both renderings [whether this is side-by-side or in-parallel depends on the format and the application where the display-rendering occurs]. Left unspecified, the lexicon setting applies to[search:] and [render:] components.
+
+2. Quelle-AVX provides support for fuzzy-match-logic. The similarity setting can be specified by the user to control the similarity threshold for approximate matching. An exact lexical match is expected when similarity is set to *exact* or 0.  Zero is not really a similarity threshold, but rather 0 is a synonym for *exact*.
+
+   Approximate matches are considered when similarity is set between 33% and 99%. Similarity is calculated based upon the phonetic representation for the word.
+
+   The minimum permitted similarity threshold is 33%. Any similarity threshold between 1% and 32% produces a syntax error.
+
+   A similarity setting of *precise* or 100% is a special case that still uses phonetics, but expects a full phonetic match (e.g. "there" and "their" are a 100% phonetic match).
+
+A reference implementation of AVX-Quelle can be found in the companion repositories of the Quelle specification.  A parser written in Rust can be found in the pinshot-blue repo. A fully realized object model that supports AVX-Quelle can be found in the AVX-Framework, which is documented in the AV-Engine repository.  AVX_Quelle represent the only known reference implementation of Quelle, to date.  AVX-Quelle is known as Imperative Control Language (ICL) in the AV-Bible-20224 application, soon to be found in the Microsoft Store.
 

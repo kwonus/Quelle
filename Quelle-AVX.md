@@ -1,4 +1,4 @@
-# Imperative Control Language (ICL) for AV-Bible<br/>and the AVX Framework
+# Quelle Specification with AVX-Specific Features
 
 ##### version 4.3.9
 
@@ -12,30 +12,61 @@ Quelle, IPA: [kɛl], in French means "What? or Which?". As Quelle HMI is designe
 
 Quelle is consistent with itself. Some constructs make parsing unambiguous; other constructs increase ease of typing (Specifically, we attempt to minimize the need to press the shift-key). Naturally, existing scripting languages have some influence on our syntax. However, to avoid complexity, we favor simplicity of expression over versatility. There might be edge cases that where a more versatile grammar could have reduced keystrokes. Yet, we strived to keep Quelle simple. Avoiding nuance has produced a grammar that is easy to type, easy to learn, and easy to remember.  Moreover, most search expressions look no different than they might appear today in a Google or Bing search box. Still, let's not get ahead of ourselves or even hint about where our simple specification might take us ;-)
 
+Vanilla Quelle specifies two possible implementation levels:
+
+- Level 1 [basic search support]
+- Level 2 [search support includes also searching on part-of-speech tags]
+
+### AVX Dialect of Quelle
+
+The AVX Dialect of Quelle is a Level 2 implementation, and has augmented search capabilities. AVX-Quelle extends baseline Vanilla-Quelle to include AVX-specific constructs.  These extensions provide additional specialized search features and the ability to manage two distinct lexicons for the biblical texts.
+
+1. AVX-Quelle represents the biblical text with two substantially similar, but distinct, lexicons. The search.lexicon setting can be specified by the user to control which lexicon is to be searched. Likewise, the render.lexicon setting is used to control which lexicon is used for displaying the biblical text. As an example, the KJV text of "thou art" would be modernized to "you are".
+
+   - AV/KJV *(a lexicon that faithfully represents the KJV bible; AV purists should select this setting)*
+
+   - AVX/Modern *(a lexicon that that has been modernized to appear more like contemporary English)*
+
+   - Dual/Both *(use both lexicons)*
+
+   The Dual/Both setting for [search:] indicates that searching should consider both lexicons. The The Dual/Both setting for [render:] indicates that results should be displayed for both renderings [whether this is side-by-side or in-parallel depends on the format and the application where the display-rendering occurs]. Left unspecified, the lexicon setting applies to[search:] and [render:] components.
+
+2. AVX-Quelle provides support for fuzzy-match-logic. The similarity setting can be specified by the user to control the similarity threshold for approximate matching. An exact lexical match is expected when similarity is set to *exact* or 0.  Zero is not really a similarity threshold, but rather 0 is a synonym for *exact*.
+
+   Approximate matches are considered when similarity is set between 33% and 99%. Similarity is calculated based upon the phonetic representation for the word.
+
+   The minimum permitted similarity threshold is 33%. Any similarity threshold between 1% and 32% produces a syntax error.
+
+   A similarity setting of *precise* or 100% is a special case that still uses phonetics, but expects a full phonetic match (e.g. "there" and "their" are a 100% phonetic match).
+
+A full reference implementation of AVX-Quelle is found in the AVBible application along with fully open source repositories on github. This implementation in AV-Bible is described as "Imperative Control Language" (ICL). To be clear, ICL is fully conformant with the Quelle 4.3.9 specification. Moreover, to date, it is the only known implementation Quelle 4.3.9 specification.
+
+The remainder of this document describes the AVX dialect of the Quelle specification. The Vanilla-Quelle specification has the root (dialect-free) specification.
+
 ### Overview of Quelle Syntax
 
-There are three types of statements in Quelle
+There are two types of statements
 
-| Statement Type               | Syntax                                                       |
-| ---------------------------- | ------------------------------------------------------------ |
-| Selection/Search Imperative  | versatile                                                    |
-| App-Configuration Imperative | single configuration-related action (cannot be combined with other actions) |
-| App-Control Imperative       | single control-related action (cannot be combined with other actions) |
+| Statement Type          | Syntax                                                       |
+| ----------------------- | ------------------------------------------------------------ |
+| **Selection  Criteria** | Combines search criteria and scoping filters for tailored verse selection.<br/>Settings can also be combined and incorporated into the selection criteria. |
+| **Discrete Imperative** | single action for configuration and/or application control (cannot be combined with other actions) |
 
-#### Selection/Search Imperatives
+#### Selection Criteria (includes search operations)
 
-Selection/Search imperative contains <u>required</u> Selection Criteria, followed by an <u>optional</u> Directive:
+Selection Criteria contains <u>required</u> Selection Criteria, followed by an <u>optional</u> Directive:
 
-The selection is made up of one to three blocks. The ordering of blocks is partly prescribed. The scoping block must be in the final position. The search-expression-block and settings-block can be in either order (so long as they are listed before the scoping block when present). 
+The selection criteria controls how verses are selected. It is made up of one to three blocks. The ordering of blocks is partly prescribed. The scoping block must be in the final position. The search-expression-block and settings-block can be in either order (so long as they are listed before the scoping block when present). 
 
 - Search Expression Block
 - Settings Block
 - Scoping Block
 
-|                         | Search Expression Block | Settings Block | Scoping Block |
-| ----------------------- | ----------------------- | -------------- | ------------- |
-| Block Position          | 0 or 1                  | 0 or 1         | final         |
-| Macro utilization level | full                    | partial        | partial       |
+| Block Position | Block Type                  | Hashtag UtilizationLevel |
+| -------------- | --------------------------- | ------------------------ |
+| **0** or **1** | **Search Expression Block** | full utilization         |
+| **0** or **1** | **Settings Block**          | partial utilization      |
+| ***final***    | **Scoping Block**           | partial utilization      |
 
 An optional directive can be issued following the selection criteria.  Only zero or one directives can be issued within a  statement:  
 
@@ -45,54 +76,54 @@ An optional directive can be issued following the selection criteria.  Only zero
 
 To be clear, a macro cannot be created for a statement that exports selection/search results to a file. Directives must be instigated separately.  The syntax for these directives is straightforward
 
-| Directive Type                  | Directive Syntax *(follows the Selection Criteria)*          |
-| ------------------------------- | ------------------------------------------------------------ |
-| Macro (*apply* tag)             | ***\|\| tag***                                               |
-| Export Block (*export* to file) | ***> filepath*** or<br/>***>> filepath*** or<br/>***=> filepath*** |
+| Directive Type                                               | Directive Syntax *(follows the Selection Criteria)*          |
+| ------------------------------------------------------------ | ------------------------------------------------------------ |
+| Macro (*apply* tag to macro)                                 | ***\|\| tag***                                               |
+| Export Block (*export* results of selection criteria to a file) | ***> filepath*** or<br/>***>> filepath*** or<br/>***=> filepath*** |
 
-#### Other [non-selection] Imperatives
+#### Discrete Imperatives
 
-Non-selection statements instigate configuration changes or application control. These statements always begin with **@**. They are executed individually and cannot be combined with any other actions. Imperatives that begin with @ cannot be combined with search expressions.
+Non-selection statements instigate configuration changes or application control. These statements always begin with **@**. They are executed individually and cannot be combined with any other actions. Imperatives that begin with \@ cannot be combined with search expressions. This is why they are called Discrete Imperatives.
 
-#### Configuration Imperatives
+#### Configuration Statements
 
-Quelle supports three categories of configuration. See Section 2 for additional details.
+Quelle grammar supports three categories of configuration. These are described more completely in Section 2.
 
-| Configuration Targets | Configuration Actions       |
-| --------------------- | --------------------------- |
-| User Settings         | @set, @get, @clear, @absorb |
-| User Macros           | @view, @delete              |
-| User History          | @view, @delete, @invoke     |
+| Configuration Targets | Configuration Actions           |
+| --------------------- | ------------------------------- |
+| User Settings         | \@set, \@get, \@clear, \@absorb |
+| User Macros           | \@view, \@delete                |
+| User History          | \@view, \@delete, \@invoke      |
 
-#### Control Imperatives
+#### Control Statements
 
-Quelle has only two control imperatives. See Section 3 for additional details.
+Quelle gram has only two control imperatives. These are described more completely in Section 3.
 
-| Control Targets  | Control Actions | Optional Parameter | Description                         |
-| ---------------- | --------------- | ------------------ | ----------------------------------- |
-| User Information | @help           | topic              | Help with Quelle syntax and usage   |
-| System Control   | @exit           | -                  | Exit the application or interpreter |
+| Control Targets   | Control Actions | Optional Parameter | Description                         |
+| ----------------- | --------------- | ------------------ | ----------------------------------- |
+| Usage Information | \@help          | topic              | Help with Quelle syntax and usage   |
+| System Control    | \@exit          | -                  | Exit the application or interpreter |
 
 ## Section 1 - Selection/Search 
 
-From a linguistic standpoint, all Quelle statements are issued in the imperative. The subject of the verb is always "you understood". As the user, you are commanding Quelle what to do. Some statements have additional guiding parameters. These parameters instruct Quelle <u>what</u> to act upon.
+From a linguistic standpoint, all Quelle statements are issued in the imperative. The subject of the verb is always "you understood". As the user, you are commanding the application what to do. Some statements have additional guiding parameters. These parameters instruct what the command is to act upon.
 
 Consider these two examples of Quelle statements (first Configuration, followed by Search):
 
-@lexicon.searh = KJV
+\@lexicon.searh = KJV
 
 "Moses"
 
-Notice that both statements above are single actions.  We should have a way to express both of these in a single command. And this is the rationale behind statements blocks and directives. Only search syntax supports combining various actions into a single statement. The previous two actions into a single compound statement, issue this command:
+Notice that both statements above are single actions.  We should have a way to express both of these in a single command. And this is why selection criteria contains multiple blocks.  The previous two actions into a single compound statement, issue this command:
 
 "Moses" [ search.lexicon:KJV ]
 
-It should be noted that these two statements, while similar, do not have identical effects:
+It should be noted that these two imperatives, while similar, do not have identical effects:
 
-- @search.lexicon = KJV
+- \@search.lexicon = KJV
 - [ search.lexicon:KJV ]
 
-The former, which is a configuration imperative, changes the lexicon setting for all future searches. Whereas, the latter, merely a Settings-Block assigment, affects only the currently executing Selection/Search imperative. Subsequent searches are unaffected by settings-block assignments. There are times when a user will want a setting to persist, and other times when the user wants the setting changed only temporarily. Quelle permits the user to choose.
+The former is a configuration imperative: it changes the lexicon setting for all future searches. Whereas, the latter is merely a temporary block assigment: it only affects Selection Statement of which it is a part. Subsequent searches are unaffected by block assignments (they are always temprorary). There are times when a user will want a setting to persist, and other times when she does not. Quelle permits the user to choose.
 
 #### QuickStart
 
@@ -104,13 +135,13 @@ Quelle syntax can specify the lexicon to search, by also supplying temporary set
 
 *[ span:7 search.lexicon:KJV ]  Moses Aaron*
 
-The statement above has two CONTROL actions and one SEARCH action
+The statement above has assigns two settings in the context of search. The search criteria, with the settings means that both Aaron and Moses are required to appear within 7 words of each other, but both names must be present to constitute a match.
 
-Next, consider a search to find Moses or Aaron:
+Next, consider a search to find Moses <u>or</u> Aaron:
 
 *Moses|Aaron*
 
-The order in which the search terms are provided is insignificant. Additionally, the type-case is insignificant. 
+The order in which the search terms are provided is insignificant. Additionally, the type-case is insignificant. And either name found would constitute a match.
 
 Of course, there are times when word order is significant. Accordingly, searching for explicit strings can be accomplished using double-quotes as follows:
 
@@ -119,10 +150,6 @@ Of course, there are times when word order is significant. Accordingly, searchin
 These constructs can even be combined. For example:
 
 *"Moses said ... Aaron|Miriam"*
-
-The search criteria above is equivalent to this search:
-
-*"Moses said ... Aaron" + "Moses said ... Miriam"*
 
 In all cases, “...” means “followed by”, but the ellipsis allows other words to appear between "said" and "Aaron". Likewise, it allows words to appear between "said" and "Miriam". 
 
@@ -165,7 +192,7 @@ The ampersand symbol can similarly be used to represent *AND* conditions upon te
 
 "part&/verb/"
 
-The SDK, provided by Digital-AV, has marked each word of the bible text for part-of-speech. With Quelle's rich syntax, this type of search is easy and intuitive.
+The SDK, provided by Digital-AV, has marked each word of the bible text for part-of-speech. With the rich syntax of Quelle, this type of search is easy and intuitive.
 
 Of course, part-of-speech expressions can also be used independently of an AND condition, as follows:
 
@@ -193,9 +220,9 @@ When the same setting appears more than once, only the last setting in the list 
 
 [ format:md  format:text ]
 
-@get format
+\@get format
 
-The @get format command would return text.  We call this: "last assignment wins".
+The \@get format command would return text.  We call this: "last assignment wins".
 
 Finally, there is a bit more to say about the similarity setting, because it actually has three components. If we issue this command, it affects similarity in two distinct ways:
 
@@ -306,7 +333,7 @@ The *use* action is supported in each of the three Selection Criteria blocks:
 - Settings *(partial macro utilization)*
 - Scoping *(partial macro utilization)*
 
-Each of the block types supports the *use* action. However, each block limited to, at most, one *use* action. The *use* action references either a tag for a macro or a statement id revealed by the @view imperative. As there are  a maximum of three blocks in the selection criteria, a statement could contain up to three *use* actions (one per block).
+Each of the block types supports the *use* action. However, each block limited to, at most, one *use* action. The *use* action references either a tag for a macro or a statement id revealed by the \@view imperative. As there are  a maximum of three blocks in the selection criteria, a statement could contain up to three *use* actions (one per block).
 
 The expression block supports full macro utilization.  In the earlier example:
 
@@ -337,7 +364,7 @@ Likewise, in this example, this clause utilizes only the filters defined within 
 
 Macro utilization within a block disallows all other entries within the block; macro utilization in a block is not compatible with any other entries in that same block.
 
-Specifically, the following statements / clauses are not supported by Quelle grammar:
+Specifically, the following statements / clauses are not supported by Quelle:
 
 **NOT SUPPORTED:**  #eternal-power-romans without excuse  
 
@@ -347,11 +374,11 @@ Specifically, the following statements / clauses are not supported by Quelle gra
 
 It should be noted that any macros referenced within a macro definition are expanded prior to applying the new tag. Therefore, subsequent redefinition of a previously referenced macro invocation never affects existing macro definitions. We call this macro-determinism.  All control settings are captured at the time that the tag is applied to the macro. This further assures that the same search results are returned each time the macro is referenced. Here is an example.
 
-@set span = 2
+\@set span = 2
 
 in beginning || in_beginning
 
-@set span = 3
+\@set span = 3
 
 #in_beginning [span:1] < genesis:1:1
 
@@ -365,7 +392,7 @@ However, if the user desires the current settings to be used instead, a speciali
 
 Similarly, another specialized setting is [ all:defaults ] ; that block represents default values for all settings. 
 
-Still, a macro can be redefined/overwritten. This doesn't disable macro determinism, even though it feels like it does. The assumption is that the user is explicitly redefining the meaning of macro and Quelle does not require an explicit @delete of the tag prior to re-applying. Here is an example:
+Still, a macro can be redefined/overwritten. This doesn't disable macro determinism, even though it feels like it does. The assumption is that the user is explicitly redefining the meaning of macro and Quelle does not require an explicit \@delete of the tag prior to re-applying. Here is an example:
 
 [ #eternal-power-romans ] eternal power godhead without excuse < #eternal-power-romans || #eternal-power-romans
 
@@ -377,11 +404,11 @@ Just like macro utilization, the *use* action is supported in each of the three 
 - Settings *(partial macro utilization)*
 - Scoping *(partial macro utilization)*
 
-Each of the block types supports the *use* action. However, each block limited to, at most, one *use* action. The *use* action references either a tag for a macro or a statement id revealed by  the @*view* imperative. As there are a maximum of three blocks in the selection criteria, a statement could contain up to three *use* actions (one per block).
+Each of the block types supports the *use* action. However, each block limited to, at most, one *use* action. The *use* action references either a tag for a macro or a statement id revealed by  the \@*view* imperative. As there are a maximum of three blocks in the selection criteria, a statement could contain up to three *use* actions (one per block).
 
 Only the expression block supports full macro utilization.
 
-Expression block macros sometimes undergo demotion. A historic utilization within the expression block is demoted into a partial macro when a provided block within the selection criteria conflicts with the macro definition. Assume that this command is identified by the @view command by id := 5:
+Expression block macros sometimes undergo demotion. A historic utilization within the expression block is demoted into a partial macro when a provided block within the selection criteria conflicts with the macro definition. Assume that this command is identified by the \@view command by id := 5:
 
 [ span: 3 similarity: 85% ] "in ... beginning" < Genesis < John
 
@@ -404,7 +431,7 @@ Likewise, in this example, this clause utilizes only the filters for id = 5.
 
 Just like macros, utilization within a block disallows all other entries within the block; utilization in a block is not compatible with any other entries in that same block.
 
-Specifically, the following statements / clauses are not supported by Quelle grammar:
+Specifically, the following statements / clauses are not supported by Quelle:
 
 **NOT SUPPORTED:**  #5 without excuse  
 
@@ -412,11 +439,11 @@ Specifically, the following statements / clauses are not supported by Quelle gra
 
 **NOT SUPPORTED:**  < #5 < Acts
 
-It should be noted that any historic id references are expanded prior to applying the new tags for macros. As mentioned in the previous section, we call this macro-determinism.  Therefore, even if an id is removed from the command history with the @delete command, any macros that it was referenced within, continue to behave identically post-deletion.
+It should be noted that any historic id references are expanded prior to applying the new tags for macros. As mentioned in the previous section, we call this macro-determinism.  Therefore, even if an id is removed from the command history with the \@delete command, any macros that it was referenced within, continue to behave identically post-deletion.
 
 
 
-## Section 2 - Configuration
+## Section 2 - Configuration Statements
 
 ### 2.1 - Viewing Macros & Tags
 
@@ -432,19 +459,19 @@ It should be noted that any historic id references are expanded prior to applyin
 
 Two additional explicit commands exist whereby a macro can be manipulated. We saw above how they can be defined and referenced. There are two additional ways commands that operate on macros: expansion and deletion.  In the last macro definition above where we created  #another-macro, the user could view an expansion by issuing this command:
 
-@view another-macro
+\@view another-macro
 
-If the user wanted to remove this definition, the @delete action is used.  Here is an example:
+If the user wanted to remove this definition, the \@delete action is used.  Here is an example:
 
-@delete another-macro
+\@delete another-macro
 
-If you want the same settings to be persisted to your current session that were in place during macro definition, the @absorb command will persist all settings for the macro into your current session
+If you want the same settings to be persisted to your current session that were in place during macro definition, the \@absorb command will persist all settings for the macro into your current session
 
-@absorb my-favorite-settings-macro 
+\@absorb my-favorite-settings-macro 
 
 **NOTE:**
 
-​       @absorb also works with command history.
+​       \@absorb also works with command history.
 
 ### 2.2 - Viewing History
 
@@ -465,7 +492,7 @@ If you want the same settings to be persisted to your current session that were 
 
 To reveal all history up until now, type:
 
-@view until now
+\@view until now
 
 To reveal all searches since January 1, 2024, type:
 
@@ -487,9 +514,9 @@ The *use* command works for command-history works exactly the same way as it doe
 
 *@view*
 
-1>  @set span = 7
+1>  \@set span = 7
 
-2>  @set similarity=85
+2>  \@set similarity=85
 
 3> eternal power
 
@@ -503,17 +530,17 @@ eternal power
 
 Again, *utilizing* a command from your command history is *used* just like a macro. Moreover, as with macros, control settings are persisted within your command history to provide invocation determinism. That means that control settings that were in place during the original command are utilized for the invocation.
 
-Command history captures all settings. We have already discussed macro-determinism. Invoking commands by their ids behave exactly like macros. In other words, invoking command history never persists changes into your environment, unless you explicitly request such behavior with the @absorb command.
+Command history captures all settings. We have already discussed macro-determinism. Invoking commands by their ids behave exactly like macros. In other words, invoking command history never persists changes into your environment, unless you explicitly request such behavior with the \@absorb command.
 
 **RESETTING COMMAND HISTORY**
 
-The @delete command can be used to remove <u>all</u> command history.
+The \@delete command can be used to remove <u>all</u> command history.
 
 To remove all command history:
 
-@delete -history -all
+\@delete -history -all
 
-FROM / UNTIL parameters can limit the scope of the @delete command.
+FROM / UNTIL parameters can limit the scope of the \@delete command.
 
 ### 2.3 - Settings
 
@@ -530,23 +557,27 @@ FROM / UNTIL parameters can limit the scope of the @delete command.
 
 **Export Format Options:**
 
-| **Markdown**                            | **Text** (UTF8)                       | HTML             | JSON             | YAML             |
-| --------------------------------------- | ------------------------------------- | ---------------- | ---------------- | ---------------- |
-| @*format = md*<br/>@*format = markdown* | @*format = text*<br/>@*format = utf8* | @*format = html* | @*format = json* | @*format = yaml* |
+| Export Content Type | Command              | Synonym          |
+| ------------------- | -------------------- | ---------------- |
+| **Markdown**        | *@format = markdown* | *@format = md*   |
+| **Text** (UTF8)     | *@format = text*     | *@format = utf8* |
+| **HTML**            | *@format = html*     |                  |
+| **JSON**            | *@format = json*     |                  |
+| **YAML**            | *@format = yaml*     |                  |
 
 **TABLE 2-3.b** - **@set** format command can be used to set the default content-formatting for for use with the export verb
 
 
 
-| **example**       | **explanation**                                              | shorthand equivalent |
-| ----------------- | ------------------------------------------------------------ | -------------------- |
-| **@set** span = 8 | Assign a control setting                                     | @span = 8            |
-| **@get** span     | get a control setting                                        | @span                |
-| **@clear** span   | Clear the control setting; restoring the Quelle driver default setting |                      |
+| **example**              | **explanation**                                              | shorthand equivalent |
+| ------------------------ | ------------------------------------------------------------ | -------------------- |
+| **@set** search.span = 8 | Assign a control setting                                     | \@span = 8           |
+| **@get** search.span     | get a control setting                                        | \@span               |
+| **@clear** search.span   | Clear the setting; restores the setting to its default value | \@clear span         |
 
 **TABLE 2-3.c** - **set/clear/get** action operate on configuration settings
 
-In all, AVX-Quelle manifests five control names. Each allows all three actions: ***set***, ***clear***, and ***@get*** verbs. Table 9 lists all settings available in AVX-Quelle. AVX-Quelle can support two distinct orthographies [i.e. Contemporary Modern English (avx/modern), and/or Early Modern English (avx/kjv).
+In all, Quelle manifests five control names. Each allows all three actions: ***set***, ***clear***, and ***@get*** verbs. Table 9 lists all settings available in AV-Bible. AV-Bible supports two distinct orthographies [i.e. Contemporary Modern English (avx/modern), and/or Early Modern English (avx/kjv). These are selectable via Quelle.
 
 | Setting Name | Functional.Name  | Meaning                                                      | Values                                                       | Default Value |
 | ------------ | ---------------- | ------------------------------------------------------------ | ------------------------------------------------------------ | ------------- |
@@ -558,20 +589,20 @@ In all, AVX-Quelle manifests five control names. Each allows all three actions: 
 | similarity   |                  | Streamlined syntax for setting word & lemma to an identical value<br/>fuzzy phonetics matching threshold is between 1 and 99<br/>0 or *none* means: do not match on phonetics (use text only)<br/>100 or *exact* means that an *exact* phonetics match is expected | 33% to 99% [fuzzy] **or** ...<br>0 **or** *none*<br>100 **or** *exact* | 0 / none      |
 | word         | similarity.word  | fuzzy phonetics matching as described above, but this prefix only affects similarity matching on the word. | 33% to 99% [fuzzy] **or** ...<br>0 **or** *none*<br>100 **or** *exact* | 0 / none      |
 | lemma        | similarity.lemma | fuzzy phonetics matching as described above, but this prefix only affects similarity matching on the lemma. | 33% to 99% [fuzzy] **or** ...<br>0 **or** *none*<br>100 **or** *exact* | 0 / none      |
-| revision     | grammar.revision | Not really a true setting: it works with the @get command to retrieve the revision number of the Quelle grammar supported by AV-Engine. This value is read-only. | 4.x.yz                                                       | n/a           |
-| ALL          |                  | ALL is an aggregate setting: it works with the @clear command to reset all variables above to their default values. It is used with @get to fetch all settings. It can also be used in the settings block of a statement to override values to default or the currently saved values for situations where a macro is utilized. | current<br/>**or**<br/>defaults                              | current       |
+| revision     | grammar.revision | Not really a true setting: it works with the \@get command to retrieve the revision number of the Quelle grammar supported by AV-Engine. This value is read-only. | 4.x.yz                                                       | n/a           |
+| ALL          |                  | ALL is an aggregate setting: it works with the \@clear command to reset all variables above to their default values. It is used with \@get to fetch all settings. It can also be used in the settings block of a statement to override values to default or the currently saved values for situations where a macro is utilized. | current<br/>**or**<br/>defaults                              | current       |
 
-**TABLE 2-3.d** - Summary of AVX-Quelle Settings
+**TABLE 2-3.d** - Summary of AV-Bible Settings
 
 The *@get* command fetches these values. The *@get* command requires a single argument. Examples are below:
 
 *@get* span
 
-@get format
+\@get format
 
 All settings can be cleared using an explicit command:
 
-@clear ALL
+\@clear ALL
 
 **Persistence of Settings**
 
@@ -581,13 +612,13 @@ It should be noted that there is a distinction between **@set** and and ***assig
 
 **QUERYING DRIVER FOR VERSION INFORMATION**
 
-This command reveals the current Quelle version of the command interpreter:
+This command reveals the current Quelle grammar revision:
 
-@get version
+\@get revision
 
 ---
 
-In general, AVX-Quelle can be thought of as a stateless server. The only exceptions of its stateless nature are:
+In general, the Quelle command processor can be thought of as a stateless server. The only exceptions of its stateless nature are:
 
 1. non-default settings assigned using the **@set** command
 
@@ -601,9 +632,9 @@ In general, AVX-Quelle can be thought of as a stateless server. The only excepti
 
 ### 3.1 - Program Help
 
-*@help*
+To get general help, use this command:
 
-This will provide a help message in a Quelle interpreter.
+*@help*
 
 Or for specific topics:
 
@@ -611,39 +642,37 @@ Or for specific topics:
 
 *@help* set
 
-@help export
+\@help export
 
 etc ...
 
-### 3.2 - Exiting Quelle
+### 3.2 - Exiting the Application
 
-Type this to terminate the Quelle interpreter:
+Type this to terminate the app:
 
 *@exit*
 
-## Section 4 - Quelle Grammar and Design Elements
+## Section 4 - Grammar and Design Elements
 
 An object model to manifest the Quelle grammar is depicted below:
 
-![QCommand](./QCommand.png)
+![QCommand](C:\Users\Me\AppData\Roaming\AV-Bible\Help\diagrams\QCommand.png)
 
 ### 4.1 - Glossary of Quelle Terminology
-
-**Syntax Categories:** Each syntax category defines rules by which verbs can be expressed in the statement. 
 
 **Actions:** Actions are complete verb-clauses issued in the imperative [you-understood].  Many actions have one or more parameters.  But just like English, a verb phrase can be a single word with no explicit subject and no explicit object.  Consider this English sentence:
 
 Go!
 
-The subject of this sentence is "you understood".  Similarly, all Quelle verbs are issued without an explicit subject. The object of the verb in the one word sentence above is also unstated.  Quelle operates in an analogous manner.  Consider this English sentence:
+The subject of this sentence is "you understood".  Similarly, all verbs are issued without an explicit subject. The object of the verb in the one word sentence above is also unstated.  Quelle operates in an analogous manner.  Consider this English sentence:
 
 Go Home!
 
 Like the earlier example, the subject is "you understood".  The object this time is defined, and insists that "you" should go home.  Some verbs always have objects, others sometimes do, and still others never do. Quelle follows this same pattern and some Quelle verbs require direct-objects; and some do not.  In the various tables throughout this document, required and optional parameters are identified, These parameters represent the object of the verb within each respective table.
 
-**Statement**: A statement is composed of one or more segments. When there is more than one segment, each segment contains a search expression. All search results are logically OR’ed together. It is recommended that statements with multiple segments be used sparingly as they represent a complex search pattern. In most situations, a single segment is sufficient to perform very powerful searches. This is because Quelle search expressions already offer powerfull searches with Boolean search logic on all search fragments.
+**Selection Criteria**: Selection what text to render is determined with a search expression, scoping filters, or both.
 
-**Expression**: Each segment has zero or one search expressions. A segment without a search expression is typically used to define a partial macro. If you are searching, your segment will contain a search expression. Expressions have fragments, and fragments have features. For an expression to match, all fragments must match (Logical AND). For a fragment to match, any feature must match (Logical OR). AND is represented by &. OR is represented by |.
+**Search Expression**: The Search Expression has fragments, and fragments have features. For an expression to match, all fragments must match (Logical AND). For a fragment to match, any feature must match (Logical OR). AND is represented by &. OR is represented by |.
 
 **Unquoted SEARCH clauses:** an unquoted search clause contains one or more search fragments. If there is more than one fragment in the clause, then each fragment is logically AND’ed together.
 
@@ -662,9 +691,9 @@ Like the earlier example, the subject is "you understood".  The object this time
 
 hyphen ( **-** ) means that any non-match satisfies the search condition. Used by itself, it would likely return every verse. Therefore, it should be used judiciously.
 
-### 4.2 - Specialized Search tokens in AVX-Quelle
+### 4.2 - Specialized Search tokens in AV-Bible
 
-The lexical search domain of AVX-Quelle includes all words in the original KJV text. It can also optionally search using a modernized lexicon of the KJV (e.g. hast and has; this is controllable with the search.lexicon setting).  The table below lists additional linguistic extensions available in AVX-Quelle, which happens to be a Level-II Quelle implementation.
+The lexical search domain of Quelle includes all words in the original KJV text. It can also optionally search using a modernized lexicon of the KJV (e.g. hast and has; this is controllable with the search.lexicon setting).  The table below lists linguistic extensions available in Quelle.
 
 | Search Term        | Operator Type                           | Meaning                                                      | Maps To                                                      | Mask   |
 | ------------------ | --------------------------------------- | ------------------------------------------------------------ | ------------------------------------------------------------ | ------ |
@@ -730,22 +759,22 @@ The lexical search domain of AVX-Quelle includes all words in the original KJV t
 | 99999:H            | Strongs Number                          | decimal Strongs number for the Hebrew word in the Old Testament | One of Strongs\[4\]                                          | 0x7FFF |
 | 99999:G            | Strongs Number                          | decimal Strongs number for the Greek word in the New Testament | One of Strongs\[4\]                                          | 0x7FFF |
 
-### 4-3 - Object Model to support search tokens in Quelle-AVX
+### 4-3 - Object Model to support Quelle search tokens
 
-An object model to support specialized Search Tokens for Quelle-AVX is depicted below:
+An object model to support specialized AVX-Quelle-specific Search Tokens is depicted below:
 
-![QFind](./QFind.png)
+![QFind](C:\Users\Me\AppData\Roaming\AV-Bible\Help\diagrams\QFind.png)
 
-### 4.4 - Quelle-AVX Addendum
+### 4.4 - Summary of conformance to the AVX dialect to the Quelle specification
 
-Vanilla Quelle specifies two possible implementation levels:
+Quelle specifies two possible implementation levels:
 
 - Level 1 [basic search support]
 - Level 2 [search support includes also searching on part-of-speech tags]
 
-AVX-Quelle is a Level 2 implementation with augmented search capabilities. AVX-Quelle extends baseline Vanilla-Quelle to include AVX-specific constructs.  These extensions provide additional specialized search features and the ability to manage two distinct lexicons for the biblical texts.
+ICL is a Level 2 Quelle implementation with augmented search capabilities. ICL extends Quelle to include AVX-Framework-specific constructs.  These extensions provide additional specialized search features and the ability to manage two distinct lexicons for the biblical texts.
 
-1. AVX-Quelle represents the biblical text with two substantially similar, but distinct, lexicons. The search.lexicon setting can be specified by the user to control which lexicon is to be searched. Likewise, the render.lexicon setting is used to control which lexicon is used for displaying the biblical text. As an example, the KJV text of "thou art" would be modernized to "you are".
+1. ICL represents the biblical text with two substantially similar, but distinct, lexicons. The search.lexicon setting can be specified by the user to control which lexicon is to be searched. Likewise, the render.lexicon setting is used to control which lexicon is used for displaying the biblical text. As an example, the KJV text of "thou art" would be modernized to "you are".
 
    - AV/KJV *(a lexicon that faithfully represents the KJV bible; AV purists should select this setting)*
 
@@ -755,7 +784,7 @@ AVX-Quelle is a Level 2 implementation with augmented search capabilities. AVX-Q
 
    The Dual/Both setting for [search:] indicates that searching should consider both lexicons. The The Dual/Both setting for [render:] indicates that results should be displayed for both renderings [whether this is side-by-side or in-parallel depends on the format and the application where the display-rendering occurs]. Left unspecified, the lexicon setting applies to[search:] and [render:] components.
 
-2. AVX-Quelle provides support for fuzzy-match-logic. The similarity setting can be specified by the user to control the similarity threshold for approximate matching. An exact lexical match is expected when similarity is set to *exact* or 0.  Zero is not really a similarity threshold, but rather 0 is a synonym for *exact*.
+2. ICL provides support for fuzzy-match-logic. The similarity setting can be specified by the user to control the similarity threshold for approximate matching. An exact lexical match is expected when similarity is set to *exact* or 0.  Zero is not really a similarity threshold, but rather 0 is a synonym for *exact*.
 
    Approximate matches are considered when similarity is set between 33% and 99%. Similarity is calculated based upon the phonetic representation for the word.
 
@@ -763,17 +792,18 @@ AVX-Quelle is a Level 2 implementation with augmented search capabilities. AVX-Q
 
    A similarity setting of *precise* or 100% is a special case that still uses phonetics, but expects a full phonetic match (e.g. "there" and "their" are a 100% phonetic match).
 
-AVX-Quelle uses the AV-1769 edition of the sacred text. It substantially agrees with the "Bearing Precious Seed" bibles, as published by local church ministries. The text itself has undergone review by Christian missionaries, pastors, and lay people since the mid-1990's. The original incarnation of the digitized AV-1769 text was implemented in the free PC/Windows app known as:
+AV-Bible uses the AV-1769 edition of the sacred text. It substantially agrees with the "Bearing Precious Seed" bibles, as published by local church ministries. The text itself has undergone review by Christian missionaries, pastors, and lay people since the mid-1990's. The original incarnation of the digitized AV-1769 text was implemented in the free PC/Windows app known as:
 
-- AV-1995
-- AV-1997
-- AV-1999
-- AV-2000
-- AV-2007
-- AV-2011
-- AV-Bible for Windows
+- AV-Bible - 1995 Edition for Windows 95 & Windows NT 3.5
+- AV-Bible - 1997 Edition for Windows 95 & Windows NT 4.0
+- AV-Bible - 1999 Edition for Windows 98 & Windows NT 4.0
+- AV-Bible - 2000 Edition for Windows Me & Windows 2000
+- AV-Bible - 2007 Edition for Windows XP
+- AV-Bible - 2011 Edition for Windows Vista
+- AV-Bible - 2021 Edition for Windows 10
+- AV-Bible - 2024 Edition for Windows 11 (current release; initial release to support ICL)
 
-These releases were found at the [older/legacy] avbible.net website. Initially [decades ago], these releases were found on internet bulletin boards and the [now defunct] bible.advocate.com website.
+Decades ago, AV-Bible (aka AV-1995, AV-1997, ... AV-2011), were found on internet bulletin boards and the now defunct bible.advocate.com website. More recent legacy versions are still available at the avbible.net website. Modern editions are distributed on the Microsoft store.
 
 Please see https://Digital-AV.org for additional information about the SDK.
 
