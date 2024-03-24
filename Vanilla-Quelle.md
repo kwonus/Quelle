@@ -1,6 +1,6 @@
 # Quelle Specification
 
-##### version 4.3.9
+##### version 4.3
 
 ### Background
 
