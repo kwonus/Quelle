@@ -1,6 +1,6 @@
 # Quelle Specification with AVX-Specific Features
 
-##### version 4.3.23
+##### version 4.3.27
 
 ### Background
 
