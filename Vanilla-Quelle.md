@@ -30,17 +30,17 @@ There are two types of statements
 
 Selection Criteria contains <u>required</u> Selection Criteria, followed by an <u>optional</u> Directive:
 
-The selection criteria controls how verses are selected. It is made up of one to three blocks. The ordering of blocks is partly prescribed. The scoping block must be in the final position. The search-expression-block and settings-block can be in either order (so long as they are listed before the scoping block when present). 
+The selection criteria controls how verses are selected. It is made up of one to three blocks. The ordering of blocks is partly prescribed. When present, the expression block must be in the initial position. The scoping block and the settings-block must follow the expression when provided. The scoping block and settings-block can be in either order (so long as they are listed before the scoping block when present). 
 
 - Search Expression Block
 - Settings Block
 - Scoping Block
 
-| Block Position | Block Type                  | Hashtag UtilizationLevel |
-| -------------- | --------------------------- | ------------------------ |
-| **0** or **1** | **Search Expression Block** | full utilization         |
-| **0** or **1** | **Settings Block**          | partial utilization      |
-| ***final***    | **Scoping Block**           | partial utilization      |
+| Block Position                         | Block Type                  | Hashtag Utilization Level |
+| -------------------------------------- | --------------------------- | ------------------------- |
+| ***initial***                          | **Search Expression Block** | full utilization          |
+| *after expression block when provided* | **Settings Block**          | partial utilization       |
+| *after expression block when provided* | **Scoping Block**           | partial utilization       |
 
 An optional directive can be issued following the selection criteria.  Only zero or one directives can be issued within a  statement:  
 
@@ -136,8 +136,8 @@ As we saw in the overview, there three blocks that compose Selection Criteria:
 | -------- | ---------------- | -------- | ---------------------------------------- | --------------------------------------------- |
 | *find*   | Expression Block | initial  | search expression or ***#id***           | **no**                                        |
 | *use*    | Expression Block | initial  | ***#tag*** or ***#id ***                 | **no**: only one macro is permitted per block |
-| *assign* | Settings Block   | initial  | ***[ setting: value ]***                 | yes (e.g. ***[ format:md  span:7]*** )        |
-| *use*    | Settings Block   | initial  | ***[ #tag ]*** or<br/>***[ #id ]***      | **no**: only one macro is permitted per block |
+| *assign* | Settings Block   | initial  | ***: setting = value***                  | yes (e.g. ***:format=md  :span=7*** )         |
+| *use*    | Settings Block   | initial  | ***: #tag*** or<br/>***: #id***          | **no**: only one macro is permitted per block |
 | *filter* | Scoping Block    | post     | ***< scope***                            | yes (e.g. ***< Genesis 3 < Revelation 1-3***) |
 | *use*    | Scoping Block    | post     | **<** ***#tag***  or<br/>**<** ***#id*** | **no**: only one macro is permitted per block |
 
@@ -155,7 +155,7 @@ The SDK, provided by Digital-AV, has marked each word of the bible text for part
 
 Of course, part-of-speech expressions can also be used independently of an AND condition, as follows:
 
-[ span: 6 ]  "/noun/ ... home"
+"/noun/ ... home" :span=6 
 
 That search would find phrases where a noun appeared within a span of six words, preceding the word "home"
 
@@ -171,35 +171,33 @@ Both of the statements above are valid, but will not match any results. Search s
 
 Consider a query for all articles that contain a Bill Clinton in the Washington Post, followed by any word that is neither a verb nor an adverb:
 
-[ span:15 ] "Bill|William ... Clinton -/v/ & -/adv/"
+"Bill|William ... Clinton -/v/ & -/adv/"  :span=15
 
 #### 1.1.2 - Settings Block
 
 When the same setting appears more than once, only the last setting in the list is preserved.  Example:
 
-[ format:md  format:text ]
+:format = md  :format = text
 
-@get format
-
-The @get format command would return text.  We call this: "last assignment wins".
+format would be set to text.  We call this: "last assignment wins".
 
 Finally, there is a bit more to say about the similarity setting, because it actually has three components. If we issue this command, it affects similarity in two distinct ways:
 
-[  similarity: 85% ]
+:similarity = 85%
 
 That command is a concise way of setting two values. It is equivalent to this command
 
-[ similarity.word:85%  similarity.lemma:85% ]
+:similarity.word = 85%  :similarity.lemma = 85%
 
 That is to say, similarity is operative for the lexical word and also the lemma of the word. While not discussed previously, these two similarities thresholds need not be identical. These commands are also valid:
 
-[ similarity.word: 85%  similarity.lemma: 95% ]
+:similarity.word = 85%  :similarity.lemma = 95%
 
-[ similarity.word: 85% ]
+:similarity.word = 85%
 
-[ similarity.word: none  similarity.lemma: exact ]
+:similarity.word = none :similarity.lemma = exact
 
-[ similarity.lemma: none ]
+:similarity.lemma = none
 
 #### 1.1.3 - Scoping Block
 
@@ -236,7 +234,7 @@ Macro tags cannot contain punctuation: only letters, numbers, hyphens, and under
 
 Let’s say we want to name the search example from the previous section; We’ll call it *eternal-power*. To accomplish this, we can apply a tag to the statement below:
 
-[ span: 7 similarity: 85% ] eternal power < Romans || eternal-power-romans
+eternal power  :span=7 :similarity=85%  < Romans || eternal-power-romans
 
 It’s that simple, now instead of typing the entire statement, we can utilize the macro by referencing our previously applied tag. Here is how the macro is utilized:
 
@@ -254,11 +252,11 @@ It’s that simple, now instead of typing the entire statement, we can utilize t
 
 This would export all verses in Genesis 1 from the most previous search as html
 
-[ format:html ] #in_beginning  > my-macro-output.html
+#in_beginning :format = html  > my-macro-output.html
 
 This would export all verses for the executed macro as markdown
 
-[ format:markdown ] #in_beginning  > my-macro-output.html
+#in_beginning :format = markdown  > my-macro-output.html
 
 Combining only with a scoping black , we could append Genesis chapter two, to an existing file:
 
@@ -288,20 +286,20 @@ All settings, filters, and search criteria are utilized (this is called full mac
 
 Expression block macros sometimes undergo demotion. A macro within the expression block is demoted into a partial macro when a provided block within the selection criteria conflicts with the macro definition. Consider these examples:
 
-Recall that the macro definition: [ span: 7 similarity: 85% ] eternal power < Romans || eternal-power-romans
+Recall that the macro definition: eternal power :span = 7  :similarity = 85% < Romans || eternal-power-romans
 
-| Macro Statement                       | Utilization level         | Explanation                                             |
-| ------------------------------------- | ------------------------- | ------------------------------------------------------- |
-| #eternal-power-romans                 | full macro utilization    | no conflicts                                            |
-| #eternal-power-romans [ all:current ] | partial macro utilization | explicit settings replace any settings defined in macro |
-| #eternal-power-romans < Acts          | partial macro utilization | explicit filter replaces any filters defined in macro   |
-| #eternal-power-romans [span:7] < Acts | partial macro utilization | only the search expression is utilized from the macro   |
+| Macro Statement                      | Utilization level         | Explanation                                             |
+| ------------------------------------ | ------------------------- | ------------------------------------------------------- |
+| #eternal-power-romans                | full macro utilization    | no conflicts                                            |
+| #eternal-power-romans :all = current | partial macro utilization | explicit settings replace any settings defined in macro |
+| #eternal-power-romans < Acts         | partial macro utilization | explicit filter replaces any filters defined in macro   |
+| #eternal-power-romans :span=7 < Acts | partial macro utilization | only the search expression is utilized from the macro   |
 
 **Table 1-4** - Macro utilization in a Search Expression 
 
 Outside of the expression block, partial macros *use* only the part of the macro that applies to the block type. For example, this clause utilizes only the settings defined within the macro.:
 
-[ #eternal-power-romans ]
+: #eternal-power-romans
 
 Likewise, in this example, this clause utilizes only the filters defined within the macro.
 
@@ -313,7 +311,7 @@ Specifically, the following statements / clauses are not supported by Quelle:
 
 **NOT SUPPORTED:**  #eternal-power-romans without excuse  
 
-**NOT SUPPORTED:**  [ #eternal-power-romans span:7 ]
+**NOT SUPPORTED:**  : #eternal-power-romans  :span=7
 
 **NOT SUPPORTED:**  < #eternal-power-romans < Acts
 

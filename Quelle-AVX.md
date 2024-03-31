@@ -1,6 +1,6 @@
 # Quelle Specification with AVX-Specific Features
 
-##### version 4.3.27
+##### version 4.3.31
 
 ### Background
 
@@ -29,7 +29,7 @@ The AVX Dialect of Quelle is a Level 2 implementation, and has augmented search 
 
    - Dual/Both *(use both lexicons)*
 
-   The Dual/Both setting for [search:] indicates that searching should consider both lexicons. The The Dual/Both setting for [render:] indicates that results should be displayed for both renderings [whether this is side-by-side or in-parallel depends on the format and the application where the display-rendering occurs]. Left unspecified, the lexicon setting applies to[search:] and [render:] components.
+   The Dual/Both setting for lexicon.search indicates that searching should consider both lexicons. The The Dual/Both setting for lexicon.render indicates that results should be displayed for both renderings [whether this is side-by-side or in-parallel depends on the format and the application where the display-rendering occurs]. Left unspecified, the lexicon setting applies to both lexicon.search and lexicon.render components.
 
 2. AVX-Quelle provides support for fuzzy-match-logic. The similarity setting can be specified by the user to control the similarity threshold for approximate matching. An exact lexical match is expected when similarity is set to *exact* or 0.  Zero is not really a similarity threshold, but rather 0 is a synonym for *exact*.
 
@@ -56,17 +56,17 @@ There are two types of statements
 
 Selection Criteria contains <u>required</u> Selection Criteria, followed by an <u>optional</u> Directive:
 
-The selection criteria controls how verses are selected. It is made up of one to three blocks. The ordering of blocks is partly prescribed. The scoping block must be in the final position. The search-expression-block and settings-block can be in either order (so long as they are listed before the scoping block when present). 
+The selection criteria controls how verses are selected. It is made up of one to three blocks. The ordering of blocks is partly prescribed. When present, the expression block must be in the initial position. The scoping block and the settings-block must follow the expression when provided. The scoping block and settings-block can be in either order (so long as they are listed before the scoping block when present). 
 
 - Search Expression Block
 - Settings Block
 - Scoping Block
 
-| Block Position | Block Type                  | Hashtag UtilizationLevel |
-| -------------- | --------------------------- | ------------------------ |
-| **0** or **1** | **Search Expression Block** | full utilization         |
-| **0** or **1** | **Settings Block**          | partial utilization      |
-| ***final***    | **Scoping Block**           | partial utilization      |
+| Block Position                         | Block Type                  | Hashtag Utilization Level |
+| -------------------------------------- | --------------------------- | ------------------------- |
+| ***initial***                          | **Search Expression Block** | full utilization          |
+| *after expression block when provided* | **Settings Block**          | partial utilization       |
+| *after expression block when provided* | **Scoping Block**           | partial utilization       |
 
 An optional directive can be issued following the selection criteria.  Only zero or one directives can be issued within a  statement:  
 
@@ -110,18 +110,18 @@ From a linguistic standpoint, all Quelle statements are issued in the imperative
 
 Consider these two examples of Quelle statements (first Configuration, followed by Search):
 
-\@lexicon.searh = KJV
+*@lexicon.search* = KJV
 
 "Moses"
 
 Notice that both statements above are single actions.  We should have a way to express both of these in a single command. And this is why selection criteria contains multiple blocks.  The previous two actions into a single compound statement, issue this command:
 
-"Moses" [ search.lexicon:KJV ]
+"Moses" :lexicon.search=KJV
 
 It should be noted that these two imperatives, while similar, do not have identical effects:
 
-- \@search.lexicon = KJV
-- [ search.lexicon:KJV ]
+- *@lexicon.search* = KJV
+- :lexicon.search = KJV
 
 The former is a configuration imperative: it changes the lexicon setting for all future searches. Whereas, the latter is merely a temporary block assigment: it only affects Selection Statement of which it is a part. Subsequent searches are unaffected by block assignments (they are always temprorary). There are times when a user will want a setting to persist, and other times when she does not. Quelle permits the user to choose.
 
@@ -129,11 +129,11 @@ The former is a configuration imperative: it changes the lexicon setting for all
 
 Consider this proximity search (find Moses and Aaron within a single span of seven words):
 
-*[ span:7 ]  Moses Aaron*
+*Moses Aaron : span = 7*
 
 Quelle syntax can specify the lexicon to search, by also supplying temporary settings:
 
-*[ span:7 search.lexicon:KJV ]  Moses Aaron*
+*Moses Aaron :span = 7  :lexicon.search = KJV 
 
 The statement above has assigns two settings in the context of search. The search criteria, with the settings means that both Aaron and Moses are required to appear within 7 words of each other, but both names must be present to constitute a match.
 
@@ -173,14 +173,14 @@ As we saw in the overview, there three blocks that compose Selection Criteria:
   - *filter directives*
   - *use filters (partial macro utilization)*
 
-| Action   | Type             | Position | Action Syntax                            | Repeatable Action                                        |
-| -------- | ---------------- | -------- | ---------------------------------------- | -------------------------------------------------------- |
-| *find*   | Expression Block | initial  | search expression or ***#id***           | **no**                                                   |
-| *use*    | Expression Block | initial  | ***#tag*** or ***#id ***                 | **no**: only one macro is permitted per block            |
-| *assign* | Settings Block   | initial  | ***[ setting: value ]***                 | yes (e.g. ***[ format:md  lexicon:kjv  span:verse ]*** ) |
-| *use*    | Settings Block   | initial  | ***[ #tag ]*** or<br/>***[ #id ]***      | **no**: only one macro is permitted per block            |
-| *filter* | Scoping Block    | post     | ***< scope***                            | yes (e.g. ***< Genesis 3 < Revelation 1-3***)            |
-| *use*    | Scoping Block    | post     | **<** ***#tag***  or<br/>**<** ***#id*** | **no**: only one macro is permitted per block            |
+| Action   | Type             | Position | Action Syntax                            | Repeatable Action                                            |
+| -------- | ---------------- | -------- | ---------------------------------------- | ------------------------------------------------------------ |
+| *find*   | Expression Block | initial  | search expression or ***#id***           | **no**                                                       |
+| *use*    | Expression Block | initial  | ***#tag*** or ***#id ***                 | **no**: only one macro is permitted per block                |
+| *assign* | Settings Block   | initial  | ***: setting = value***                  | yes (e.g. ***:format = md  :lexicon = kjv  :span = verse*** ) |
+| *use*    | Settings Block   | initial  | *** : #tag*** or<br/>*** : #id***        | **no**: only one macro is permitted per block                |
+| *filter* | Scoping Block    | post     | ***< scope***                            | yes (e.g. ***< Genesis 3 < Revelation 1-3***)                |
+| *use*    | Scoping Block    | post     | **<** ***#tag***  or<br/>**<** ***#id*** | **no**: only one macro is permitted per block                |
 
 **Table 1-1** - Summary of actions expressible in the Selection Criteria segment of a Selection/Search imperative statement
 
@@ -196,7 +196,7 @@ The SDK, provided by Digital-AV, has marked each word of the bible text for part
 
 Of course, part-of-speech expressions can also be used independently of an AND condition, as follows:
 
-[ span: 6 ]  "/noun/ ... home"
+"/noun/ ... home" :  span = 6
 
 That search would find phrases where a noun appeared within a span of six words, preceding the word "home"
 
@@ -212,7 +212,7 @@ Both of the statements above are valid, but will not match any results. Search s
 
 Consider a query for all passages that contain a word beginning with "Lord", followed by any word that is neither a verb nor an adverb:
 
-[ span:15 ] "Lord\* -/v/ & -/adv/"
+"Lord\* -/v/ & -/adv/"  :  span = 15
 
 #### 1.1.2 - Settings Block
 
@@ -220,39 +220,39 @@ When the same setting appears more than once, only the last setting in the list 
 
 [ format:md  format:text ]
 
-\@get format
+*@get format*
 
 The \@get format command would return text.  We call this: "last assignment wins".
 
 Finally, there is a bit more to say about the similarity setting, because it actually has three components. If we issue this command, it affects similarity in two distinct ways:
 
-[  similarity: 85% ]
+:similarity = 85%
 
 That command is a concise way of setting two values. It is equivalent to this command
 
-[ similarity.word:85%  similarity.lemma:85% ]
+:similarity.word = 85%  :similarity.lemma = 85%
 
 That is to say, similarity is operative for the lexical word and also the lemma of the word. While not discussed previously, these two similarities thresholds need not be identical. These commands are also valid:
 
-[ similarity.word: 85%  similarity.lemma: 95% ]
+:similarity.word = 85%  :similarity.lemma = 95%
 
-[ similarity.word: 85% ]
+:similarity.word = 85%
 
-[ similarity.word: none  similarity.lemma: exact ]
+:similarity.word = none  :similarity.lemma = exac
 
-[ similarity.lemma: none ]
+:similarity.lemma = none
 
 the lexicon controls operate in a similar manner:
 
-[  lexicon: KJV ]
+:lexicon = KJV
 
 That command is a concise way of setting two values. It is equivalent to this command
 
-[ search.lexicon: KJV  render.lexicon: KJV ]
+:lexicon.search = KJV  :lexicon.render =  KJV
 
 That is to say, lexicon is operative for searching and rendering. Like the similarity setting, the lexicon setting can also diverge between search and render parts. A common lexicon setting might be:
 
-[ search.lexicon: both  render.lexicon: kjv ]
+:lexicon.search = both :lexicon.render = kjv
 
 That setting would search both the KJV (aka AV) lexicon and a modernized lexicon (aka AVX), but verse rendering would only be in KJV.
 
@@ -291,7 +291,7 @@ Macro tags cannot contain punctuation: only letters, numbers, hyphens, and under
 
 Let’s say we want to name the search example from the previous section; We’ll call it *eternal-power*. To accomplish this, we can apply a tag to the statement below:
 
-[ span: 7 similarity: 85% ] eternal power < Romans || eternal-power-romans
+eternal power < Romans  :span=7  :similarity=85% || eternal-power-romans
 
 It’s that simple, now instead of typing the entire statement, we can utilize the macro by referencing our previously applied tag. Here is how the macro is utilized:
 
@@ -309,11 +309,11 @@ It’s that simple, now instead of typing the entire statement, we can utilize t
 
 This would export all verses in Genesis 1 from the most previous search as html
 
-[ format:html ] #in_beginning  > my-macro-output.html
+#in_beginning   :format = html  > my-macro-output.html
 
 This would export all verses for the executed macro as markdown
 
-[ format:markdown ] #in_beginning  > my-macro-output.html
+#in_beginning  :format = markdown  > my-macro-output.html
 
 Combining only with a scoping black , we could append Genesis chapter two, to an existing file:
 
@@ -343,20 +343,20 @@ All settings, filters, and search criteria are utilized (this is called full mac
 
 Expression block macros sometimes undergo demotion. A macro within the expression block is demoted into a partial macro when a provided block within the selection criteria conflicts with the macro definition. Consider these examples:
 
-Recall that the macro definition: [ span: 7 similarity: 85% ] eternal power < Romans || eternal-power-romans
+Recall that the macro definition: eternal power < Romans  :span=7  :similarity = 85%  || eternal-power-romans
 
-| Macro Statement                       | Utilization level         | Explanation                                             |
-| ------------------------------------- | ------------------------- | ------------------------------------------------------- |
-| #eternal-power-romans                 | full macro utilization    | no conflicts                                            |
-| #eternal-power-romans [ all:current ] | partial macro utilization | explicit settings replace any settings defined in macro |
-| #eternal-power-romans < Acts          | partial macro utilization | explicit filter replaces any filters defined in macro   |
-| #eternal-power-romans [span:7] < Acts | partial macro utilization | only the search expression is utilized from the macro   |
+| Macro Statement                        | Utilization level         | Explanation                                             |
+| -------------------------------------- | ------------------------- | ------------------------------------------------------- |
+| #eternal-power-romans                  | full macro utilization    | no conflicts                                            |
+| #eternal-power-romans :all = current   | partial macro utilization | explicit settings replace any settings defined in macro |
+| #eternal-power-romans < Acts           | partial macro utilization | explicit filter replaces any filters defined in macro   |
+| #eternal-power-romans  :span=7  < Acts | partial macro utilization | only the search expression is utilized from the macro   |
 
 **Table 1-4** - Macro utilization in a Search Expression 
 
 Outside of the expression block, partial macros *use* only the part of the macro that applies to the block type. For example, this clause utilizes only the settings defined within the macro.:
 
-[ #eternal-power-romans ]
+: #eternal-power-romans
 
 Likewise, in this example, this clause utilizes only the filters defined within the macro.
 
@@ -368,33 +368,31 @@ Specifically, the following statements / clauses are not supported by Quelle:
 
 **NOT SUPPORTED:**  #eternal-power-romans without excuse  
 
-**NOT SUPPORTED:**  [ #eternal-power-romans span:7 ]
+**NOT SUPPORTED:**  : #eternal-power-romans  :span=7
 
 **NOT SUPPORTED:**  < #eternal-power-romans < Acts
 
 It should be noted that any macros referenced within a macro definition are expanded prior to applying the new tag. Therefore, subsequent redefinition of a previously referenced macro invocation never affects existing macro definitions. We call this macro-determinism.  All control settings are captured at the time that the tag is applied to the macro. This further assures that the same search results are returned each time the macro is referenced. Here is an example.
 
-\@set span = 2
+*@set span = 2*
 
 in beginning || in_beginning
 
-\@set span = 3
+*@set span = 3*
 
-#in_beginning [span:1] < genesis:1:1
+#in_beginning  :span=1  < genesis:1:1
 
 ***result:*** none
 
 However, if the user desires the current settings to be used instead, a specialized control setting [ all:current ] represents all currently persisted settings; just include it in the statement (as show below). 
 
-[ all:current ] #in_beginning < genesis:1:1
+#in_beginning  :all=current  < genesis:1:1
 
 ***result:*** Gen 1:1 In the beginning, God created ...
 
-Similarly, another specialized setting is [ all:defaults ] ; that block represents default values for all settings. 
-
 Still, a macro can be redefined/overwritten. This doesn't disable macro determinism, even though it feels like it does. The assumption is that the user is explicitly redefining the meaning of macro and Quelle does not require an explicit \@delete of the tag prior to re-applying. Here is an example:
 
-[ #eternal-power-romans ] eternal power godhead without excuse < #eternal-power-romans || #eternal-power-romans
+eternal power godhead without excuse : #eternal-power-romans  < #eternal-power-romans || #eternal-power-romans
 
 ### 1.5 - History Utilization
 
@@ -410,20 +408,20 @@ Only the expression block supports full macro utilization.
 
 Expression block macros sometimes undergo demotion. A historic utilization within the expression block is demoted into a partial macro when a provided block within the selection criteria conflicts with the macro definition. Assume that this command is identified by the \@view command by id := 5:
 
-[ span: 3 similarity: 85% ] "in ... beginning" < Genesis < John
+"in ... beginning"  :span = 3  :similarity = 85%  < Genesis < John
 
-| Statement          | Utilization level         | Explanation                                             |
-| ------------------ | ------------------------- | ------------------------------------------------------- |
-| #5                 | full macro utilization    | no conflicts                                            |
-| #5 [ all:current ] | partial macro utilization | explicit settings replace any settings defined in macro |
-| #5 < Acts          | partial macro utilization | explicit filter replaces any filters defined in macro   |
-| #5 [span:7] < Acts | partial macro utilization | only the search expression is utilized from the macro   |
+| Statement           | Utilization level         | Explanation                                             |
+| ------------------- | ------------------------- | ------------------------------------------------------- |
+| #5                  | full macro utilization    | no conflicts                                            |
+| #5 :all = current   | partial macro utilization | explicit settings replace any settings defined in macro |
+| #5 < Acts           | partial macro utilization | explicit filter replaces any filters defined in macro   |
+| #5 :span = 7 < Acts | partial macro utilization | only the search expression is utilized from the macro   |
 
 **Table 1-5** - History utilization in a Search Expression 
 
 Outside of the expression block, partial *usage* applies by block type. For example, this clause utilizes only the settings defined where id = 5.
 
-[ #5 ]
+: #5
 
 Likewise, in this example, this clause utilizes only the filters for id = 5.
 
@@ -433,13 +431,13 @@ Just like macros, utilization within a block disallows all other entries within 
 
 Specifically, the following statements / clauses are not supported by Quelle:
 
-**NOT SUPPORTED:**  #5 without excuse  
+**NOT SUPPORTED:**  #5  without excuse  
 
-**NOT SUPPORTED:**  [ #5 span:7 ]
+**NOT SUPPORTED:**  :#5  :span = 7
 
 **NOT SUPPORTED:**  < #5 < Acts
 
-It should be noted that any historic id references are expanded prior to applying the new tags for macros. As mentioned in the previous section, we call this macro-determinism.  Therefore, even if an id is removed from the command history with the \@delete command, any macros that it was referenced within, continue to behave identically post-deletion.
+It should be noted that any historic id references are expanded prior to applying the new tags for macros. As mentioned in the previous section, we call this macro-determinism.  Therefore, even if an id is removed from the command history with the *@delete* command, any macros that it was referenced within, continue to behave identically post-deletion.
 
 
 
@@ -579,18 +577,18 @@ FROM / UNTIL parameters can limit the scope of the \@delete command.
 
 In all, Quelle manifests five control names. Each allows all three actions: ***set***, ***clear***, and ***@get*** verbs. Table 9 lists all settings available in AV-Bible. AV-Bible supports two distinct orthographies [i.e. Contemporary Modern English (avx/modern), and/or Early Modern English (avx/kjv). These are selectable via Quelle.
 
-| Setting Name | Functional.Name  | Meaning                                                      | Values                                                       | Default Value |
-| ------------ | ---------------- | ------------------------------------------------------------ | ------------------------------------------------------------ | ------------- |
-| span         | search.span      | proximity distance limit                                     | 0 to 999 or verse                                            | 0 / verse     |
-| lexicon      | -                | Streamlined syntax for setting search.lexicon and search. render to the same value | av or avx or dual<br/>(kjv or modern or both)                | n/a           |
-| search       | search.lexicon   | the lexicon to be used for searching                         | av or avx or dual<br/>(kjv or modern or both)                | dual / both   |
-| render       | render.lexicon   | the lexicon to be used for display/rendering                 | av/avx (kjv/modern)                                          | av / kjv      |
-| format       | render.format    | format of results on output                                  | see Table 7                                                  | text / utf8   |
-| similarity   |                  | Streamlined syntax for setting word & lemma to an identical value<br/>fuzzy phonetics matching threshold is between 1 and 99<br/>0 or *none* means: do not match on phonetics (use text only)<br/>100 or *exact* means that an *exact* phonetics match is expected | 33% to 99% [fuzzy] **or** ...<br>0 **or** *none*<br>100 **or** *exact* | 0 / none      |
-| word         | similarity.word  | fuzzy phonetics matching as described above, but this prefix only affects similarity matching on the word. | 33% to 99% [fuzzy] **or** ...<br>0 **or** *none*<br>100 **or** *exact* | 0 / none      |
-| lemma        | similarity.lemma | fuzzy phonetics matching as described above, but this prefix only affects similarity matching on the lemma. | 33% to 99% [fuzzy] **or** ...<br>0 **or** *none*<br>100 **or** *exact* | 0 / none      |
-| revision     | grammar.revision | Not really a true setting: it works with the \@get command to retrieve the revision number of the Quelle grammar supported by AV-Engine. This value is read-only. | 4.x.yz                                                       | n/a           |
-| ALL          |                  | ALL is an aggregate setting: it works with the \@clear command to reset all variables above to their default values. It is used with \@get to fetch all settings. It can also be used in the settings block of a statement to override values to default or the currently saved values for situations where a macro is utilized. | current<br/>**or**<br/>defaults                              | current       |
+| Setting Name     | Shorthand | Meaning                                                      | Values                                                       | Default Value |
+| ---------------- | --------- | ------------------------------------------------------------ | ------------------------------------------------------------ | ------------- |
+| span             | -         | proximity distance limit                                     | 0 to 999 or verse                                            | 0 / verse     |
+| lexicon          | -         | Streamlined syntax for setting lexicon.search<br>and lexicon .render to the same value | av or avx or dual<br/>(kjv or modern or both)                | n/a           |
+| lexicon.search   | search    | the lexicon to be used for searching                         | av or avx or dual<br/>(kjv or modern or both)                | dual / both   |
+| lexicon.render   | render    | the lexicon to be used for display/rendering                 | av/avx (kjv/modern)                                          | av / kjv      |
+| format           | -         | format of results on output                                  | see Table 7                                                  | text / utf8   |
+| similarity       | -         | Streamlined syntax for setting similarity.word & similarity.lemma to the same value<br/>fuzzy phonetics matching threshold is between 1 and 99<br/>0 or *none* means: do not match on phonetics (use text only)<br/>100 or *exact* means that an *exact* phonetics match is expected | 33% to 99% [fuzzy] **or** ...<br>0 **or** *none*<br>100 **or** *exact* | 0 / none      |
+| similarity.word  | word      | fuzzy phonetics matching as described above, but this prefix only affects similarity matching on the word. | 33% to 99% [fuzzy] **or** ...<br>0 **or** *none*<br>100 **or** *exact* | 0 / none      |
+| similarity.lemma | lemma     | fuzzy phonetics matching as described above, but this prefix only affects similarity matching on the lemma. | 33% to 99% [fuzzy] **or** ...<br>0 **or** *none*<br>100 **or** *exact* | 0 / none      |
+| revision         | -         | Not really a true setting: it works with the \@get command to retrieve the revision number of the Quelle grammar supported by AV-Engine. This value is read-only. | 4.x.yz                                                       | n/a           |
+| ALL              | -         | ALL is an aggregate setting: it works with the \@clear command to reset all variables above to their default values. It is used with \@get to fetch all settings. It can also be used in the settings block of a statement to override values to default or the currently saved values for situations where a macro is utilized. | current<br/>**or**<br/>defaults                              | current       |
 
 **TABLE 2-3.d** - Summary of AV-Bible Settings
 
