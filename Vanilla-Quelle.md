@@ -487,12 +487,12 @@ FROM / UNTIL parameters can limit the scope of the @delete command.
 
 ### 2.3 - Settings
 
-| Action      | Parameters                                |
-| ----------- | ----------------------------------------- |
-| **@clear**  | *setting* or ALL                          |
-| **@get**    | **optional:** *setting* or ALL or VERSION |
-| **@set**    | *setting* **=** *value*                   |
-| **@absorb** | ***id*** or ***tag***                     |
+| Action      | Parameters                   |
+| ----------- | ---------------------------- |
+| **@clear**  | *setting* or ALL             |
+| **@get**    | *setting* or ALL or revision |
+| **@set**    | *setting* **=** *value*      |
+| **@absorb** | ***id*** or ***tag***        |
 
 **TABLE 2-3.a** - **Listing of additional CONTROL actions**
 
@@ -512,25 +512,25 @@ FROM / UNTIL parameters can limit the scope of the @delete command.
 
 
 
-| **example**              | **explanation**                                              | shorthand equivalent |
-| ------------------------ | ------------------------------------------------------------ | -------------------- |
-| **@set** search.span = 8 | Assign a control setting                                     | @span = 8            |
-| **@get** search.span     | get a control setting                                        | @span                |
-| **@clear** search.span   | Clear the setting; restores the setting to its default value | @clear span          |
+| **example**       | **explanation**                                              | shorthand equivalent |
+| ----------------- | ------------------------------------------------------------ | -------------------- |
+| **@set** span = 8 | Assign a control setting                                     | **@span** = 8        |
+| **@get** span     | get a control setting                                        | **@span**            |
+| **@clear** span   | Clear the setting; restores the setting to its default value/a |                      |
 
 **TABLE 2-3.c** - **set/clear/get** action operate on configuration settings
 
 In all, Quelle manifests five control names. Each allows all three actions: ***set***, ***clear***, and ***@get*** verbs. Table 2.3.d lists all Quelle settings. Some settings should only be expected in implementations that conform to the Level 2 specification.
 
-| Setting Name | Functional.Name  | Meaning                                                      | Values                                                       | Default Value | Spec Level |
-| ------------ | ---------------- | ------------------------------------------------------------ | ------------------------------------------------------------ | ------------- | ---------- |
-| span         | search.span      | proximity distance limit                                     | 0 to 999 or verse                                            | 0 / verse     | 1          |
-| format       | render.format    | format of results on output                                  | see Table 7                                                  | text / utf8   | 2          |
-| similarity   |                  | Streamlined syntax for setting word & lemma to an identical value<br/>fuzzy phonetics matching threshold is between 1 and 99<br/>0 or *none* means: do not match on phonetics (use text only)<br/>100 or *exact* means that an *exact* phonetics match is expected | 33% to 99% [fuzzy] **or** ...<br>0 **or** *none*<br>100 **or** *exact* | 0 / none      | 2          |
-| word         | similarity.word  | fuzzy phonetics matching as described above, but this prefix only affects similarity matching on the word. | 33% to 99% [fuzzy] **or** ...<br>0 **or** *none*<br>100 **or** *exact* | 0 / none      | 2          |
-| lemma        | similarity.lemma | fuzzy phonetics matching as described above, but this prefix only affects similarity matching on the lemma. | 33% to 99% [fuzzy] **or** ...<br>0 **or** *none*<br>100 **or** *exact* | 0 / none      | 2          |
-| revision     | grammar.revision | Not really a true setting: it works with the @get command to retrieve the revision number of the Quelle grammar supported by AV-Engine. This value is read-only. | 4.x.yz                                                       | n/a           | 1          |
-| ALL          |                  | ALL is an aggregate setting: it works with the @clear command to reset all variables above to their default values. It is used with @get to fetch all settings. It can also be used in the settings block of a statement to override values to default or the currently saved values for situations where a macro is utilized. | current<br/>**or**<br/>defaults                              | current       | 1          |
+| Setting Name     | Shorthand | Meaning                                                      | Values                                                       | Default Value | Spec Level |
+| ---------------- | --------- | ------------------------------------------------------------ | ------------------------------------------------------------ | ------------- | ---------- |
+| span             | -         | proximity distance limit                                     | 0 to 999 or verse                                            | 0 / verse     | 1          |
+| format           | -         | format of results on output                                  | see Table 7                                                  | text / utf8   | 2          |
+| similarity       |           | Streamlined syntax for setting word & lemma to an identical value<br/>fuzzy phonetics matching threshold is between 33% and 99%<br/>0% or *none* means: do not match on phonetics (use text only)<br/>100% or *exact* means that an *exact* phonetics match is expected | 33% to 99% [fuzzy] **or** ...<br>0% **or** *none*<br>100% **or** *exact* | 0% / none     | 2          |
+| similarity.word  | word      | fuzzy phonetics matching as described above, but this prefix only affects similarity matching on the word. | 33% to 99% [fuzzy] **or** ...<br>0% **or** *none*<br>100% **or** *exact* | 0% / none     | 2          |
+| similarity.lemma | lemma     | fuzzy phonetics matching as described above, but this prefix only affects similarity matching on the lemma. | 33% to 99% [fuzzy] **or** ...<br>0% **or** *none*<br>100% **or** *exact* | 0% / none     | 2          |
+| revision         | -         | Not really a true setting: it works with the @get command to retrieve the revision number of the Quelle grammar supported by AV-Engine. This value is read-only. | 4.x.yz                                                       | n/a           | 1          |
+| ALL              | -         | ALL is an aggregate setting: it works with the @clear command to reset all variables above to their default values. It is used with @get to fetch all settings. It can also be used in the settings block of a statement to override values to default or the currently saved values for situations where a macro is utilized. | current<br/>**or**<br/>defaults                              | current       | 1          |
 
 **TABLE 2-3.d** - Summary of AV-Bible Settings
 
