@@ -1,6 +1,6 @@
 # Quelle Specification
 
-##### version 4.3
+##### version 4.4
 
 ### Background
 
@@ -67,7 +67,7 @@ Quelle grammar supports three categories of configuration. These are described m
 | --------------------- | --------------------------- |
 | User Settings         | @set, @get, @clear, @absorb |
 | User Macros           | @view, @delete              |
-| User History          | @view, @delete, @invoke     |
+| User History          | @view, @delete              |
 
 #### Control Statements
 
@@ -84,7 +84,7 @@ Quelle gram has only two control imperatives. These are described more completel
 
 Consider this proximity search (find Moses and Aaron within a single span of seven words, along with a scoping [domain] filter):
 
-*[ span:7 ]  Moses Aaron* < bible
+*+span=7  Moses Aaron* < bible
 
 Next, consider a search to find Moses <u>or</u> Aaron:
 
@@ -136,8 +136,8 @@ As we saw in the overview, there three blocks that compose Selection Criteria:
 | -------- | ---------------- | -------- | ---------------------------------------- | --------------------------------------------- |
 | *find*   | Expression Block | initial  | search expression or ***#id***           | **no**                                        |
 | *use*    | Expression Block | initial  | ***#tag*** or ***#id ***                 | **no**: only one macro is permitted per block |
-| *assign* | Settings Block   | initial  | ***: setting = value***                  | yes (e.g. ***:format=md  :span=7*** )         |
-| *use*    | Settings Block   | initial  | ***: #tag*** or<br/>***: #id***          | **no**: only one macro is permitted per block |
+| *assign* | Settings Block   | initial  | ***+ setting = value***                  | yes (e.g. ***+format=md  +span=7*** )         |
+| *use*    | Settings Block   | initial  | ***+ #tag*** or<br/>***+ #id***          | **no**: only one macro is permitted per block |
 | *filter* | Scoping Block    | post     | ***< scope***                            | yes (e.g. ***< Genesis 3 < Revelation 1-3***) |
 | *use*    | Scoping Block    | post     | **<** ***#tag***  or<br/>**<** ***#id*** | **no**: only one macro is permitted per block |
 
@@ -155,7 +155,7 @@ The SDK, provided by Digital-AV, has marked each word of the bible text for part
 
 Of course, part-of-speech expressions can also be used independently of an AND condition, as follows:
 
-"/noun/ ... home" :span=6 
+"/noun/ ... home" +span=6 
 
 That search would find phrases where a noun appeared within a span of six words, preceding the word "home"
 
@@ -171,33 +171,33 @@ Both of the statements above are valid, but will not match any results. Search s
 
 Consider a query for all articles that contain a Bill Clinton in the Washington Post, followed by any word that is neither a verb nor an adverb:
 
-"Bill|William ... Clinton -/v/ & -/adv/"  :span=15
+"Bill|William ... Clinton -/v/ & -/adv/"  +span=15
 
 #### 1.1.2 - Settings Block
 
 When the same setting appears more than once, only the last setting in the list is preserved.  Example:
 
-:format = md  :format = text
++format = md  +format = text
 
 format would be set to text.  We call this: "last assignment wins".
 
 Finally, there is a bit more to say about the similarity setting, because it actually has three components. If we issue this command, it affects similarity in two distinct ways:
 
-:similarity = 85%
++similarity = 85%
 
 That command is a concise way of setting two values. It is equivalent to this command
 
-:similarity.word = 85%  :similarity.lemma = 85%
++similarity.word = 85%  +similarity.lemma = 85%
 
 That is to say, similarity is operative for the lexical word and also the lemma of the word. While not discussed previously, these two similarities thresholds need not be identical. These commands are also valid:
 
-:similarity.word = 85%  :similarity.lemma = 95%
++similarity.word = 85%  +similarity.lemma = 95%
 
-:similarity.word = 85%
++similarity.word = 85%
 
-:similarity.word = none :similarity.lemma = exact
++similarity.word = off +similarity.lemma = 100%
 
-:similarity.lemma = none
++similarity.lemma = off
 
 #### 1.1.3 - Scoping Block
 
@@ -234,7 +234,7 @@ Macro tags cannot contain punctuation: only letters, numbers, hyphens, and under
 
 Let’s say we want to name the search example from the previous section; We’ll call it *eternal-power*. To accomplish this, we can apply a tag to the statement below:
 
-eternal power  :span=7 :similarity=85%  < Romans || eternal-power-romans
+eternal power  +span=7 +similarity=85%  < Romans || eternal-power-romans
 
 It’s that simple, now instead of typing the entire statement, we can utilize the macro by referencing our previously applied tag. Here is how the macro is utilized:
 
@@ -252,11 +252,11 @@ It’s that simple, now instead of typing the entire statement, we can utilize t
 
 This would export all verses in Genesis 1 from the most previous search as html
 
-#in_beginning :format = html  > my-macro-output.html
+#in_beginning +format = html  > my-macro-output.html
 
 This would export all verses for the executed macro as markdown
 
-#in_beginning :format = markdown  > my-macro-output.html
+#in_beginning +format = markdown  > my-macro-output.html
 
 Combining only with a scoping black , we could append Genesis chapter two, to an existing file:
 
@@ -286,20 +286,20 @@ All settings, filters, and search criteria are utilized (this is called full mac
 
 Expression block macros sometimes undergo demotion. A macro within the expression block is demoted into a partial macro when a provided block within the selection criteria conflicts with the macro definition. Consider these examples:
 
-Recall that the macro definition: eternal power :span = 7  :similarity = 85% < Romans || eternal-power-romans
+Recall that the macro definition: eternal power +span = 7  +similarity = 85% < Romans || eternal-power-romans
 
 | Macro Statement                      | Utilization level         | Explanation                                             |
 | ------------------------------------ | ------------------------- | ------------------------------------------------------- |
 | #eternal-power-romans                | full macro utilization    | no conflicts                                            |
-| #eternal-power-romans :all = current | partial macro utilization | explicit settings replace any settings defined in macro |
+| #eternal-power-romans +all = current | partial macro utilization | explicit settings replace any settings defined in macro |
 | #eternal-power-romans < Acts         | partial macro utilization | explicit filter replaces any filters defined in macro   |
-| #eternal-power-romans :span=7 < Acts | partial macro utilization | only the search expression is utilized from the macro   |
+| #eternal-power-romans +span=7 < Acts | partial macro utilization | only the search expression is utilized from the macro   |
 
 **Table 1-4** - Macro utilization in a Search Expression 
 
-Outside of the expression block, partial macros *use* only the part of the macro that applies to the block type. For example, this clause utilizes only the settings defined within the macro.:
+Outside of the expression block, partial macros *use* only the part of the macro that applies to the block type. For example, this clause utilizes only the settings defined within the macro:
 
-: #eternal-power-romans
++ #eternal-power-romans
 
 Likewise, in this example, this clause utilizes only the filters defined within the macro.
 
@@ -311,7 +311,7 @@ Specifically, the following statements / clauses are not supported by Quelle:
 
 **NOT SUPPORTED:**  #eternal-power-romans without excuse  
 
-**NOT SUPPORTED:**  : #eternal-power-romans  :span=7
+**NOT SUPPORTED:**  + #eternal-power-romans  +span=7
 
 **NOT SUPPORTED:**  < #eternal-power-romans < Acts
 
@@ -323,21 +323,21 @@ in beginning || in_beginning
 
 @set span = 3
 
-#in_beginning [span:1] < genesis:1:1
+#in_beginning +span=1 < genesis 1
 
 ***result:*** none
 
-However, if the user desires the current settings to be used instead, a specialized control setting [ all:current ] represents all currently persisted settings; just include it in the statement (as show below). 
+However, if the user desires the current settings to be used instead, a specialized control setting [ +all=current ] represents all currently persisted settings; just include it in the statement (as show below). 
 
-[ all:current ] #in_beginning < genesis:1:1
+#in_beginning + all=current < genesis 1
 
 ***result:*** Gen 1:1 In the beginning, God created ...
 
-Similarly, another specialized setting is [ all:defaults ] ; that block represents default values for all settings. 
+Similarly, another specialized setting is [ +all=defaults ] ; that block represents default values for all settings. 
 
 Still, a macro can be redefined/overwritten. This doesn't disable macro determinism, even though it feels like it does. The assumption is that the user is explicitly redefining the meaning of macro and Quelle does not require an explicit @delete of the tag prior to re-applying. Here is an example:
 
-[ #eternal-power-romans ] eternal power godhead without excuse < #eternal-power-romans || #eternal-power-romans
+eternal power godhead without excuse + #eternal-power-romans < #eternal-power-romans || #eternal-power-romans
 
 ### 1.5 - History Utilization
 
@@ -353,20 +353,20 @@ Only the expression block supports full macro utilization.
 
 Expression block macros sometimes undergo demotion. A historic utilization within the expression block is demoted into a partial macro when a provided block within the selection criteria conflicts with the macro definition. Assume that this command is identified by the @view command by id := 5:
 
-[ span: 3 similarity: 85% ] "in ... beginning" < Genesis < John
+"in ... beginning" +span=3  +similarity=85% < Genesis < John
 
 | Statement          | Utilization level         | Explanation                                             |
 | ------------------ | ------------------------- | ------------------------------------------------------- |
 | #5                 | full macro utilization    | no conflicts                                            |
-| #5 [ all:current ] | partial macro utilization | explicit settings replace any settings defined in macro |
+| #5 + all=current   | partial macro utilization | explicit settings replace any settings defined in macro |
 | #5 < Acts          | partial macro utilization | explicit filter replaces any filters defined in macro   |
-| #5 [span:7] < Acts | partial macro utilization | only the search expression is utilized from the macro   |
+| #5 + span=7 < Acts | partial macro utilization | only the search expression is utilized from the macro   |
 
 **Table 1-5** - History utilization in a Search Expression 
 
 Outside of the expression block, partial *usage* applies by block type. For example, this clause utilizes only the settings defined where id = 5.
 
-[ #5 ]
+\+ #5
 
 Likewise, in this example, this clause utilizes only the filters for id = 5.
 
@@ -378,7 +378,7 @@ Specifically, the following statements / clauses are not supported by Quelle:
 
 **NOT SUPPORTED:**  #5 without excuse  
 
-**NOT SUPPORTED:**  [ #5 span:7 ]
+**NOT SUPPORTED:**  #5 +span=7
 
 **NOT SUPPORTED:**  < #5 < Acts
 
@@ -390,11 +390,11 @@ It should be noted that any historic id references are expanded prior to applyin
 
 ### 2.1 - Viewing Macros & Tags
 
-| Action      | Syntax                                                       |
+| Verb        | Parameters                                                   |
 | ----------- | ------------------------------------------------------------ |
-| **@delete** | *tag* <u>or</u> *wildcard* <u>or</u> -tags FROM <u>and/or</u> UNTIL<br/>**FROM parameter :** *from* yyyy/mm/dd<br/>**UNTIL parameter :** *until* yyyy/mm/dd |
-| **@view**   | *tag* <u>or</u> *wildcard* <u>or</u> -tags <u>optional</u> FROM <u>and/or</u> UNTIL<br/>**FROM parameter :** *from* yyyy/mm/dd<br/>**UNTIL parameter :** *until* yyyy/mm/dd |
-| **@absorb** | **permitted:** *tag*                                         |
+| **@delete** | \#*id* <u>or</u> -history FROM <u>and/or</u> TO<br/>**DATE FROM/TO PARAMETERS:**<br/>**FROM: *from* yyyy/mm/dd **or** *from* yyyy-mm-dd **or** *from* mm/dd/yyyy **or** *from* mm-dd-yyyy<br/>**TO:** *to* yyyy/mm/dd **or** *to* yyyy-mm-dd **or** *to* mm/dd/yyyy **or** *to* mm-dd-yyyy<br/>**ID FROM/TO PARAMETERS:**<br/>**FROM** : *from* #id<br/>**TO:** *to* #id |
+| **@view**   | \#*id* <u>or</u> -history <u>optional</u> FROM <u>and/or</u> UNTIL<br/>**DATE FROM/TO PARAMETERS:**<br/>**FROM: *from* yyyy/mm/dd **or** *from* yyyy-mm-dd **or** *from* mm/dd/yyyy **or** *from* mm-dd-yyyy<br/>**TO:** *to* yyyy/mm/dd **or** *to* yyyy-mm-dd **or** *to* mm/dd/yyyy **or** *to* mm-dd-yyyy<br/>**ID FROM/TO PARAMETERS:**<br/>**FROM** : *from* #id<br/>**TO:** *to* #id |
+| **@absorb** | ***id***                                                     |
 
 **TABLE 2-1** -- **Tagging and viewing tagged statements**
 
@@ -420,7 +420,6 @@ If you want the same settings to be persisted to your current session that were 
 
 | Verb        | Syntax Category | Parameters                                                   |
 | ----------- | --------------- | ------------------------------------------------------------ |
-| **@invoke** | Configuration   | ***id***                                                     |
 | **@delete** | Configuration   | -history FROM <u>and/or</u> UNTIL<br/>**FROM parameter :** *from* *id* <u>or</u> *from* yyyy/mm/dd<br/>**UNTIL parameter :** *until* *id* <u>or</u> *until* yyyy/mm/dd |
 | **@view**   | Configuration   | *id* <u>or</u> -history <u>optional</u> FROM <u>and/or</u> UNTIL<br/>**FROM parameter :** *from* *id* <u>or</u> *from* yyyy/mm/dd<br/>**UNTIL parameter :** *until* *id* <u>or</u> *until* yyyy/mm/dd |
 | **@absorb** | Configuration   | ***id***                                                     |
@@ -433,17 +432,13 @@ If you want the same settings to be persisted to your current session that were 
 
 *@view* -history
 
-To reveal all history up until now, type:
-
-@view until now
-
 To reveal all searches since January 1, 2024, type:
 
 *@view* from 2024/1/1
 
 To reveal for the single month of January 2024:
 
-*@view* from 2024/1/1 until 2024/1/31
+*@view* from 2024/1/1 to 2024/1/31
 
 To reveal all history since id:5 [inclusive]:
 
@@ -455,7 +450,7 @@ All ranges are inclusive.
 
 The *use* command works for command-history works exactly the same way as it does for macros.  After issuing a *@view* command to show history, the user might receive a response as follows.
 
-*@view*
+*@view* -history from #1 to #3
 
 1>  @set span = 7
 
@@ -522,15 +517,15 @@ FROM / UNTIL parameters can limit the scope of the @delete command.
 
 In all, Quelle manifests five control names. Each allows all three actions: ***set***, ***clear***, and ***@get*** verbs. Table 2.3.d lists all Quelle settings. Some settings should only be expected in implementations that conform to the Level 2 specification.
 
-| Setting Name     | Shorthand | Meaning                                                      | Values                                                       | Default Value | Spec Level |
-| ---------------- | --------- | ------------------------------------------------------------ | ------------------------------------------------------------ | ------------- | ---------- |
-| span             | -         | proximity distance limit                                     | 0 to 999 or verse                                            | 0 / verse     | 1          |
-| format           | -         | format of results on output                                  | see Table 7                                                  | text / utf8   | 2          |
-| similarity       |           | Streamlined syntax for setting word & lemma to an identical value<br/>fuzzy phonetics matching threshold is between 33% and 99%<br/>0% or *none* means: do not match on phonetics (use text only)<br/>100% or *exact* means that an *exact* phonetics match is expected | 33% to 99% [fuzzy] **or** ...<br>0% **or** *none*<br>100% **or** *exact* | 0% / none     | 2          |
-| similarity.word  | word      | fuzzy phonetics matching as described above, but this prefix only affects similarity matching on the word. | 33% to 99% [fuzzy] **or** ...<br>0% **or** *none*<br>100% **or** *exact* | 0% / none     | 2          |
-| similarity.lemma | lemma     | fuzzy phonetics matching as described above, but this prefix only affects similarity matching on the lemma. | 33% to 99% [fuzzy] **or** ...<br>0% **or** *none*<br>100% **or** *exact* | 0% / none     | 2          |
-| revision         | -         | Not really a true setting: it works with the @get command to retrieve the revision number of the Quelle grammar supported by AV-Engine. This value is read-only. | 4.x.yz                                                       | n/a           | 1          |
-| ALL              | -         | ALL is an aggregate setting: it works with the @clear command to reset all variables above to their default values. It is used with @get to fetch all settings. It can also be used in the settings block of a statement to override values to default or the currently saved values for situations where a macro is utilized. | current<br/>**or**<br/>defaults                              | current       | 1          |
+| Setting Name     | Shorthand | Meaning                                                      | Values                          | Default Value | Spec Level |
+| ---------------- | --------- | ------------------------------------------------------------ | ------------------------------- | ------------- | ---------- |
+| span             | -         | proximity distance limit                                     | 0 to 999 or verse               | 0 / verse     | 1          |
+| format           | -         | format of results on output                                  | see Table 7                     | text / utf8   | 2          |
+| similarity       | -         | Streamlined syntax for setting similarity.word<br/>and similarity.lemma to the same value<br/>Phonetics matching threshold is between 33% and 100%. 100% represents an exact sounds-alike match. Any percentage less than 100, represents a fuzzy sounds-similar match <br/>Similarity matching can be completely disabled by setting this value to off | 33% to 100% **or** *off*        | off           | 2          |
+| similarity.word  | word      | fuzzy phonetics matching as described above, but this prefix only affects similarity matching on the word. | 33% to 100% **or** *off*        | off           | 2          |
+| similarity.lemma | lemma     | fuzzy phonetics matching as described above, but this prefix only affects similarity matching on the lemma. | 33% to 100% **or** *off*        | off           | 2          |
+| revision         | -         | Not really a true setting: it works with the @get command to retrieve the revision number of the Quelle grammar supported by AV-Engine. This value is read-only. | 4.x.yz                          | n/a           | 1          |
+| ALL              | -         | ALL is an aggregate setting: it works with the @clear command to reset all variables above to their default values. It is used with @get to fetch all settings. It can also be used in the settings block of a statement to override values to default or the currently saved values for situations where a macro is utilized. | current<br/>**or**<br/>defaults | current       | 1          |
 
 **TABLE 2-3.d** - Summary of AV-Bible Settings
 
@@ -596,7 +591,7 @@ Type this to terminate the app:
 
 An object model to manifest the Quelle grammar is depicted below:
 
-![QCommand](C:\Users\Me\AppData\Roaming\AV-Bible\Help\diagrams\QCommand.png)
+![QCommand](./QCommand.png)
 
 ### 4.1 - Glossary of Quelle Terminology
 
@@ -646,7 +641,7 @@ The table below lists linguistic extensions in level #2 dialects of Quelle.
 | un\*pro\*fit\*ness | wildcard (example)                      | starts with: un<br/>contains: pro and fit<br/>ends with: ness | all lexical entries that start with "un", contain "pro" and "fit", and end with "ness" |
 | ~ʃɛpɝd*            | phonetic wildcard (example)             | Tilde marks the wildcard as phonetic (wildcards never perform sounds-alike searching) | All lexical entries that start with the sound ʃɛpɝd (this would include shepherd, shepherds, shepherding...) |
 | ~ʃɛpɝdz            | sounds-alike search using IPA (example) | Tilde marks the search term as phonetic (and if similarity is set between 33 and 99, search handles approximate matching) | This would match the lexical entry "shepherds" (and possibly similar terms, depending on similarity threshold) |
-| \\is\\             | lemma                                   | search on all words that share the same lemma as is: be, is, are, ... | be is are ...                                                |
+| \(is\)             | lemma                                   | search on all words that share the same lemma as is: be, is, are, ... | be is are ...                                                |
 | /noun/             | lexical marker                          | any word where part of speech is a noun                      |                                                              |
 | /n/                | lexical marker                          | synonym for /noun/                                           |                                                              |
 | /verb/             | lexical marker                          | any word where part of speech is a verb                      |                                                              |
@@ -698,15 +693,15 @@ Quelle-AVX is a Level 2 Quelle implementation with augmented search capabilities
 
    - Dual/Both *(use both lexicons)*
 
-   The Dual/Both setting for [search:] indicates that searching should consider both lexicons. The The Dual/Both setting for [render:] indicates that results should be displayed for both renderings [whether this is side-by-side or in-parallel depends on the format and the application where the display-rendering occurs]. Left unspecified, the lexicon setting applies to[search:] and [render:] components.
+   The Dual/Both setting for +search=dual indicates that searching should consider both lexicons. The The Dual/Both setting for +render=dual indicates that results should be displayed for both renderings [whether this is side-by-side or in-parallel depends on the format and the application where the display-rendering occurs]. Left unspecified, the lexicon setting applies to search <u>and</u> render components.
 
-2. Quelle-AVX provides support for fuzzy-match-logic. The similarity setting can be specified by the user to control the similarity threshold for approximate matching. An exact lexical match is expected when similarity is set to *exact* or 0.  Zero is not really a similarity threshold, but rather 0 is a synonym for *exact*.
+2. Quelle-AVX provides support for fuzzy-match-logic. The similarity setting can be specified by the user to control the similarity threshold for approximate matching. An exact lexical match is expected when similarity is set to *off*.
 
-   Approximate matches are considered when similarity is set between 33% and 99%. Similarity is calculated based upon the phonetic representation for the word.
+   Phonetic matches are enabled when similarity is set between 33% and 100%. Similarity is calculated based upon the phonetic representation for the word.
 
    The minimum permitted similarity threshold is 33%. Any similarity threshold between 1% and 32% produces a syntax error.
 
-   A similarity setting of *precise* or 100% is a special case that still uses phonetics, but expects a full phonetic match (e.g. "there" and "their" are a 100% phonetic match).
+   A similarity setting of 100% still uses phonetics, but expects a full phonetic match (e.g. "there" and "their" are a 100% phonetic match).
 
 A reference implementation of AVX-Quelle can be found in the companion repositories of the Quelle specification.  A parser written in Rust can be found in the pinshot-blue repo. A fully realized object model that supports AVX-Quelle can be found in the AVX-Framework, which is documented in the AV-Engine repository.  AVX_Quelle represent the only known reference implementation of Quelle, to date.  AVX-Quelle is known as Imperative Control Language (ICL) in the AV-Bible-20224 application, soon to be found in the Microsoft Store.
 
