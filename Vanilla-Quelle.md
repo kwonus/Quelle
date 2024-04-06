@@ -388,61 +388,72 @@ It should be noted that any historic id references are expanded prior to applyin
 
 ## Section 2 - Configuration Statements
 
-### 2.1 - Viewing Macros & Tags
+### 2.1 - Macros
 
-| Verb        | Parameters                                                   |
-| ----------- | ------------------------------------------------------------ |
-| **@delete** | \#*id* <u>or</u> -history FROM <u>and/or</u> TO<br/>**DATE FROM/TO PARAMETERS:**<br/>**FROM: *from* yyyy/mm/dd **or** *from* yyyy-mm-dd **or** *from* mm/dd/yyyy **or** *from* mm-dd-yyyy<br/>**TO:** *to* yyyy/mm/dd **or** *to* yyyy-mm-dd **or** *to* mm/dd/yyyy **or** *to* mm-dd-yyyy<br/>**ID FROM/TO PARAMETERS:**<br/>**FROM** : *from* #id<br/>**TO:** *to* #id |
-| **@view**   | \#*id* <u>or</u> -history <u>optional</u> FROM <u>and/or</u> UNTIL<br/>**DATE FROM/TO PARAMETERS:**<br/>**FROM: *from* yyyy/mm/dd **or** *from* yyyy-mm-dd **or** *from* mm/dd/yyyy **or** *from* mm-dd-yyyy<br/>**TO:** *to* yyyy/mm/dd **or** *to* yyyy-mm-dd **or** *to* mm/dd/yyyy **or** *to* mm-dd-yyyy<br/>**ID FROM/TO PARAMETERS:**<br/>**FROM** : *from* #id<br/>**TO:** *to* #id |
-| **@absorb** | ***id***                                                     |
+| Action             | Syntax                                                       |
+| ------------------ | ------------------------------------------------------------ |
+| **@view**          | *tag*                                                        |
+| **@macros**        | *wildcard*  ***<- OR ->***   ***from*** {DATE} <u>and/or</u> ***to*** {DATE} |
+| **@delete**        | *tag*                                                        |
+| **@macros delete** | *wildcard*  ***<- OR ->***   ***from*** {DATE} <u>and/or</u> ***to*** {DATE} |
+| **@absorb**        | *tag*                                                        |
 
-**TABLE 2-1** -- **Tagging and viewing tagged statements**
+**TABLE 2-1** -- **Viewing and deleting macros**
 
-##### Additional explicit macro commands:
+**DATE PARAMETER:**<br/>{DATE}: any of:
 
-Two additional explicit commands exist whereby a macro can be manipulated. We saw above how they can be defined and referenced. There are two additional ways commands that operate on macros: expansion and deletion.  In the last macro definition above where we created  #another-macro, the user could view an expansion by issuing this command:
+- yyyy/mm/dd
+- yyyy-mm-dd
+- mm/dd/yyyy
+- mm-dd-yyyy
 
-@view another-macro
+##### Overview of macro commands:
 
-If the user wanted to remove this definition, the @delete action is used.  Here is an example:
+Viewing and Deletion of macros and history are nearly identical for single hashtag references. In the case of macros, we supply the tag name or label as a parameter to the view command:
 
-@delete another-macro
+\@view another-macro
 
-If you want the same settings to be persisted to your current session that were in place during macro definition, the @absorb command will persist all settings for the macro into your current session
+If the user wanted to remove this definition, the \@delete action is used:
 
-@absorb my-favorite-settings-macro 
+\@delete another-macro
+
+If you want the same settings to be persisted to your current session that were in place during macro definition, the \@absorb command will persist all settings for the macro into your current session
+
+\@absorb my-favorite-settings-macro 
 
 **NOTE:**
 
-​       @absorb also works with command history.
+​       \@absorb also works with search history.
 
-### 2.2 - Viewing History
+### 2.2 - History
 
-| Verb        | Syntax Category | Parameters                                                   |
-| ----------- | --------------- | ------------------------------------------------------------ |
-| **@delete** | Configuration   | -history FROM <u>and/or</u> UNTIL<br/>**FROM parameter :** *from* *id* <u>or</u> *from* yyyy/mm/dd<br/>**UNTIL parameter :** *until* *id* <u>or</u> *until* yyyy/mm/dd |
-| **@view**   | Configuration   | *id* <u>or</u> -history <u>optional</u> FROM <u>and/or</u> UNTIL<br/>**FROM parameter :** *from* *id* <u>or</u> *from* yyyy/mm/dd<br/>**UNTIL parameter :** *until* *id* <u>or</u> *until* yyyy/mm/dd |
-| **@absorb** | Configuration   | ***id***                                                     |
+| Verb                | Parameters                                                   |
+| ------------------- | ------------------------------------------------------------ |
+| **@view**           | *id*                                                         |
+| **@history**        | *<u>optional:</u>*  ***from*** {DATE} <u>and/or</u> ***to*** {DATE} ***<- OR ->*** ***from*** *id* <u>and/or</u> ***to*** *id* |
+| **@delete**         | *id*                                                         |
+| **@history delete** | ***from*** {DATE} <u>and/or</u> ***to*** {DATE} ***<- OR ->*** ***from*** *id* <u>and/or</u> ***to*** *id* |
+| **@absorb**         | *id*                                                         |
 
-**TABLE 2-2** -- **Viewing & Invoking statement history**
+**TABLE 2-2** -- **Viewing & deleting history**
 
-**COMMAND HISTORY** 
+**SEARCH HISTORY** 
 
-*@view* allows you to see your previous activity.  To show the last ten searches, type:
+*@history* allows you to see your previous activity.  To show the last ten searches, type:
 
-*@view* -history
+*@history*
 
 To reveal all searches since January 1, 2024, type:
 
-*@view* from 2024/1/1
+*@history* from 2024/1/1
 
 To reveal for the single month of January 2024:
 
-*@view* from 2024/1/1 to 2024/1/31
+*@history* from 2024/1/1 to 2024/1/31
 
 To reveal all history since id:5 [inclusive]:
 
-*@view* from 5
+*@history* from 5
 
 All ranges are inclusive. 
 
@@ -450,11 +461,11 @@ All ranges are inclusive.
 
 The *use* command works for command-history works exactly the same way as it does for macros.  After issuing a *@view* command to show history, the user might receive a response as follows.
 
-*@view* -history from #1 to #3
+*@history from 1 to 3*
 
-1>  @set span = 7
+1>  *@set* span = 7
 
-2>  @set similarity=85
+2>  *@set* similarity=85
 
 3> eternal power
 
@@ -468,17 +479,17 @@ eternal power
 
 Again, *utilizing* a command from your command history is *used* just like a macro. Moreover, as with macros, control settings are persisted within your command history to provide invocation determinism. That means that control settings that were in place during the original command are utilized for the invocation.
 
-Command history captures all settings. We have already discussed macro-determinism. Invoking commands by their ids behave exactly like macros. In other words, invoking command history never persists changes into your environment, unless you explicitly request such behavior with the @absorb command.
+Command history captures all settings. We have already discussed macro-determinism. Invoking commands by their ids behave exactly like macros. In other words, invoking command history never persists changes into your environment, unless you explicitly request such behavior with the \@absorb command.
 
 **RESETTING COMMAND HISTORY**
 
-The @delete command can be used to remove <u>all</u> command history.
+The *@history* command can be used to remove <u>all</u> command history. To remove all command history:
 
-To remove all command history:
+*@history delete all*
 
-@delete -history -all
+FROM / TO parameters can limit the scope of the delete command:
 
-FROM / UNTIL parameters can limit the scope of the @delete command.
+*@history delete from 12/31/2023 to 4/17/2024*
 
 ### 2.3 - Settings
 
