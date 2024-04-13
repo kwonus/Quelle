@@ -9,13 +9,13 @@ Initially, the manual served as the most complete specification. It was a specif
 
 Quelle syntax agnostic about the search domain. Consequently, Quelle syntax has the potential for ubiquity.
 
-That said, a dialect of Quelle which is optimized for the Digital-AV, and called Search-for-Truth (S4T) query language. It can be found here:
+In fact, a dialect of Quelle that is optimized for the bible search using AVX-Framework is the first complete reference implementation of Quelle. In the AVBible application, it is called Search-for-Truth (S4T) query language. It is found here:
 
 [AVBible/Help/AV-Bible-S4T.html (github.com/kwonus)](https://github.com/kwonus/AVBible/blob/omega/Help/AV-Bible-S4T.html)
 
-Its formal grammar specification for S4T can be found at:
+The formal grammar specification for S4T can be found at:
 
-[Pin-Shot-Blue/src/avx-quelle.pest (github.com/kwonus)](https://github.com/kwonus/Pin-Shot-Blue/blob/main/src/avx-quelle.pest)
+[Pinshot-Blue/src/avx-quelle.pest (github.com/kwonus)](https://github.com/kwonus/pinshot-blue/blob/main/src/avx-quelle.pest)
 
 
 
