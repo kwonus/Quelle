@@ -1,6 +1,6 @@
 # Quelle Specification with AVX-Specific Features
 
-##### version 4.4.7
+##### version 4.4.11
 
 ### Background
 
@@ -39,7 +39,7 @@ The AVX Dialect of Quelle is a Level 2 implementation, and has augmented search 
 
    A similarity setting of 100% still uses phonetics, but expects a full phonetic match (e.g. "there" and "their" are a 100% phonetic match).
 
-A full reference implementation of AVX-Quelle is found in the AVBible application along with fully open source repositories on github. This implementation in AV-Bible is described as "Imperative Control Language" (ICL). To be clear, ICL is fully conformant with the Quelle 4.3.9 specification. Moreover, to date, it is the only known implementation Quelle 4.3.9 specification.
+A full reference implementation of AVX-Quelle is found in the AVBible application along with fully open source repositories on github. This implementation in AV-Bible is described as "Search-for-Truth" (S4T) query language. To be clear, S4T is fully conformant with the Quelle 4.4.11 specification. Moreover, to date, it is the only known implementation Quelle 4.4.11 specification.
 
 The remainder of this document describes the AVX dialect of the Quelle specification. The Vanilla-Quelle specification has the root (dialect-free) specification.
 
@@ -173,14 +173,14 @@ As we saw in the overview, there three blocks that compose Selection Criteria:
   - *filter directives*
   - *use filters (partial macro utilization)*
 
-| Action   | Type             | Position | Action Syntax                            | Repeatable Action                                            |
-| -------- | ---------------- | -------- | ---------------------------------------- | ------------------------------------------------------------ |
-| *find*   | Expression Block | initial  | search expression or ***#id***           | **no**                                                       |
-| *use*    | Expression Block | initial  | ***#tag*** or ***#id ***                 | **no**: only one macro is permitted per block                |
-| *assign* | Settings Block   | initial  | ***+ setting = value***                  | yes (e.g. ***+format = md  +lexicon = kjv  +span = verse*** ) |
-| *use*    | Settings Block   | initial  | *** + #tag*** or<br/>*** + #id***        | **no**: only one macro is permitted per block                |
-| *filter* | Scoping Block    | post     | ***< scope***                            | yes (e.g. ***< Genesis 3 < Revelation 1-3***)                |
-| *use*    | Scoping Block    | post     | **<** ***#tag***  or<br/>**<** ***#id*** | **no**: only one macro is permitted per block                |
+| Action   | Type             | Position | Action Syntax                   | Repeatable Action                                            |
+| -------- | ---------------- | -------- | ------------------------------- | ------------------------------------------------------------ |
+| *find*   | Expression Block | initial  | search expression or ***#tag*** | **no**                                                       |
+| *use*    | Expression Block | initial  | ***#tag***                      | **no**: only one macro is permitted per block                |
+| *assign* | Settings Block   | initial  | ***+ setting = value***         | yes (e.g. ***+format = md  +lexicon = kjv  +span = verse*** ) |
+| *use*    | Settings Block   | initial  | *** + #tag***                   | **no**: only one macro is permitted per block                |
+| *filter* | Scoping Block    | post     | ***< scope***                   | yes (e.g. ***< Genesis 3 < Revelation 1-3***)                |
+| *use*    | Scoping Block    | post     | **<** ***#tag***                | **no**: only one macro is permitted per block                |
 
 **Table 1-1** - Summary of actions expressible in the Selection Criteria segment of a Selection/Search imperative statement
 
@@ -402,11 +402,11 @@ Just like macro utilization, the *use* action is supported in each of the three 
 - Settings *(partial macro utilization)*
 - Scoping *(partial macro utilization)*
 
-Each of the block types supports the *use* action. However, each block limited to, at most, one *use* action. The *use* action references either a tag for a macro or a statement id revealed by  the \@*view* imperative. As there are a maximum of three blocks in the selection criteria, a statement could contain up to three *use* actions (one per block).
+Each of the block types supports the *use* action. However, each block limited to, at most, one *use* action. The *use* action references a tag (either for a macro or for a tag revealed by  the \@*history* imperative. As there are a maximum of three blocks in the selection criteria, a statement could contain up to three *use* actions (one per block).
 
 Only the expression block supports full macro utilization.
 
-Expression block macros sometimes undergo demotion. A historic utilization within the expression block is demoted into a partial macro when a provided block within the selection criteria conflicts with the macro definition. Assume that this command is identified by the \@view command by id := 5:
+Expression block macros sometimes undergo demotion. A historic utilization within the expression block is demoted into a partial macro when a provided block within the selection criteria conflicts with the macro definition. Assume that this command is identified by the \@view command by tag := 5:
 
 "in ... beginning"  +span = 3  +similarity = 85%  < Genesis < John
 
@@ -419,11 +419,11 @@ Expression block macros sometimes undergo demotion. A historic utilization withi
 
 **Table 1-5** - History utilization in a Search Expression 
 
-Outside of the expression block, partial *usage* applies by block type. For example, this clause utilizes only the settings defined where id = 5.
+Outside of the expression block, partial *usage* applies by block type. For example, this clause utilizes only the settings defined where tag = 5.
 
-+ #5
+\+ #5
 
-Likewise, in this example, this clause utilizes only the filters for id = 5.
+Likewise, in this example, this clause utilizes only the filters for tag = 5.
 
 < #5
 
@@ -437,7 +437,7 @@ Specifically, the following statements / clauses are not supported by Quelle:
 
 **NOT SUPPORTED:**  < #5 < Acts
 
-It should be noted that any historic id references are expanded prior to applying the new tags for macros. As mentioned in the previous section, we call this macro-determinism.  Therefore, even if an id is removed from the command history with the *@delete* command, any macros that it was referenced within, continue to behave identically post-deletion.
+It should be noted that any historic tag references are expanded prior to applying the new tags for macros. As mentioned in the previous section, this provides determinism.  Therefore, even if a tag is removed from the command history with the *@delete* command, any macros that it was referenced within, continue to behave identically post-deletion.
 
 
 
@@ -484,11 +484,11 @@ If you want the same settings to be persisted to your current session that were 
 
 | Verb                | Parameters                                                   |
 | ------------------- | ------------------------------------------------------------ |
-| **@view**           | *id*                                                         |
-| **@history**        | *<u>optional:</u>*  ***from*** {DATE} <u>and/or</u> ***to*** {DATE} ***<- OR ->*** ***from*** *id* <u>and/or</u> ***to*** *id* |
-| **@delete**         | *id*                                                         |
-| **@history delete** | ***from*** {DATE} <u>and/or</u> ***to*** {DATE} ***<- OR ->*** ***from*** *id* <u>and/or</u> ***to*** *id* |
-| **@absorb**         | *id*                                                         |
+| **@view**           | *tag*                                                        |
+| **@history**        | *<u>optional:</u>*  ***from*** {DATE} <u>and/or</u> ***to*** {DATE} ***<- OR ->*** ***from*** *tag* <u>and/or</u> ***to*** *tag* |
+| **@delete**         | *tag*                                                        |
+| **@history delete** | ***from*** {DATE} <u>and/or</u> ***to*** {DATE} ***<- OR ->*** ***from*** *tag* <u>and/or</u> ***to*** *tag* |
+| **@absorb**         | *tag*                                                        |
 
 **TABLE 2-2** -- **Viewing & deleting history**
 
@@ -513,7 +513,7 @@ To reveal for the single month of January 2024:
 
 *@history* from 2024/1/1 to 2024/1/31
 
-To reveal all history since id:5 [inclusive]:
+To reveal all history since tag:5 [inclusive]:
 
 *@history* from 5
 
@@ -541,7 +541,7 @@ eternal power
 
 Again, *utilizing* a command from your command history is *used* just like a macro. Moreover, as with macros, control settings are persisted within your command history to provide invocation determinism. That means that control settings that were in place during the original command are utilized for the invocation.
 
-Command history captures all settings. We have already discussed macro-determinism. Invoking commands by their ids behave exactly like macros. In other words, invoking command history never persists changes into your environment, unless you explicitly request such behavior with the \@absorb command.
+Command history captures all settings. We have already discussed macro-determinism. Invoking previous searches by their @history tags behave exactly like invocation of macros by their tags. In other words, invoking command history never persists changes into your environment, unless you explicitly request such behavior with the \@absorb command.
 
 **RESETTING COMMAND HISTORY**
 
@@ -560,7 +560,7 @@ FROM / TO parameters can limit the scope of the delete command:
 | **@clear**  | *setting* or ALL             |
 | **@get**    | *setting* or ALL or revision |
 | **@set**    | *setting* **=** *value*      |
-| **@absorb** | ***id*** or ***tag***        |
+| **@absorb** | ***tag***                    |
 
 **TABLE 2-3.a** - **Listing of additional CONTROL actions**
 
@@ -600,7 +600,7 @@ In all, Quelle manifests five control names. Each allows all three actions: ***s
 | similarity       | -         | Streamlined syntax for setting similarity.word<br/>and similarity.lemma to the same value<br/>Phonetics matching threshold is between 33% and 100%. 100% represents an exact sounds-alike match. Any percentage less than 100, represents a fuzzy sounds-similar match <br/>Similarity matching can be completely disabled by setting this value to off | 33% to 100% **or** *off*                      | off           |
 | similarity.word  | word      | fuzzy phonetics matching as described above, but this prefix only affects similarity matching on the word. | 33% to 100% **or** *off*                      | off           |
 | similarity.lemma | lemma     | fuzzy phonetics matching as described above, but this prefix only affects similarity matching on the lemma. | 33% to 100% **or** *off*                      | off           |
-| revision         | -         | Not really a true setting: it works with the *@get* command to retrieve the revision number of the ICL grammar supported by AV-Engine. This value is read-only. | 4.x.yz                                        | n/a           |
+| revision         | -         | Not really a true setting: it works with the *@get* command to retrieve the revision number of the S4T grammar supported by AV-Engine. This value is read-only. | 4.x.yz                                        | n/a           |
 | ALL              | -         | ALL is an aggregate setting: it works with the *@clear* command to reset all variables above to their default values. It is used with *@get* to fetch all settings. It can also be used in the settings block of a statement to override values to default or the currently saved values for situations where a macro is utilized. | n/a                                           | n/a           |
 
 **TABLE 2-3.d** - Summary of AV-Bible Settings
@@ -783,9 +783,9 @@ Quelle specifies two possible implementation levels:
 - Level 1 [basic search support]
 - Level 2 [search support includes also searching on part-of-speech tags]
 
-ICL is a Level 2 Quelle implementation with augmented search capabilities. ICL extends Quelle to include AVX-Framework-specific constructs.  These extensions provide additional specialized search features and the ability to manage two distinct lexicons for the biblical texts.
+S4T query language is a Level 2 Quelle implementation with augmented search capabilities. S4T grammar extends Quelle to include AVX-Framework-specific constructs.  These extensions provide additional specialized search features and the ability to manage two distinct lexicons for the biblical texts.
 
-1. ICL represents the biblical text with two substantially similar, but distinct, lexicons. The search.lexicon setting can be specified by the user to control which lexicon is to be searched. Likewise, the render.lexicon setting is used to control which lexicon is used for displaying the biblical text. As an example, the KJV text of "thou art" would be modernized to "you are".
+1. S4T grammar represents the biblical text with two substantially similar, but distinct, lexicons. The search.lexicon setting can be specified by the user to control which lexicon is to be searched. Likewise, the render.lexicon setting is used to control which lexicon is used for displaying the biblical text. As an example, the KJV text of "thou art" would be modernized to "you are".
 
    - AV/KJV *(a lexicon that faithfully represents the KJV bible; AV purists should select this setting)*
 
@@ -795,7 +795,7 @@ ICL is a Level 2 Quelle implementation with augmented search capabilities. ICL e
 
    The Dual/Both setting for +search=dual indicates that searching should consider both lexicons. The The Dual/Both setting for +render=dual indicates that results should be displayed for both renderings [whether this is side-by-side or in-parallel depends on the format and the application where the display-rendering occurs]. Left unspecified, the lexicon setting applies to search <u>and</u> render components.
 
-2. ICL provides support for fuzzy-match-logic. The similarity setting can be specified by the user to control the similarity threshold for approximate matching. An exact lexical match is expected when similarity is set to *exact* or 0.  Zero is not really a similarity threshold, but rather 0 is a synonym for *exact*.
+2. S4T grammar provides support for fuzzy-match-logic. The similarity setting can be specified by the user to control the similarity threshold for approximate matching. An exact lexical match is expected when similarity is set to *exact* or 0.  Zero is not really a similarity threshold, but rather 0 is a synonym for *exact*.
 
    Approximate matches are considered when similarity is set between 33% and 99%. Similarity is calculated based upon the phonetic representation for the word.
 
@@ -812,7 +812,7 @@ AV-Bible uses the AV-1769 edition of the sacred text. It substantially agrees wi
 - AV-Bible - 2007 Edition for Windows XP
 - AV-Bible - 2011 Edition for Windows Vista
 - AV-Bible - 2021 Edition for Windows 10
-- AV-Bible - 2024 Edition for Windows 11 (current release; initial release to support ICL)
+- AV-Bible - 2024 Edition for Windows 11 (current release; initial release to support S4T grammar)
 
 Decades ago, AV-Bible (aka AV-1995, AV-1997, ... AV-2011), were found on internet bulletin boards and the now defunct bible.advocate.com website. More recent legacy versions are still available at the avbible.net website. Modern editions are distributed on the Microsoft store.
 
