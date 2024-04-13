@@ -132,14 +132,14 @@ As we saw in the overview, there three blocks that compose Selection Criteria:
   - *filter directives*
   - *use filters (partial macro utilization)*
 
-| Action   | Type             | Position | Action Syntax                            | Repeatable Action                             |
-| -------- | ---------------- | -------- | ---------------------------------------- | --------------------------------------------- |
-| *find*   | Expression Block | initial  | search expression or ***#id***           | **no**                                        |
-| *use*    | Expression Block | initial  | ***#tag*** or ***#id ***                 | **no**: only one macro is permitted per block |
-| *assign* | Settings Block   | initial  | ***+ setting = value***                  | yes (e.g. ***+format=md  +span=7*** )         |
-| *use*    | Settings Block   | initial  | ***+ #tag*** or<br/>***+ #id***          | **no**: only one macro is permitted per block |
-| *filter* | Scoping Block    | post     | ***< scope***                            | yes (e.g. ***< Genesis 3 < Revelation 1-3***) |
-| *use*    | Scoping Block    | post     | **<** ***#tag***  or<br/>**<** ***#id*** | **no**: only one macro is permitted per block |
+| Action   | Type             | Position | Action Syntax                   | Repeatable Action                               |
+| -------- | ---------------- | -------- | ------------------------------- | ----------------------------------------------- |
+| *find*   | Expression Block | initial  | search expression or ***#tag*** | **no**                                          |
+| *use*    | Expression Block | initial  | ***#tag***                      | **no**: only one macro is permitted per block   |
+| *assign* | Settings Block   | initial  | ***+ setting = value***         | yes (e.g. ***+format=md  +span=7*** )           |
+| *use*    | Settings Block   | initial  | ***+ #tag***                    | **no**: only one hashtag is permitted per block |
+| *filter* | Scoping Block    | post     | ***< scope***                   | yes (e.g. ***< Genesis 3 < Revelation 1-3***)   |
+| *use*    | Scoping Block    | post     | **<** ***#tag***                | **no**: only one hashtag is permitted per block |
 
 **Table 1-1** - Summary of actions expressible in the Selection Criteria segment of a Selection/Search imperative statement
 
@@ -276,7 +276,7 @@ The *use* action is supported in each of the three Selection Criteria blocks:
 - Settings *(partial macro utilization)*
 - Scoping *(partial macro utilization)*
 
-Each of the block types supports the *use* action. However, each block limited to, at most, one *use* action. The *use* action references either a tag for a macro or a statement id revealed by the @view imperative. As there are  a maximum of three blocks in the selection criteria, a statement could contain up to three *use* actions (one per block).
+Each of the block types supports the *use* action. However, each block limited to, at most, one *use* action. The *use* action references a tag, either for a macro or for a tag revealed by the @history imperative. As there are  a maximum of three blocks in the selection criteria, a statement could contain up to three *use* actions (one per block).
 
 The expression block supports full macro utilization.  In the earlier example:
 
@@ -347,11 +347,11 @@ Just like macro utilization, the *use* action is supported in each of the three 
 - Settings *(partial macro utilization)*
 - Scoping *(partial macro utilization)*
 
-Each of the block types supports the *use* action. However, each block limited to, at most, one *use* action. The *use* action references either a tag for a macro or a statement id revealed by  the @*view* imperative. As there are a maximum of three blocks in the selection criteria, a statement could contain up to three *use* actions (one per block).
+Recall that each block type supports the *use* action. However, each block limited to, at most, one *use* action. The *use* action references a tag (e.g. a tag revealed by the @history imperative). As there are  a maximum of three blocks in the selection criteria, a statement could contain up to three *use* actions (one per block).
 
 Only the expression block supports full macro utilization.
 
-Expression block macros sometimes undergo demotion. A historic utilization within the expression block is demoted into a partial macro when a provided block within the selection criteria conflicts with the macro definition. Assume that this command is identified by the @view command by id := 5:
+Expression block macros sometimes undergo demotion. A historic utilization within the expression block is demoted into a partial macro when a provided block within the selection criteria conflicts with the macro definition. Assume that this command is identified by the @view command by tag := 5:
 
 "in ... beginning" +span=3  +similarity=85% < Genesis < John
 
@@ -364,11 +364,11 @@ Expression block macros sometimes undergo demotion. A historic utilization withi
 
 **Table 1-5** - History utilization in a Search Expression 
 
-Outside of the expression block, partial *usage* applies by block type. For example, this clause utilizes only the settings defined where id = 5.
+Outside of the expression block, partial *usage* applies by block type. For example, this clause utilizes only the settings defined where tag = 5.
 
 \+ #5
 
-Likewise, in this example, this clause utilizes only the filters for id = 5.
+Likewise, in this example, this clause utilizes only the filters for tag = 5.
 
 < #5
 
@@ -382,7 +382,7 @@ Specifically, the following statements / clauses are not supported by Quelle:
 
 **NOT SUPPORTED:**  < #5 < Acts
 
-It should be noted that any historic id references are expanded prior to applying the new tags for macros. As mentioned in the previous section, we call this macro-determinism.  Therefore, even if an id is removed from the command history with the @delete command, any macros that it was referenced within, continue to behave identically post-deletion.
+It should be noted that any historic tag references are expanded prior to applying the new tags for macros. As mentioned in the previous section, we call this macro-determinism.  Therefore, even if a command is subsequently removed, any macros that it were referenced within, continue to behave identically post-deletion.
 
 
 
@@ -429,11 +429,11 @@ If you want the same settings to be persisted to your current session that were 
 
 | Verb                | Parameters                                                   |
 | ------------------- | ------------------------------------------------------------ |
-| **@view**           | *id*                                                         |
-| **@history**        | *<u>optional:</u>*  ***from*** {DATE} <u>and/or</u> ***to*** {DATE} ***<- OR ->*** ***from*** *id* <u>and/or</u> ***to*** *id* |
-| **@delete**         | *id*                                                         |
-| **@history delete** | ***from*** {DATE} <u>and/or</u> ***to*** {DATE} ***<- OR ->*** ***from*** *id* <u>and/or</u> ***to*** *id* |
-| **@absorb**         | *id*                                                         |
+| **@view**           | *tag*                                                        |
+| **@history**        | *<u>optional:</u>*  ***from*** {DATE} <u>and/or</u> ***to*** {DATE} ***<- OR ->*** ***from*** *tag* <u>and/or</u> ***to*** *tag* |
+| **@delete**         | *tag*                                                        |
+| **@history delete** | ***from*** {DATE} <u>and/or</u> ***to*** {DATE} ***<- OR ->*** ***from*** *tag* <u>and/or</u> ***to*** *tag* |
+| **@absorb**         | *tag*                                                        |
 
 **TABLE 2-2** -- **Viewing & deleting history**
 
@@ -451,7 +451,7 @@ To reveal for the single month of January 2024:
 
 *@history* from 2024/1/1 to 2024/1/31
 
-To reveal all history since id:5 [inclusive]:
+To reveal all history since tag:5 [inclusive]:
 
 *@history* from 5
 
@@ -498,7 +498,7 @@ FROM / TO parameters can limit the scope of the delete command:
 | **@clear**  | *setting* or ALL             |
 | **@get**    | *setting* or ALL or revision |
 | **@set**    | *setting* **=** *value*      |
-| **@absorb** | ***id*** or ***tag***        |
+| **@absorb** | ***tag***                    |
 
 **TABLE 2-3.a** - **Listing of additional CONTROL actions**
 
