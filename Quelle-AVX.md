@@ -485,9 +485,9 @@ If you want the same settings to be persisted to your current session that were 
 | Verb                | Parameters                                                   |
 | ------------------- | ------------------------------------------------------------ |
 | **@view**           | *tag*                                                        |
-| **@history**        | *<u>optional:</u>*  ***from*** {DATE} <u>and/or</u> ***to*** {DATE} ***<- OR ->*** ***from*** *tag* <u>and/or</u> ***to*** *tag* |
+| **@history**        | *<u>optional:</u>*  ***from*** {DATE} <u>and/or</u> ***to*** {DATE} |
 | **@delete**         | *tag*                                                        |
-| **@history delete** | ***from*** {DATE} <u>and/or</u> ***to*** {DATE} ***<- OR ->*** ***from*** *tag* <u>and/or</u> ***to*** *tag* |
+| **@history delete** | ***from*** {DATE} <u>and/or</u> ***to*** {DATE}              |
 | **@absorb**         | *tag*                                                        |
 
 **TABLE 2-2** -- **Viewing & deleting history**
@@ -513,21 +513,11 @@ To reveal for the single month of January 2024:
 
 *@history* from 2024/1/1 to 2024/1/31
 
-To reveal all history since tag:5 [inclusive]:
-
-*@history* from 5
-
-All ranges are inclusive. 
-
 **History Utilization**
 
 The *use* command works for command-history works exactly the same way as it does for macros.  After issuing a *@view* command to show history, the user might receive a response as follows.
 
-*@history from 1 to 3*
-
-1>  *@set* span = 7
-
-2>  *@set* similarity=85
+*@view 3*
 
 3> eternal power
 
