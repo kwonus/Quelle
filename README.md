@@ -7,7 +7,7 @@ Initially, the manual served as the most complete specification. It was a specif
 
 [Pin-Shot-Blue/src/quelle.pest (github.com/kwonus)](https://github.com/kwonus/Pin-Shot-Blue/blob/main/src/quelle.pest)
 
-Quelle syntax agnostic about the search domain. Consequently, Quelle syntax has the potential for ubiquity.
+Quelle syntax is agnostic about the search domain. Consequently, Quelle syntax has the potential for ubiquity.
 
 In fact, a dialect of Quelle that is optimized for the bible search using AVX-Framework is the first complete reference implementation of Quelle. In the AVBible application, it is called Search-for-Truth (S4T) query language. It is found here:
 
