@@ -39,9 +39,9 @@ The AVX Dialect of Quelle is a Level 2 implementation, and has augmented search 
 
    A similarity setting of 100% still uses phonetics, but expects a full phonetic match (e.g. "there" and "their" are a 100% phonetic match).
 
-A full reference implementation of AVX-Quelle is found in the AVBible application along with fully open source repositories on github. This implementation in AV-Bible is described as "Search-for-Truth" (S4T) query language. To be clear, S4T is fully conformant with the Quelle 4.4.11 specification. Moreover, to date, it is the only known implementation Quelle 4.4.11 specification.
+A full reference implementation of AVX-Quelle is found in the AVBible application along with fully open source repositories on github. This implementation in AV-Bible is described as "Search-for-Truth" (S4T) query language. To be clear, S4T is fully conformant with the Quelle 4.4.14 specification. Moreover, to date, it is the only known implementation of the Quelle 4.4 specification.
 
-The remainder of this document describes the AVX dialect of the Quelle specification. The Vanilla-Quelle specification has the root (dialect-free) specification.
+The remainder of this document describes the AVX dialect of the Quelle specification.
 
 ### Overview of Quelle Syntax
 
