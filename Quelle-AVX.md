@@ -1,6 +1,6 @@
 # Quelle Specification with AVX-Specific Features
 
-##### version 4.4.21
+##### version 4.4.28
 
 ### Background
 
@@ -79,7 +79,7 @@ To be clear, a macro cannot be created for a statement that exports selection/se
 | Directive Type                                               | Directive Syntax *(follows the Selection Criteria)*          |
 | ------------------------------------------------------------ | ------------------------------------------------------------ |
 | Macro (*apply* tag to macro)                                 | ***\|\| tag***                                               |
-| Export Block (*export* results of selection criteria to a file) | ***> filepath*** or<br/>***>> filepath*** or<br/>***=> filepath*** |
+| Export Block (*export* results of selection criteria to a file) | ***> filepath*** or<br/>***>> filepath*** or<br/>***?> filepath*** or <br/>***:> format*** |
 
 #### Discrete Imperatives
 
@@ -301,9 +301,9 @@ It’s that simple, now instead of typing the entire statement, we can utilize t
 
 ### 1.3 - Export Directive
 
-| Export Directive  *(follows the Selection Criteria)* | Create file      | Create or Overwrite file | Create or Append File |
-| ---------------------------------------------------- | ---------------- | :----------------------- | :-------------------- |
-| *export*                                             | **>** *filename* | **=>** *filename*        | **>>** *filename*     |
+| Create file       | Create or Overwrite file | Create or Append File | Stream *(internal use only)* |
+| ----------------- | :----------------------- | :-------------------- | ---------------------------- |
+| **?>** *filename* | **>** *filename*         | **>>** *filename*     | **::** *format*              |
 
 **Table 1-3** - Syntax summary for the *export* action in the Export Directive of a Selection/Search imperative statement.
 
@@ -321,9 +321,11 @@ Combining only with a scoping black , we could append Genesis chapter two, to an
 
 Combining with a scoping black , we could replace the contents of an existing file with Genesis chapter three:
 
-< Genesis 3  => C:\users\my-user-name\documents\existing-file.md
+< Genesis 3  > C:\users\my-user-name\documents\existing-file.md
 
+If you instead want to prevent accidental overwrites of previous exports, this syntax only succeeds if the file does not already exist:
 
+< Genesis 3  **?**> C:\users\my-user-name\documents\existing-file.md  +format=markdown
 
 ### 1.4 - Macro Utilization
 
