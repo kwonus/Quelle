@@ -1,6 +1,6 @@
 # Quelle Specification with AVX-Specific Features
 
-##### version 4.4.28
+##### version 4.4.30
 
 ### Background
 
@@ -79,7 +79,7 @@ To be clear, a macro cannot be created for a statement that exports selection/se
 | Directive Type                                               | Directive Syntax *(follows the Selection Criteria)*          |
 | ------------------------------------------------------------ | ------------------------------------------------------------ |
 | Macro (*apply* tag to macro)                                 | ***\|\| tag***                                               |
-| Export Block (*export* results of selection criteria to a file) | ***> filepath*** or<br/>***>> filepath*** or<br/>***?> filepath*** or <br/>***:> format*** |
+| Export Block (*export* results of selection criteria to a file) | ***> filepath*** or<br/>***>> filepath*** or<br/>***?> filepath*** or <br/>***:= format*** or <br/>***:: format*** |
 
 #### Discrete Imperatives
 
@@ -301,9 +301,9 @@ It’s that simple, now instead of typing the entire statement, we can utilize t
 
 ### 1.3 - Export Directive
 
-| Create file       | Create or Overwrite file | Create or Append File | Stream *(internal use only)* |
-| ----------------- | :----------------------- | :-------------------- | ---------------------------- |
-| **?>** *filename* | **>** *filename*         | **>>** *filename*     | **::** *format*              |
+| Create file       | Create or Overwrite file | Create or Append File | Stream w/o context                        | Stream with context                       |
+| ----------------- | :----------------------- | :-------------------- | ----------------------------------------- | ----------------------------------------- |
+| **?>** *filename* | **>** *filename*         | **>>** *filename*     | **:=** *format*<br/>*(internal use only)* | **::** *format*<br/>*(internal use only)* |
 
 **Table 1-3** - Syntax summary for the *export* action in the Export Directive of a Selection/Search imperative statement.
 
